@@ -2,6 +2,7 @@
 <html>
     
     <?php
+    //added comment
     include 'sessioninclude.php';
     include_once '../Off_System_Slotting/connection/connection_details.php';
     ?>
