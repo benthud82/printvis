@@ -9,6 +9,7 @@ include '../functions/functions_totetimes.php';
 $today = date('Y-m-d');
 $startday = date('Y-m-d', (strtotime('-15 days', strtotime($today))));
 $startjday = _gregdatetoyyddd($startday);
+$endjday = _gregdatetoyyddd($today);
 
 $whsearray = array(7,2, 3, 6, 9);
 //$whsearray = array(6);
@@ -88,7 +89,7 @@ foreach ($whsearray as $whse) {
                                                                             PDWHSE = $whse AND PDBXSZ = 'CSE'
                                                                                 AND PDLOC# NOT LIKE '%SDS%'
                                                                                 AND PCWHSE = 0
-                                                                              AND   PBRCJD >= $startjday
+                                                                              AND   PBRCJD >= $startjday AND PBRCJD < $endjday
                                                                           --      AND PBRCJD > 17227 and PBRCJD <= 17262");
     $result1->execute();
     $mindaysarray = $result1->fetchAll(pdo::FETCH_ASSOC);
