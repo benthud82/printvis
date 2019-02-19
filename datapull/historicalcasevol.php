@@ -1,4 +1,5 @@
 <?php
+
 //this is the push from sublime text
 include '../../globalincludes/usa_asys.php';
 include '../../connections/conn_printvis.php';
@@ -11,7 +12,7 @@ $startday = date('Y-m-d', (strtotime('-15 days', strtotime($today))));
 $startjday = _gregdatetoyyddd($startday);
 $endjday = _gregdatetoyyddd($today);
 
-$whsearray = array(7,2, 3, 6, 9);
+$whsearray = array(7, 2, 3, 6, 9);
 //$whsearray = array(6);
 
 foreach ($whsearray as $whse) {
@@ -132,7 +133,7 @@ foreach ($whsearray as $whse) {
             $PBRLJD = $mindaysarray[$counter]['PBRLJD'];
             $PBRLHM = $mindaysarray[$counter]['PBRLHM'];
             $PBRLHR = $mindaysarray[$counter]['PBRLHR'];
-            $PBWCS  = $mindaysarray[$counter]['PBWCS#'];
+            $PBWCS = $mindaysarray[$counter]['PBWCS#'];
             $PBORJD = $mindaysarray[$counter]['PBORJD'];
             $PBORHM = $mindaysarray[$counter]['PBORHM'];
             $PBLP9D = $mindaysarray[$counter]['PBLP9D'];
@@ -278,4 +279,27 @@ foreach ($whsearray as $whse) {
         $query->execute();
         $maxrange += 4000;
     } while ($counter <= $rowcount);
+
+
+
+
+    $sqlinsert = "INSERT INTO printvis.hist_casevol_summary(
+                            SELECT 
+                                hist_whse,
+                                hist_build,
+                                hist_equip,
+                                predicted_availdate,
+                                CASE
+                                    WHEN predicted_availhour < 6 THEN 6
+                                    WHEN predicted_availhour > 17 THEN 17
+                                    ELSE predicted_availhour
+                                END as predicted_availhour,
+                                COUNT(*) AS COUNT_LINE,
+                                SUM(hist_cubeinch) AS SUM_VOLUME
+                            FROM
+                                printvis.hist_casevol
+                            GROUP BY hist_whse , hist_build , hist_equip , predicted_availdate , predicted_availhour) 
+                            on duplicate key update casevol_lines=VALUES(casevol_lines),casevol_cube=VALUES(casevol_cube)";
+    $queryinsert = $conn1->prepare($sqlinsert);
+    $queryinsert->execute();
 }
