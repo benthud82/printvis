@@ -10,6 +10,11 @@ $whssqlarray = $whssql->fetchAll(pdo::FETCH_ASSOC);
 $whsesel = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 
 $batch = ($_POST['batch']);
+if (isset($_POST['building'])) {
+    $building = intval($_POST['building']);
+} else {
+    echo '';
+}
 
 $totedata = $conn1->prepare("SELECT 
                                                     casetote_time_cart,
@@ -23,7 +28,6 @@ $totedata = $conn1->prepare("SELECT
                                                 WHERE casetote_time_cart = '$batch' and casetote_time_whse = $whsesel;");
 $totedata->execute();
 $totedata_modal = $totedata->fetchAll(pdo::FETCH_ASSOC);
-
 ?>
 
 <!--start of div table-->

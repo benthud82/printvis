@@ -27,19 +27,25 @@ $casetotetimes_cols = 'casetote_time_whse, casetote_time_build, casetote_time_ca
 
 $casebatchtimes_cols = 'casebatches_whse,casebatches_build,casebatches_cart,casebatches_equipment,casebatches_time_kiosk,casebatches_time_batch,casebatches_time_complete,casebatches_time_short,casebatches_trip,casebatches_totaltrips,casebatches_time_tripcube,casebatches_lines,casebatches_firstloc,casebatches_lastloc,casebatches_time_pickloc,casebatches_time_unit,casebatches_time_indirect,casebatches_time_dropoff,casebatches_time_noncon,casebatches_aisleinches,casebatches_time_aisletravel,casebatches_starttofirst,casebatches_lasttostop,casebatches_inchpermin,casebatches_startstopinches,casebatches_time_startstop,casebatches_time_final';
 
-$whsearray = array(7, 6, 3, 9,2);
-foreach ($whsearray as $whsesel) {
-    if ($whsesel == 3) {
+$whsearray = array(6, 3.1, 3.2, 9, 2);
+
+foreach ($whsearray as $whse) {
+    if ($whse == 3.1) {
+        $building = 1;
+        $whsesel = 3;
+    } elseif ($whse == 3.2) {
         $building = 2;
+        $whsesel = 3;
     } else {
         $building = 1;
+        $whsesel = $whse;
     }
     //delete cases not printed table
-    $sqldelete = "DELETE FROM  printvis.casesnotprinted WHERE notprinted_whse = $whsesel ";
+    $sqldelete = "DELETE FROM  printvis.casesnotprinted WHERE notprinted_whse = $whsesel and notprinted_build =  $building";
     $querydelete = $conn1->prepare($sqldelete);
     $querydelete->execute();
     //delete cases not printed table
-    $sqldelete = "DELETE FROM  printvis.casesnotprinted_temp WHERE notprinted_whse = $whsesel ";
+    $sqldelete = "DELETE FROM  printvis.casesnotprinted_temp WHERE notprinted_whse = $whsesel  and notprinted_build =  $building";
     $querydelete = $conn1->prepare($sqldelete);
     $querydelete->execute();
 
@@ -55,15 +61,6 @@ foreach ($whsearray as $whsesel) {
 
 
 
-    //operator count by equipment type
-    $operatorcount = $conn1->prepare("SELECT 
-                                                                            equipcount_equipment, equipcount_count
-                                                                        FROM
-                                                                            printvis.case_equipmentcount
-                                                                        WHERE
-                                                                            equipcount_whse = $whsesel;");
-    $operatorcount->execute();
-    $operatorcountarray = $operatorcount->fetchAll(pdo::FETCH_ASSOC);
 
 
 //pull in open case batches that have not been printed
@@ -164,7 +161,7 @@ foreach ($whsearray as $whsesel) {
                                                                         printvis.printcutoff_case ON notprinted_whse = cutoff_DC
                                                                             AND substr(notprinted_shipzone,1,2) = substr(cutoff_zone,1,2)
                                                                     WHERE
-                                                                        notprinted_whse = $whsesel and notprinted_build = $building;");
+                                                                        notprinted_whse = $whsesel and notprinted_build = $building ");
     $casesavail->execute();
     $casesavailarray = $casesavail->fetchAll(pdo::FETCH_ASSOC);
 
@@ -231,10 +228,19 @@ foreach ($whsearray as $whsesel) {
     } while ($counter <= $rowcount);
 
 
-
+    //operator count by equipment type
+    $operatorcount = $conn1->prepare("SELECT 
+                                                                            equipcount_equipment, equipcount_count
+                                                                        FROM
+                                                                            printvis.case_equipmentcount
+                                                                        WHERE
+                                                                            equipcount_whse = $whsesel and equipcount_build = $building ;");
+    $operatorcount->execute();
+    $operatorcountarray = $operatorcount->fetchAll(pdo::FETCH_ASSOC);
 
     //loop through available equipment types
     foreach ($operatorcountarray as $key2 => $value) {
+
         $equipment = $operatorcountarray[$key2]['equipcount_equipment'];
         $equipment_count = $operatorcountarray[$key2]['equipcount_count'];
 
@@ -273,6 +279,8 @@ foreach ($whsearray as $whsesel) {
             $notprinted_batch = $batchnumb;
             $notprinted_aisle = substr($notprinted_location, 0, 3);
 
+
+
             $notprintedbatchdata[] = "($notprinted_lp, $notprinted_whse, $notprinted_build, '$notprinted_cubinch', '$notprinted_location', '$notprinted_equiptype', '$notprinted_batch', '$notprinted_aisle')";
 
             if (($countbyequipmenttype - 1) == $key3) {//have reached last line, write to table
@@ -288,117 +296,176 @@ foreach ($whsearray as $whsesel) {
 
 
     $opentotedata = $conn1->prepare("SELECT 
-                                                                        notprinted_whse,
-                                                                        notprinted_build,
-                                                                        notprinted_batch,
-                                                                        notprinted_aisle,
-                                                                        SUM(notprinted_cubinch) AS TRIPS,
-                                                                        COUNT(*) AS LINE_COUNT,
-                                                                        @FIRSTLOC:=MIN(notprinted_location) AS FIRSTLOC,
-                                                                        @LASTLOC:=MAX(notprinted_location) AS LASTLOC,
-                                                                        casepm_inch_per_min,
-                                                                        SUM(notprinted_cubinch) AS CUBICINCH,
-                                                                        @AISLESTART_X:=(SELECT 
-                                                                                pickprediction_xcoor
-                                                                            FROM
-                                                                                printvis.pickprediction_casemap
-                                                                            WHERE
-                                                                                CONCAT(notprinted_aisle, 'P') = casemap_loc
-                                                                                    AND casemap_whse = notprinted_whse
-                                                                                    AND casemap_building = notprinted_build) AS AISLESTART_X,
-                                                                        @AISLESTART_Z:=(SELECT 
-                                                                                casemap_zcoor
-                                                                            FROM
-                                                                                printvis.pickprediction_casemap
-                                                                            WHERE
-                                                                                CONCAT(notprinted_aisle, 'P') = casemap_loc
-                                                                                    AND casemap_whse = notprinted_whse) AS AISLESTART_Z,
-                                                                        @LASTLOC_X:=(SELECT 
-                                                                                pickprediction_xcoor
-                                                                            FROM
-                                                                                printvis.pickprediction_casemap
-                                                                            WHERE
-                                                                                SUBSTRING(MAX(notprinted_location),
-                                                                                    1,
-                                                                                    6) = casemap_loc
-                                                                                    AND casemap_whse = notprinted_whse) AS LASTLOC_X,
-                                                                        @LASTLOC_Z:=(SELECT 
-                                                                                casemap_zcoor
-                                                                            FROM
-                                                                                printvis.pickprediction_casemap
-                                                                            WHERE
-                                                                                SUBSTRING(MAX(notprinted_location),
-                                                                                    1,
-                                                                                    6) = casemap_loc
-                                                                                    AND casemap_whse = notprinted_whse) AS LASTLOC_Z,
-                                                                        @FIRSTLOC_X:=(SELECT 
-                                                                                pickprediction_xcoor
-                                                                            FROM
-                                                                                printvis.pickprediction_casemap
-                                                                            WHERE
-                                                                                SUBSTRING(MIN(notprinted_location),
-                                                                                    1,
-                                                                                    6) = casemap_loc
-                                                                                    AND casemap_whse = notprinted_whse) AS FIRSTLOC_X,
-                                                                        @FIRSTLOC_Z:=(SELECT 
-                                                                                casemap_zcoor
-                                                                            FROM
-                                                                                printvis.pickprediction_casemap
-                                                                            WHERE
-                                                                                SUBSTRING(MIN(notprinted_location),
-                                                                                    1,
-                                                                                    6) = casemap_loc
-                                                                                    AND casemap_whse = notprinted_whse) AS FIRSTLOC_Z,
-                                                                        (ABS((SELECT 
-                                                                                        pickprediction_xcoor
-                                                                                    FROM
-                                                                                        printvis.pickprediction_casemap
-                                                                                    WHERE
-                                                                                        SUBSTRING(MIN(notprinted_location),
-                                                                                            1,
-                                                                                            6) = casemap_loc
-                                                                                            AND casemap_whse = notprinted_whse) - (SELECT 
-                                                                                        pickprediction_xcoor
-                                                                                    FROM
-                                                                                        printvis.pickprediction_casemap
-                                                                                    WHERE
-                                                                                        SUBSTRING(MAX(notprinted_location),
-                                                                                            1,
-                                                                                            6) = casemap_loc
-                                                                                            AND casemap_whse = notprinted_whse)) + ABS((SELECT 
-                                                                                        casemap_zcoor
-                                                                                    FROM
-                                                                                        printvis.pickprediction_casemap
-                                                                                    WHERE
-                                                                                        SUBSTRING(MIN(notprinted_location),
-                                                                                            1,
-                                                                                            6) = casemap_loc
-                                                                                            AND casemap_whse = notprinted_whse) - (SELECT 
-                                                                                        casemap_zcoor
-                                                                                    FROM
-                                                                                        printvis.pickprediction_casemap
-                                                                                    WHERE
-                                                                                        SUBSTRING(MAX(notprinted_location),
-                                                                                            1,
-                                                                                            6) = casemap_loc
-                                                                                            AND casemap_whse = notprinted_whse))) AS INNERAISLETRAVEL,
-                                                                        notprinted_equiptype,
-                                                                        casepm_pickloc,
-                                                                        casepm_units,
-                                                                        casepm_indirect,
-                                                                        casepm_dropoff,
-                                                                        casepm_noncon
-                                                                    FROM
-                                                                        printvis.casesnotprinted_bybatch
-                                                                            JOIN
-                                                                        printvis.pm_casetimes ON casepm_whse = notprinted_whse
-                                                                            AND casepm_build = notprinted_build
-                                                                            AND casepm_equipment = notprinted_equiptype
-                                                                    WHERE
-                                                                        notprinted_whse = $whsesel
-                                                                            AND notprinted_build = $building
-                                                                    GROUP BY notprinted_whse , notprinted_build , notprinted_batch , notprinted_aisle
-                                                                    ORDER BY notprinted_batch , notprinted_location;");
+    notprinted_whse,
+    notprinted_build,
+    notprinted_batch,
+    notprinted_aisle,
+    SUM(notprinted_cubinch) AS TRIPS,
+    COUNT(*) AS LINE_COUNT,
+    @FIRSTLOC:=MIN(notprinted_location) AS FIRSTLOC,
+    @LASTLOC:=MAX(notprinted_location) AS LASTLOC,
+    casepm_inch_per_min,
+    SUM(notprinted_cubinch) AS CUBICINCH,
+    @LOWSTART_X:=(SELECT 
+            aisle_x
+        FROM
+            printvis.aisle_coor
+                JOIN
+            printvis.pickprediction_casemap ON casemap_whse = aisle_whse
+                AND casemap_aisle = aisle_id
+        WHERE
+            casemap_whse = notprinted_whse
+                AND casemap_loc = SUBSTR(MAX(notprinted_location), 1, 6)
+                AND aisle_location = 'L') AS LOWSTART_X,
+    @LOWSTART_Z:=(SELECT 
+            aisle_z
+        FROM
+            printvis.aisle_coor
+                JOIN
+            printvis.pickprediction_casemap ON casemap_whse = aisle_whse
+                AND casemap_aisle = aisle_id
+        WHERE
+            casemap_whse = notprinted_whse
+                AND casemap_loc = SUBSTR(MAX(notprinted_location), 1, 6)
+                AND aisle_location = 'L') AS LOWSTART_Z,
+    @HIGHSTART_X:=(SELECT 
+            aisle_x
+        FROM
+            printvis.aisle_coor
+                JOIN
+            printvis.pickprediction_casemap ON casemap_whse = aisle_whse
+                AND casemap_aisle = aisle_id
+        WHERE
+            casemap_whse = notprinted_whse
+                AND casemap_loc = SUBSTR(MAX(notprinted_location), 1, 6)
+                AND aisle_location = 'H') AS HIGHSTART_X,
+    @HIGHSTART_Z:=(SELECT 
+            aisle_z
+        FROM
+            printvis.aisle_coor
+                JOIN
+            printvis.pickprediction_casemap ON casemap_whse = aisle_whse
+                AND casemap_aisle = aisle_id
+        WHERE
+            casemap_whse = notprinted_whse
+                AND casemap_loc = SUBSTR(MAX(notprinted_location), 1, 6)
+                AND aisle_location = 'H') AS HIGHSTART_Z,
+    @BRIDGESTART_X:=(SELECT 
+            aisle_x
+        FROM
+            printvis.aisle_coor
+                JOIN
+            printvis.pickprediction_casemap ON casemap_whse = aisle_whse
+                AND casemap_aisle = aisle_id
+        WHERE
+            casemap_whse = notprinted_whse
+                AND casemap_loc = SUBSTR(MAX(notprinted_location), 1, 6)
+                AND aisle_location = 'B') AS BRIDGESTART_X,
+    @BRIDGESTART_Z:=(SELECT 
+            aisle_z
+        FROM
+            printvis.aisle_coor
+                JOIN
+            printvis.pickprediction_casemap ON casemap_whse = aisle_whse
+                AND casemap_aisle = aisle_id
+        WHERE
+            casemap_whse = notprinted_whse
+                AND casemap_loc = SUBSTR(MAX(notprinted_location), 1, 6)
+                AND aisle_location = 'B') AS BRIDGESTART_Z,
+    @LASTLOC_X:=(SELECT 
+            pickprediction_xcoor
+        FROM
+            printvis.pickprediction_casemap
+        WHERE
+            SUBSTRING(MAX(notprinted_location),
+                1,
+                6) = casemap_loc
+                AND casemap_whse = notprinted_whse
+                AND casemap_building = notprinted_build) AS LASTLOC_X,
+    @LASTLOC_Z:=(SELECT 
+            casemap_zcoor
+        FROM
+            printvis.pickprediction_casemap
+        WHERE
+            SUBSTRING(MAX(notprinted_location),
+                1,
+                6) = casemap_loc
+                AND casemap_whse = notprinted_whse
+                AND casemap_building = notprinted_build) AS LASTLOC_Z,
+    @FIRSTLOC_X:=(SELECT 
+            pickprediction_xcoor
+        FROM
+            printvis.pickprediction_casemap
+        WHERE
+            SUBSTRING(MIN(notprinted_location),
+                1,
+                6) = casemap_loc
+                AND casemap_whse = notprinted_whse
+                AND casemap_building = notprinted_build) AS FIRSTLOC_X,
+    @FIRSTLOC_Z:=(SELECT 
+            casemap_zcoor
+        FROM
+            printvis.pickprediction_casemap
+        WHERE
+            SUBSTRING(MIN(notprinted_location),
+                1,
+                6) = casemap_loc
+                AND casemap_whse = notprinted_whse
+                AND casemap_building = notprinted_build) AS FIRSTLOC_Z,
+    (ABS((SELECT 
+                    pickprediction_xcoor
+                FROM
+                    printvis.pickprediction_casemap
+                WHERE
+                    SUBSTRING(MIN(notprinted_location),
+                        1,
+                        6) = casemap_loc
+                        AND casemap_whse = notprinted_whse
+                        AND casemap_building = notprinted_build) - (SELECT 
+                    pickprediction_xcoor
+                FROM
+                    printvis.pickprediction_casemap
+                WHERE
+                    SUBSTRING(MAX(notprinted_location),
+                        1,
+                        6) = casemap_loc
+                        AND casemap_whse = notprinted_whse
+                        AND casemap_building = notprinted_build)) + ABS((SELECT 
+                    casemap_zcoor
+                FROM
+                    printvis.pickprediction_casemap
+                WHERE
+                    SUBSTRING(MIN(notprinted_location),
+                        1,
+                        6) = casemap_loc
+                        AND casemap_whse = notprinted_whse
+                        AND casemap_building = notprinted_build) - (SELECT 
+                    casemap_zcoor
+                FROM
+                    printvis.pickprediction_casemap
+                WHERE
+                    SUBSTRING(MAX(notprinted_location),
+                        1,
+                        6) = casemap_loc
+                        AND casemap_whse = notprinted_whse
+                        AND casemap_building = notprinted_build))) AS INNERAISLETRAVEL,
+    notprinted_equiptype,
+    casepm_pickloc,
+    casepm_units,
+    casepm_indirect,
+    casepm_dropoff,
+    casepm_noncon
+FROM
+    printvis.casesnotprinted_bybatch
+        JOIN
+    printvis.pm_casetimes ON casepm_whse = notprinted_whse
+        AND casepm_build = notprinted_build
+        AND casepm_equipment = notprinted_equiptype
+WHERE
+    notprinted_whse = $whsesel
+        AND notprinted_build = $building
+GROUP BY notprinted_whse , notprinted_build , notprinted_batch , notprinted_aisle
+ORDER BY notprinted_batch , notprinted_location");
     $opentotedata->execute();
     $opentotedataarray = $opentotedata->fetchAll(pdo::FETCH_ASSOC);
 
@@ -434,6 +501,8 @@ foreach ($whsearray as $whsesel) {
     $openbatchcount = 0;
     $openarraycount = count($opentotedataarray) - 1;
 
+
+
     foreach ($opentotedataarray as $key => $value) {
 
         //calculate estimated completion times by batch/aisle key
@@ -454,14 +523,77 @@ foreach ($whsearray as $whsesel) {
         $casepm_inch_per_min = $opentotedataarray[$key]['casepm_inch_per_min'];
         $casebatch_cubicinch = $opentotedataarray[$key]['CUBICINCH'];
         $caseaisle_inches_inner = $opentotedataarray[$key]['INNERAISLETRAVEL'];
+        if (is_null($caseaisle_inches_inner)) {
+            $caseaisle_inches_inner = 0;
+        }
 
-
-        $AISLESTART_X = $opentotedataarray[$key]['AISLESTART_X'];
-        $AISLESTART_Z = $opentotedataarray[$key]['AISLESTART_Z'];
+        $LOWSTART_X = $opentotedataarray[$key]['LOWSTART_X'];
+        $LOWSTART_Z = $opentotedataarray[$key]['LOWSTART_Z'];
+        $HIGHSTART_X = $opentotedataarray[$key]['HIGHSTART_X'];
+        $HIGHSTART_Z = $opentotedataarray[$key]['HIGHSTART_Z'];
+        $BRIDGESTART_X = $opentotedataarray[$key]['BRIDGESTART_X'];
+        $BRIDGESTART_Z = $opentotedataarray[$key]['BRIDGESTART_Z'];
         $FIRSTLOC_X = $opentotedataarray[$key]['FIRSTLOC_X'];
         $FIRSTLOC_Z = $opentotedataarray[$key]['FIRSTLOC_Z'];
         $LASTLOC_X = $opentotedataarray[$key]['LASTLOC_X'];
         $LASTLOC_Z = $opentotedataarray[$key]['LASTLOC_Z'];
+
+
+
+        If ($key !== 0) { //Not the first record
+            $previousloc_X = $opentotedataarray[$key - 1]['LASTLOC_X'];  //previous aisle last location X
+            $previousloc_Z = $opentotedataarray[$key - 1]['LASTLOC_Z'];  //previous aisle last location Z
+            $previousaisleH_X = $opentotedataarray[$key - 1]['HIGHSTART_X'];  //previous aisle high parking X
+            $previousaisleH_Z = $opentotedataarray[$key - 1]['HIGHSTART_Z'];  //previous aisle high parking Z
+            $previousaisleL_X = $opentotedataarray[$key - 1]['LOWSTART_X'];  //previous aisle low parking X
+            $previousaisleL_Z = $opentotedataarray[$key - 1]['LOWSTART_Z'];  //previous aisle low parking Z
+            $previousaisleB_X = $opentotedataarray[$key - 1]['BRIDGESTART_X'];  //previous aisle bridge parking X
+            $previousaisleB_Z = $opentotedataarray[$key - 1]['BRIDGESTART_Z'];  //previous aisle bridge parking Z
+        } else {//First record in array
+            $previousloc_X = $previousloc_Z = $previousaisleH_X = $previousaisleH_Z = $previousaisleL_X = $previousaisleL_Z = $previousaisleB_X = $previousaisleB_Z = 0; //set all to 0 if first record
+        }
+
+        if ($key !== $openarraycount) { //Not the last record
+            $nextloc_X = $opentotedataarray[$key + 1]['LASTLOC_X'];  //next aisle last location X
+            $nextloc_Z = $opentotedataarray[$key + 1]['LASTLOC_Z'];  //next aisle last location Z
+            $nextaisleH_X = $opentotedataarray[$key + 1]['HIGHSTART_X'];  //next aisle high parking X
+            $nextaisleH_Z = $opentotedataarray[$key + 1]['HIGHSTART_Z'];  //next aisle high parking Z
+            $nextaisleL_X = $opentotedataarray[$key + 1]['LOWSTART_X'];  //next aisle low parking X
+            $nextaisleL_Z = $opentotedataarray[$key + 1]['LOWSTART_Z'];  //next aisle low parking Z
+            $nextaisleB_X = $opentotedataarray[$key + 1]['BRIDGESTART_X'];  //next aisle bridge parking X
+            $nextaisleB_Z = $opentotedataarray[$key + 1]['BRIDGESTART_Z'];  //next aisle bridge parking Z
+        } else {//Last record in array
+            $nextloc_X = $nextloc_Z = $nextaisleH_X = $nextaisleH_Z = $nextaisleL_X = $nextaisleL_Z = $nextaisleB_X = $nextaisleB_Z = 0; //set all to 0 if last record
+        }
+
+        $outeraisle_high = _casetravel($previousloc_X, $previousloc_Z, $previousaisleH_X, $previousaisleH_Z, $HIGHSTART_X, $HIGHSTART_Z, $FIRSTLOC_X, $FIRSTLOC_Z);
+        $outeraisle_low = _casetravel($previousloc_X, $previousloc_Z, $previousaisleL_X, $previousaisleL_Z, $LOWSTART_X, $LOWSTART_Z, $FIRSTLOC_X, $FIRSTLOC_Z);
+
+        if ($casebatch_whse === 6) {
+            //Because the "bridge" is actually a travel aisle with different aisles on either side, must calc L to H and H to L
+            $outeraisle_hightoL = _casetravel($previousloc_X, $previousloc_Z, $previousaisleH_X, $previousaisleH_Z, $LOWSTART_X, $LOWSTART_Z, $FIRSTLOC_X, $FIRSTLOC_Z);
+            $outeraisle_lowtoH = _casetravel($previousloc_X, $previousloc_Z, $previousaisleL_X, $previousaisleL_Z, $HIGHSTART_X, $HIGHSTART_Z, $FIRSTLOC_X, $FIRSTLOC_Z);
+        } else {
+            $outeraisle_hightoL = 999999;
+            $outeraisle_lowtoH = 999999;
+        }
+
+        //Are there any bridge restictions.  Returns $bridge_restriction array
+        include 'bridge_restriction.php';
+        $bridge_inlcude = 1;  //Reset bridge to include
+        foreach ($bridge_restriction_array as $val_bridge) {
+            if ($val_bridge > $bridge_prev_coordinate && $val_bridge < $bridge_curr_coordianate) {
+                $bridge_inlcude = 0;
+                break;
+            }
+        }
+
+        if ($bridge_inlcude == 1) {
+            $outeraisle_bridge = _casetravel($previousloc_X, $previousloc_Z, $previousaisleB_X, $previousaisleB_Z, $BRIDGESTART_X, $BRIDGESTART_Z, $FIRSTLOC_X, $FIRSTLOC_Z);
+        } else {
+            $outeraisle_bridge = 99999999999;
+        }
+        $outeraisle_min = min($outeraisle_high, $outeraisle_low, $outeraisle_bridge, $outeraisle_hightoL, $outeraisle_lowtoH);
 
         if (isset($opentotedataarray[$key + 1]['notprinted_batch'])) {
             $nextcart = intval($opentotedataarray[$key + 1]['notprinted_batch']);
@@ -469,74 +601,37 @@ foreach ($whsearray as $whsesel) {
             $nextcart = 0;
         }
 
+        //calculate time from this P point to next P point.
         if ($casebatch_cart != $nextcart && $casebatch_cart != intval($opentotedataarray[$key - 1]['notprinted_batch'])) {
-            $outeraisletravel = abs($FIRSTLOC_X - $cstart_xcoor) + abs($FIRSTLOC_Z - $cstart_zcoor);
-            $outeraisletravel += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
+            $outeraisle_min = abs($FIRSTLOC_X - $cstart_xcoor) + abs($FIRSTLOC_Z - $cstart_zcoor);
+            $outeraisle_min += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
             $openbatchcount = 0;
         } elseif ($openbatchcount == 0) {  //first aisle on batch.  what is distance from CSTART to first location
-            $outeraisletravel = abs($FIRSTLOC_X - $cstart_xcoor) + abs($FIRSTLOC_Z - $cstart_zcoor);
+            $outeraisle_min = abs($FIRSTLOC_X - $cstart_xcoor) + abs($FIRSTLOC_Z - $cstart_zcoor);
             $openbatchcount += 1;
         } elseif ($key == $openarraycount) { //if last line of array do normal calc, go back to CSTOP
-            $outeraisletravel += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
+            $outeraisle_min += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
             $openbatchcount = 0;
         } elseif ($casebatch_cart != $nextcart && $openbatchcount == 0) {//if new batch is on next line and this is first line of batch, go from CSTART to Location the location back to CSTOP
-            $outeraisletravel = abs($FIRSTLOC_X - $cstart_xcoor) + abs($FIRSTLOC_Z - $cstart_zcoor);
-            $outeraisletravel += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
+            $outeraisle_min = abs($FIRSTLOC_X - $cstart_xcoor) + abs($FIRSTLOC_Z - $cstart_zcoor);
+            $outeraisle_min += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
             $openbatchcount = 0;
         } elseif ($casebatch_cart != $nextcart) {//if new batch is on next line do normal calc then add distance from last location and go back to CSTOP
-            $outeraisletravel += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
+            $outeraisle_min += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
             $openbatchcount = 0;
         } else { //calc distance from Last location to mid point , add to next mid point, add to next mid point to first loc of next aisle
             //make excpetion for aisle 49 in Sparks. Go from last location on w49 to first location on next aisle
-            if (($whsesel == 3 || $whsesel == 6) && substr($opentotedataarray[$key - 1]['LASTLOC'], 0, 3) == 'W49') {
-                $outeraisletravel = abs($opentotedataarray[$key - 1]['LASTLOC_X'] - $FIRSTLOC_X) + abs($opentotedataarray[$key - 1]['LASTLOC_Z'] - $FIRSTLOC_Z);
+            if (($whsesel == 3 || $whsesel == 6) && substr($opentotedataarray[$key - 1]['casepm_pickloc'], 0, 3) == 'W49') {
+                $outeraisle_min = abs($opentotedataarray[$key - 1]['LASTLOC_X'] - $FIRSTLOC_X) + abs($opentotedataarray[$key - 1]['LASTLOC_Z'] - $FIRSTLOC_Z);
             } else { //normal calc
                 $openbatchcount += 1;
             }
         }
 
 
-
-
-
-        //calculate time from this P point to next P point.
-//        if ($key == $openarraycount) { //if last line of array do normal calc, go back to CSTOP
-//            $outeraisletravel = abs($opentotedataarray[$key - 1]['LASTLOC_X'] - $opentotedataarray[$key - 1]['AISLESTART_X']) + abs($opentotedataarray[$key - 1]['LASTLOC_Z'] - $opentotedataarray[$key - 1]['AISLESTART_Z']);  //Previous last loc to previous start.
-//            $outeraisletravel += abs($AISLESTART_X - $opentotedataarray[$key - 1]['AISLESTART_X']) + abs($AISLESTART_Z - $opentotedataarray[$key - 1]['AISLESTART_Z']);
-//            $outeraisletravel += abs($FIRSTLOC_X - $AISLESTART_X) + abs($FIRSTLOC_Z - $AISLESTART_Z);
-//            $outeraisletravel += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
-//            $openbatchcount = 0;
-//        } elseif ($casebatch_cart !== $opentotedataarray[$key + 1]['notprinted_batch'] && $openbatchcount == 0) {//if new batch is on next line and this is first line of batch, go from Last Loc to Location the location back to CSTOP
-//            $outeraisletravel = abs($FIRSTLOC_X - $cstart_xcoor) + abs($FIRSTLOC_Z - $cstart_zcoor);
-//            $outeraisletravel += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
-//            $openbatchcount = 0;
-//        } elseif ($casebatch_cart !== $opentotedataarray[$key + 1]['notprinted_batch']) {//if new batch is on next line do normal calc then add distance from last location and go back to CSTOP
-//            $outeraisletravel = abs($opentotedataarray[$key - 1]['LASTLOC_X'] - $opentotedataarray[$key - 1]['AISLESTART_X']) + abs($opentotedataarray[$key - 1]['LASTLOC_Z'] - $opentotedataarray[$key - 1]['AISLESTART_Z']);  //Previous last loc to previous start.
-//            $outeraisletravel += abs($AISLESTART_X - $opentotedataarray[$key - 1]['AISLESTART_X']) + abs($AISLESTART_Z - $opentotedataarray[$key - 1]['AISLESTART_Z']);
-//            $outeraisletravel += abs($FIRSTLOC_X - $AISLESTART_X) + abs($FIRSTLOC_Z - $AISLESTART_Z);
-//            $outeraisletravel += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
-//            $openbatchcount = 0;
-//        } elseif ($openbatchcount == 0) {  //first aisle on batch.  what is distance from CSTART to first location
-//            $outeraisletravel = abs($FIRSTLOC_X - $cstart_xcoor) + abs($FIRSTLOC_Z - $cstart_zcoor);
-//            $openbatchcount += 1;
-//        } else { //calc distance from Last location to mid point , add to next mid point to first loc of next aisle
-//            //make excpetion for aisle 49 in Sparks. Go from last location on w49 to first location on next aisle
-//            if ($whsesel == 3 && $building == 2 && substr($opentotedataarray[$key - 1]['LASTLOC'], 0, 3) == 'W49') {
-//                $outeraisletravel = abs($opentotedataarray[$key - 1]['LASTLOC_X'] - $FIRSTLOC_X) + abs($opentotedataarray[$key - 1]['LASTLOC_Z'] - $FIRSTLOC_Z);
-//            } else { //normal calc
-//                $outeraisletravel = abs($opentotedataarray[$key - 1]['LASTLOC_X'] - $opentotedataarray[$key - 1]['AISLESTART_X']) + abs($opentotedataarray[$key - 1]['LASTLOC_Z'] - $opentotedataarray[$key - 1]['AISLESTART_Z']);  //Previous last loc to previous start.
-//                $outeraisletravel += abs($AISLESTART_X - $opentotedataarray[$key - 1]['AISLESTART_X']) + abs($AISLESTART_Z - $opentotedataarray[$key - 1]['AISLESTART_Z']);
-//                $outeraisletravel += abs($FIRSTLOC_X - $AISLESTART_X) + abs($FIRSTLOC_Z - $AISLESTART_Z);
-//                $openbatchcount += 1;
-//            }
-//        }
-
-        if (is_null($outeraisletravel)) {
-            $outeraisletravel = 0;
+        if (is_null($outeraisle_min)) {
+            $outeraisle_min = 0;
         }
-
-
-
 
         $calc_picktimeloc = $casebatch_lines * $casepm_pickloc;
         $calc_picktimeunit = $casebatch_cubicinch * $casepm_units;
@@ -544,13 +639,12 @@ foreach ($whsearray as $whsesel) {
         $calc_picktimedropoff = $casebatch_lines * $casepm_dropoff;
         $calc_picktimenoncon = $casebatch_lines * $casepm_noncon;
 
-        $caseaisle_inches = ($caseaisle_inches_inner + $outeraisletravel);
+        $caseaisle_inches = ($caseaisle_inches_inner + $outeraisle_min);
         if ($casepm_inch_per_min > 0) {
             $calc_taveltime = $caseaisle_inches / $casepm_inch_per_min;
         } else {
             $calc_taveltime = 0;
         }
-
 
 
         $totaltime = $calc_picktimeloc + $calc_picktimeunit + $calc_picktimeindirect + $calc_picktimedropoff + $calc_picktimenoncon + $calc_taveltime;
@@ -1109,3 +1203,7 @@ WHERE
                                                                 GROUP BY EQUIP ON duplicate key update caseactbyhour_minutes=VALUES(caseactbyhour_minutes);");
     $result2->execute();
 } //end of whse foreach loop
+
+
+
+    

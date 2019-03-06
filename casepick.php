@@ -21,7 +21,32 @@
         <!--body content-->
         <section id="content"> 
             <section class="main padder" style="padding-top: 75px"> 
-                <div class="btn btn-danger" id="btn_casedatarefresh">Refresh Data</div> 
+                <?php
+                if (isset($_SESSION['MYUSER'])) {
+                    $var_userid = $_SESSION['MYUSER'];
+                    $whssql = $conn1->prepare("SELECT prodvisdb_users_PRIMDC from printvis.prodvisdb_users WHERE prodvisdb_users_ID = '$var_userid'");
+                    $whssql->execute();
+                    $whssqlarray = $whssql->fetchAll(pdo::FETCH_ASSOC);
+                    $var_whse = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
+                }
+                if ($var_whse == 3) {
+                    $buidlingclass = '';
+                } else {
+                    $buidlingclass = 'hidden';
+                }
+                ?>
+                <div id="buildingcontainer" class="<?php echo $buidlingclass ?>">
+                    <label>Select Building: </label>
+                    <select class="selectstyle" id="building" name="building" style="width: 75px;" onChange="refreshall()">
+                        <!--<option value="both">Pick and Replen Map</option>-->
+                        <option value="2">2</option>   
+                        <option value="1">1</option>
+                        <!--<option value="pickhigh">Pick Map - HIGHS</option>-->
+                        <!--<option value="replen">Replen Map</option>-->
+                    </select>
+                </div>
+
+
                 <!--Header stats at top of page-->
                 <div id="headerstats" class="hidden"></div>
                 <div id="ajaxloadergif" class=""> Data Loading, please wait...<img src="../ajax-loader-big.gif" alt=""/></div>
@@ -62,7 +87,7 @@
                         <div class="panel-body">
                             <!--forecasts stats data goes here-->
                             <div id="forecaststats"></div>
-                            <?php // include 'globaldata/forecaststats.php'; ?>
+                            <?php // include 'globaldata/forecaststats.php';   ?>
 
 
                             <div id="foretoact"  class="page-break" style="width: 100%">
@@ -155,6 +180,7 @@
 
             //ajax detail data for cases not yet printed
             $(document).on("click touchstart", "#stat_notprintedtime", function (e) {
+
                 $('#ctn_notprintedcases').addClass('hidden');
                 $('#ctn_printednotpicked').addClass('hidden');
                 $('#ctn_picking').addClass('hidden');
@@ -163,6 +189,7 @@
 
             //ajax detail data for cases printed
             $(document).on("click touchstart", "#stat_printed", function (e) {
+
                 $('#ctn_notprintedcases').addClass('hidden');
                 $('#ctn_printednotpicked').addClass('hidden');
                 $('#ctn_picking').addClass('hidden');
@@ -171,6 +198,7 @@
 
             //ajax detail data for cases currently being picked
             $(document).on("click touchstart", "#stat_beingpicked", function (e) {
+
                 $('#ctn_notprintedcases').addClass('hidden');
                 $('#ctn_printednotpicked').addClass('hidden');
                 $('#ctn_picking').addClass('hidden');
@@ -181,6 +209,7 @@
             $(document).on("click touchstart", ".click_sort", function (e) {
                 var sort_class = $(this).attr('data-sort');
                 var datapull = $(this).attr('data-pull');
+                var building = $('#building').val();
                 if (sort_class === ' asc') {
                     $(this).attr('data-sort', ' desc');
                 }
@@ -204,13 +233,14 @@
 
             //ajax function to pull data for printed batches
             function ajaxpull_picking(orderby, sort_class) {
+                var building = $('#building').val();
                 if (typeof (orderby) !== "undefined" && orderby !== null) {
                     var orderby = orderby;
                 } else {
                     var orderby = 'default';
                 }
                 $.ajax({
-                    data: {orderby: orderby, sort_class: sort_class},
+                    data: {orderby: orderby, sort_class: sort_class, building: building},
                     url: 'globaldata/data_pickingcase.php',
                     type: 'POST',
                     dataType: 'html',
@@ -223,13 +253,14 @@
 
             //ajax function to pull data for printed batches
             function ajaxpull_printed(orderby, sort_class) {
+                var building = $('#building').val();
                 if (typeof (orderby) !== "undefined" && orderby !== null) {
                     var orderby = orderby;
                 } else {
                     var orderby = 'default';
                 }
                 $.ajax({
-                    data: {orderby: orderby, sort_class: sort_class},
+                    data: {orderby: orderby, sort_class: sort_class, building: building},
                     url: 'globaldata/data_printedcase.php',
                     type: 'POST',
                     dataType: 'html',
@@ -242,13 +273,14 @@
 
             //ajax function to pull data for printed batches
             function ajaxpull_notprinted(orderby, sort_class) {
+                var building = $('#building').val();
                 if (typeof (orderby) !== "undefined" && orderby !== null) {
                     var orderby = orderby;
                 } else {
                     var orderby = 'default';
                 }
                 $.ajax({
-                    data: {orderby: orderby, sort_class: sort_class},
+                    data: {orderby: orderby, sort_class: sort_class, building: building},
                     url: 'globaldata/data_notprintedcase.php',
                     type: 'POST',
                     dataType: 'html',
@@ -262,8 +294,9 @@
 
             //ajax function to pull data for printed batches
             function ajaxpull_forecaststats() {
-
+                var building = $('#building').val();
                 $.ajax({
+                    data: {building: building},
                     url: 'globaldata/forecaststats.php',
                     type: 'POST',
                     dataType: 'html',
@@ -277,9 +310,10 @@
             //ajax to change equipment type needed by batch
             $(document).on("click touchstart", ".btn_changeequip", function (e) {
                 var newequip = $('.updateequip').val();
+                var building = $('#building').val();
                 var batchid = $(this).attr('batch-id');
                 $.ajax({
-                    data: {newequip: newequip, batchid: batchid},
+                    data: {newequip: newequip, batchid: batchid, building: building},
                     url: 'formpost/changeequip.php',
                     type: 'POST',
                     dataType: 'html',
@@ -291,32 +325,13 @@
 
             //ajax detail data for cases currently being picked
             $(document).on("click touchstart", "#stat_beingpicked", function (e) {
-                $('#ctn_notprintedcases').addClass('hidden');
-                $('#ctn_printednotpicked').addClass('hidden');
-                $('#ctn_picking').addClass('hidden');
-                $.ajax({
-                    url: 'globaldata/data_pickingcase.php',
-                    type: 'POST',
-                    dataType: 'html',
-                    success: function (ajaxresult) {
-                        $("#ctn_picking").html(ajaxresult);
-                        $('#ctn_picking').removeClass('hidden');
-                    }
-                });
-            });
 
-            //if refresh button is clicked, call all refresh functions
-            $(document).on("click touchstart", "#btn_casedatarefresh", function (e) {
-                refreshprintedcasedata();
-                refreshnotprintedcasedata();
-                refreshheaderdata();
+                ajaxpull_picking();
             });
 
             //Set the interval function to refresh a set time period
             setInterval(function () {
                 //set header data to refresh every 120 seconds (120,000 ms)
-                //refreshprintedcasedata();
-                //refreshnotprintedcasedata();
                 refreshheaderdata();
                 highchartoptions();
                 highchartoptions_forecast();
@@ -324,35 +339,9 @@
                 $(window).resize();
             }, 245000);
 
-            //Data pull to refresh printed case data
-            function refreshprintedcasedata() {
-                $('#headerstats').addClass('hidden');
-                $('#ctn_notprintedcases').addClass('hidden');
-                $('#ctn_printednotpicked').addClass('hidden');
-                $('#ctn_picking').addClass('hidden');
-                $('#ajaxloadergif').removeClass('hidden');
-                $.ajax({
-                    url: 'datapull/casedata.php',
-                    type: 'POST',
-                    dataType: 'html',
-                    success: function (ajaxresult) {
-                    }
-                });
-            }
-
-            //Data pull to refresh NOT printed case data
-            function refreshnotprintedcasedata() {
-                $.ajax({
-                    url: 'datapull/opencases.php',
-                    type: 'POST',
-                    dataType: 'html',
-                    success: function (ajaxresult) {
-                    }
-                });
-            }
-
             //Chart options and ajax for labor hours by hour
             function highchartoptions() {
+                var building = $('#building').val();
                 //Highchart variables for total hours not printed history
                 var options = {
                     chart: {
@@ -416,6 +405,7 @@
                     series: []
                 };
                 $.ajax({
+                    data: {building: building},
                     url: 'globaldata/graphdata_notprinted.php',
                     type: 'GET',
                     dataType: 'json',
@@ -438,6 +428,7 @@
 
             //Chart options and ajax for labor hours by hour
             function highchartoptions_forecast() {
+                var building = $('#building').val();
                 //Highchart variables for total hours not printed history
                 var options2 = {
                     chart: {
@@ -501,6 +492,7 @@
                     series: []
                 };
                 $.ajax({
+                    data: {building: building},
                     url: 'globaldata/graphdata_foretoact.php',
                     type: 'GET',
                     dataType: 'json',
@@ -537,7 +529,9 @@
 
             //Data pull to refresh header case data
             function refreshheaderdata() {
+                var building = $('#building').val();
                 $.ajax({
+                    data: {building: building},
                     url: 'globaldata/data_casepickheadertimes.php',
                     type: 'POST',
                     dataType: 'html',
@@ -550,13 +544,7 @@
                 });
             }
 
-            $(document).ready(function () {
-                //call function to refresh casedata
-                //refreshprintedcasedata();
-
-                //call function to refresh open not printed cases
-                //refreshnotprintedcasedata();
-
+            function refreshall() {
                 //call function to refresh header data
                 refreshheaderdata();
 
@@ -565,20 +553,25 @@
 
                 //call highchart on load
                 highchartoptions_forecast();
-                
+
                 //call forecast stats function
                 ajaxpull_forecaststats();
-                
+
                 $(window).resize();
+            }
+
+            $(document).ready(function () {
+                refreshall();
+
             });
 
             //show detail on click for not printed projected batches
             $(document).on("click touchstart", ".batchclick_notprinted", function (e) {
-                debugger;
+                var building = $('#building').val();
                 var batch = (this.id);
                 $('#modal_notprintedbatch').modal('toggle');
                 $.ajax({
-                    data: {batch: batch},
+                    data: {batch: batch, building: building},
                     url: 'globaldata/modal_notprintedbatch.php',
                     type: 'POST',
                     dataType: 'html',
@@ -622,9 +615,10 @@
 
             //show detail on click for not printed projected batches
             $(document).on("click touchstart", "#btn_equipmodal", function (e) {
-
+                var building = $('#building').val();
                 $('#modal_equipmentchange').modal('toggle');
                 $.ajax({
+                    data: {building: building},
                     url: 'globaldata/modal_equipalloc.php',
                     type: 'POST',
                     dataType: 'html',
@@ -637,23 +631,18 @@
 
             //call ajax to post the change in equipment allocation from the equip allocation modal
             $(document).on("click touchstart", "#formpost_equipalloc", function (e) {
+                var building = $('#building').val();
                 e.preventDefault();
                 var count_pj = $('#count_PALLETJACK').val();
                 var count_belt = $('#count_BELTLINE').val();
                 var count_op = $('#count_ORDERPICKER').val();
                 $.ajax({
-                    data: {count_pj: count_pj, count_belt: count_belt, count_op: count_op},
+                    data: {count_pj: count_pj, count_belt: count_belt, count_op: count_op, building: building},
                     url: 'formpost/post_changeequip.php',
                     type: 'POST',
                     dataType: 'html',
                     success: function (ajaxresult) {
                         $('#modal_equipmentchange').modal('toggle');
-                        //call function to refresh casedata
-                        refreshprintedcasedata();
-
-                        //call function to refresh open not printed cases
-                        refreshnotprintedcasedata();
-
                         //call function to refresh header data
                         refreshheaderdata();
 

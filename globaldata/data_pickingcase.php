@@ -12,15 +12,15 @@ if (isset($_SESSION['MYUSER'])) {
     $var_whse = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
     $whsesel = $var_whse;
     include '../timezoneset.php';
-    if ($var_whse == 3) {
-        $building = 2;
-    } else {
-        $building = 1;
-    }
 } else {
     $whsearray = array(7);
 }
 
+if(isset($_POST['building'])){
+    $building = intval($_POST['building']);
+} else{
+    echo '';
+}
 
 
 if (isset($_POST['sort_class'])) {
@@ -302,9 +302,6 @@ $timebyequiparray = $timebyequip->fetchAll(pdo::FETCH_ASSOC);
                     //if projected time to complete eclipses a break or lunch, account for lost time
                     $startutc = date('U', strtotime($casespickingarray[$key]['starttime_starttime']));
                     $endutc = ceil($startutc + ($casespickingarray[$key]['casebatches_time_final'] * 60));
-                    
-                    
-                    
                     ?>
                     <div id=""class='divtablerow itemdetailexpand'>
                         <div class='divtabledata width8_33' style="vertical-align: text-top; cursor: pointer"> <input type="checkbox" class="chkbox_deletebatch" name="checkbox" id="<?php echo $casespickingarray[$key]['starttime_batch']; ?>"  /></div>

@@ -22,6 +22,11 @@ if (isset($_SESSION['MYUSER'])) {
     $whsearray = array(7);
 }
 $today = date('Y-m-d');
+if (isset($_POST['building'])) {
+    $building = intval($_POST['building']);
+} else {
+    echo 'bre';
+}
 
 //hours remaining in building
 $forstat_hoursremain_sql = $conn1->prepare("SELECT 

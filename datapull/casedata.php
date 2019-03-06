@@ -6,8 +6,8 @@ ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
 //include '../../globalfunctions/custdbfunctions.php';
-//$whsearray = array(7,3,6,9,2);
-$whsearray = array(3);
+$whsearray = array(3, 6, 9, 2);
+
 
 $today = date('Y-m-d');
 $dayofweek = date('w', strtotime($today));
@@ -567,7 +567,7 @@ FROM
     LEFT JOIN
         printvis.casepm_baytobay on baytobay_whse = casebatch_whse and baytobay_aisle = casebatch_aisle
 WHERE
-    casebatch_whse = $whsesel
+    casebatch_whse = $whsesel and casebatch_build = $building
  --          and caseequip_batch = 30702
 ORDER BY casebatch_cart , casebatch_minbin");
     $opentotedata->execute();
@@ -764,6 +764,9 @@ ORDER BY casebatch_cart , casebatch_minbin");
         }
 
         if ($casebatch_vertdist > 0 && $caseequip_equipment == 'ORDERPICKER') {
+            if ($casepm_vertinpermin == 0) {
+                echo 't';
+            }
             $calc_verttime = $casebatch_vertdist / $casepm_vertinpermin;
         } else {
             $calc_verttime = 0;
