@@ -6,7 +6,7 @@ ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
 //include '../../globalfunctions/custdbfunctions.php';
-$whsearray = array(3, 6, 9, 2);
+$whsearray = array(3.1, 3.2, 6, 9, 2);
 
 
 $today = date('Y-m-d');
@@ -55,11 +55,16 @@ $querydelete7 = $conn1->prepare($sqldelete7);
 $querydelete7->execute();
 
 
-foreach ($whsearray as $whsesel) {
-    if ($whsesel == 3) {
+foreach ($whsearray as $whse) {
+    if ($whse == 3.1) {
+        $building = 1;
+        $whsesel = 3;
+    } elseif ($whse == 3.2) {
         $building = 2;
+        $whsesel = 3;
     } else {
         $building = 1;
+        $whsesel = $whse;
     }
     include '../timezoneset.php';
     //Delete from openbatches_case table where batches are older than yesterday's cutoff time
