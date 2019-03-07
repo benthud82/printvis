@@ -25,7 +25,7 @@ $totedata = $conn1->prepare("SELECT
                                                     casetote_time_totaltime
                                                 FROM
                                                     printvis.notprintedcasetote_time
-                                                WHERE casetote_time_cart = '$batch' and casetote_time_whse = $whsesel;");
+                                                WHERE casetote_time_cart = '$batch' and casetote_time_whse = $whsesel and casetote_time_build = $building;");
 $totedata->execute();
 $totedata_modal = $totedata->fetchAll(pdo::FETCH_ASSOC);
 ?>
