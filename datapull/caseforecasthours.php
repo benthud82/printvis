@@ -20,7 +20,7 @@ include '../functions/functions_totetimes.php';
 //}
 
 
-$whsearray = array(7,3,6,9);
+$whsearray = array(7, 3.1, 3.2, 6, 9);
 
 
 
@@ -35,8 +35,12 @@ $openbatches_case_cols = '';
 
 foreach ($whsearray as $whsesel) {
     include '../timezoneset.php';
-    if ($whsesel == 3) {
+    if ($whsesel == 3.1) {
+        $building = 1;
+        $whsesel = 3;
+    } elseif ($whsesel == 3.2) {
         $building = 2;
+        $whsesel = 3;
     } else {
         $building = 1;
     }
@@ -111,7 +115,7 @@ foreach ($whsearray as $whsesel) {
         if ($fcase_equipment == 'BELTLINE' && $whsesel == 3) {
             $casepm_short = $forecast_array[$key]['casepm_short'] * $hourbatchcount * $fcase_lines;
         } else {
-            $casepm_short = $forecast_array[$key]['casepm_short'] ;
+            $casepm_short = $forecast_array[$key]['casepm_short'];
         }
 
         $TOT_TRIPS = intval(ceil($fcase_cubevol / $casepm_tripdivisor));
