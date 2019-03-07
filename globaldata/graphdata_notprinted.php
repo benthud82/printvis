@@ -10,10 +10,10 @@ $whssql = $conn1->prepare("SELECT prodvisdb_users_PRIMDC from printvis.prodvisdb
 $whssql->execute();
 $whssqlarray = $whssql->fetchAll(pdo::FETCH_ASSOC);
 $whsesel = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
-if ($whsesel == 3) {
-    $building = 2;
-} else {
-    $building = 1;
+if(isset($_GET['building'])){
+    $building = intval($_GET['building']);
+} else{
+    echo '';
 }
 session_write_close();
 

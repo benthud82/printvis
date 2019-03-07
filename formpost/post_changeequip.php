@@ -11,10 +11,10 @@ $whssql->execute();
 $whssqlarray = $whssql->fetchAll(pdo::FETCH_ASSOC);
 $whsesel = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 
-if ($whsesel == 3) {
-    $building = 2;
+if (isset($_POST['building'])) {
+    $building = intval($_POST['building']);
 } else {
-    $building = 1;
+    echo '';
 }
 
 $count_pj = intval($_POST['count_pj']);

@@ -10,10 +10,10 @@ if (isset($_SESSION['MYUSER'])) {
 
     $var_whse = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
     $whsesel = $var_whse;
-    if ($var_whse == 3) {
-        $building = 2;
+    if (isset($_POST['building'])) {
+        $building = intval($_POST['building']);
     } else {
-        $building = 1;
+        echo '';
     }
 } else {
     $whsearray = array(7);
@@ -26,9 +26,6 @@ $printcutoff = '17:07';
 if ($timenow > $printcutoff) {
     include 'aftercutoff.php';
 } else {  //not after print cutoff, proceed with time projection
-
-
-
     if (isset($_POST['sort_class'])) {
         $asc_desc = $_POST['sort_class'];
     } else {
@@ -88,7 +85,7 @@ if ($timenow > $printcutoff) {
 
     <!--time by equipment header-->
     <div class="row">
-        <?php foreach ($notprintedbyequiparray as $key => $value) { ?>
+    <?php foreach ($notprintedbyequiparray as $key => $value) { ?>
 
             <div class="col-lg-4">
                 <div class="widget-thumb widget-bg-color-white text-uppercase">
@@ -102,7 +99,7 @@ if ($timenow > $printcutoff) {
                 </div>
             </div>
 
-        <?php } ?>
+    <?php } ?>
     </div>  
 
 
@@ -124,19 +121,19 @@ if ($timenow > $printcutoff) {
                         <div class='divtabletitle width25 click_sort' data-pull="notprinted"  name="lines" data-sort="<?php echo $asc_desc ?>">Total Lines</div>
                         <div class='divtabletitle width25 click_sort' data-pull="notprinted"  name="hours_projected" data-sort="<?php echo $asc_desc ?>" >Projected Completion Time</div>
                     </div>
-                    <?php
-                    foreach ($casesnotprintedarray as $key => $value) {
-                        ?>
+    <?php
+    foreach ($casesnotprintedarray as $key => $value) {
+        ?>
                         <div id=""class='divtablerow itemdetailexpand'>
                             <div id="<?php echo $casesnotprintedarray[$key]['casebatches_cart']; ?>"class='divtabledata width25 batchclick_notprinted'  style="cursor: pointer; text-decoration: underline"><?php echo $casesnotprintedarray[$key]['casebatches_cart']; ?></div>
                             <div class='divtabledata width25' ><?php echo $casesnotprintedarray[$key]['casebatches_equipment']; ?></div>
                             <div class='divtabledata width25' ><?php echo $casesnotprintedarray[$key]['casebatches_lines']; ?></div>
                             <div class='divtabledata width25' ><?php echo _convertToHoursMins($casesnotprintedarray[$key]['casebatches_time_final']); ?></div>
                         </div>
-                    <?php } ?>
+    <?php } ?>
                 </div>
             </div>
         </div>    
     </div>    
-<?php
+    <?php
 }
