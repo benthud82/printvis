@@ -27,7 +27,7 @@ $casetotetimes_cols = 'casetote_time_whse, casetote_time_build, casetote_time_ca
 
 $casebatchtimes_cols = 'casebatches_whse,casebatches_build,casebatches_cart,casebatches_equipment,casebatches_time_kiosk,casebatches_time_batch,casebatches_time_complete,casebatches_time_short,casebatches_trip,casebatches_totaltrips,casebatches_time_tripcube,casebatches_lines,casebatches_firstloc,casebatches_lastloc,casebatches_time_pickloc,casebatches_time_unit,casebatches_time_indirect,casebatches_time_dropoff,casebatches_time_noncon,casebatches_aisleinches,casebatches_time_aisletravel,casebatches_starttofirst,casebatches_lasttostop,casebatches_inchpermin,casebatches_startstopinches,casebatches_time_startstop,casebatches_time_final';
 
-$whsearray = array(6, 3.1, 3.2, 9, 2);
+$whsearray = array(3.1, 3.2, 9, 2, 6);
 
 foreach ($whsearray as $whse) {
     if ($whse == 3.1) {
@@ -38,7 +38,7 @@ foreach ($whsearray as $whse) {
         $whsesel = 3;
     } else {
         $building = 1;
-        $whsesel = $whse;
+        $whsesel = intval($whse);
     }
     //delete cases not printed table
     $sqldelete = "DELETE FROM  printvis.casesnotprinted WHERE notprinted_whse = $whsesel and notprinted_build =  $building";
@@ -927,9 +927,9 @@ ORDER BY notprinted_batch , notprinted_location");
 
     $case_total_time = _convertToHoursMins($case_printtime + $case_beingpickedtime + $case_notprintedtime);
 
-
-    switch ($whse) {
-        case 3.2:
+    $whsebuild = intval($whsesel . $building);
+    switch ($whsebuild) {
+        case 32:
             $hourssql = "SELECT 
     @SCHEDULED_HOURS:=(UNIX_TIMESTAMP(CONCAT(CURDATE(), ' ', SHIFT_ENDTIME)) - UNIX_TIMESTAMP(CONCAT(CURDATE(), ' ', SHIFT_STARTTIME))) / (3600) AS SCHEDULED_HOURS,
     @WORK_HOURS:=CASE
@@ -981,7 +981,7 @@ WHERE
         AND t.SHIFT_TSMNUM = a.SHIFT_TSMNUM";
 
             break;
-        case 3.1:
+        case 31:
             $hourssql = "SELECT 
     @SCHEDULED_HOURS:=(UNIX_TIMESTAMP(CONCAT(CURDATE(), ' ', SHIFT_ENDTIME)) - UNIX_TIMESTAMP(CONCAT(CURDATE(), ' ', SHIFT_STARTTIME))) / (3600) AS SCHEDULED_HOURS,
     @WORK_HOURS:=CASE
@@ -1033,7 +1033,7 @@ WHERE
         AND t.SHIFT_TSMNUM = a.SHIFT_TSMNUM";
 
             break;
-        case 7:
+        case 71:
             $hourssql = "SELECT 
     @SCHEDULED_HOURS:=(UNIX_TIMESTAMP(CONCAT(CURDATE(), ' ', SHIFT_ENDTIME)) - UNIX_TIMESTAMP(CONCAT(CURDATE(), ' ', SHIFT_STARTTIME))) / (3600) AS SCHEDULED_HOURS,
     @WORK_HOURS:=CASE
@@ -1085,7 +1085,7 @@ WHERE
         AND t.SHIFT_TSMNUM = a.SHIFT_TSMNUM";
 
             break;
-        case 9:
+        case 91:
             $hourssql = "SELECT 
     @SCHEDULED_HOURS:=(UNIX_TIMESTAMP(CONCAT(CURDATE(), ' ', SHIFT_ENDTIME)) - UNIX_TIMESTAMP(CONCAT(CURDATE(), ' ', SHIFT_STARTTIME))) / (3600) AS SCHEDULED_HOURS,
     @WORK_HOURS:=CASE
@@ -1137,7 +1137,7 @@ WHERE
         AND t.SHIFT_TSMNUM = a.SHIFT_TSMNUM";
 
             break;
-        case 6:
+        case 61:
             $hourssql = "SELECT 
     @SCHEDULED_HOURS:=(UNIX_TIMESTAMP(CONCAT(CURDATE(), ' ', SHIFT_ENDTIME)) - UNIX_TIMESTAMP(CONCAT(CURDATE(), ' ', SHIFT_STARTTIME))) / (3600) AS SCHEDULED_HOURS,
     @WORK_HOURS:=CASE
