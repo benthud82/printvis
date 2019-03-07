@@ -68,22 +68,22 @@ foreach ($whsearray as $whse) {
     }
     include '../timezoneset.php';
     //Delete from openbatches_case table where batches are older than yesterday's cutoff time
-    $sqldelete = "DELETE FROM  printvis.openbatches_case WHERE casebatch_whse = $whsesel and  openbatches_printdatetime < '$printcutoff' ";
+    $sqldelete = "DELETE FROM  printvis.openbatches_case WHERE casebatch_whse = $whsesel and  openbatches_printdatetime < '$printcutoff' and casebatch_build = $building ";
     $querydelete = $conn1->prepare($sqldelete);
     $querydelete->execute();
 
     //Delete from case_batchequip table where batches are older than yesterday's cutoff time
-    $sqldelete2 = "DELETE FROM  printvis.case_batchequip WHERE caseequip_whse = $whsesel and  caseequip_printdate < '$printcutoff' ";
+    $sqldelete2 = "DELETE FROM  printvis.case_batchequip WHERE caseequip_whse = $whsesel and  caseequip_printdate < '$printcutoff' and caseequip_build = $building ";
     $querydelete2 = $conn1->prepare($sqldelete2);
     $querydelete2->execute();
 
     //Delete from casetote_time table where batches are older than yesterday's cutoff time
-    $sqldelete3 = "DELETE FROM  printvis.casetote_time WHERE casetote_time_whse = $whsesel and  casetote_time_printdate < '$printcutoff' ";
+    $sqldelete3 = "DELETE FROM  printvis.casetote_time WHERE casetote_time_whse = $whsesel and  casetote_time_printdate < '$printcutoff' and casetote_time_build = $building ";
     $querydelete3 = $conn1->prepare($sqldelete3);
     $querydelete3->execute();
 
     //Delete from casetote_time table where batches are older than yesterday's cutoff time
-    $sqldelete4 = "DELETE FROM  printvis.casebatches_time WHERE casebatches_whse = $whsesel and  casebatches_printdate < '$printcutoff' ";
+    $sqldelete4 = "DELETE FROM  printvis.casebatches_time WHERE casebatches_whse = $whsesel and  casebatches_printdate < '$printcutoff' and casebatches_build = $building";
     $querydelete4 = $conn1->prepare($sqldelete4);
     $querydelete4->execute();
 
@@ -92,7 +92,7 @@ foreach ($whsearray as $whse) {
 //    $querydelete5 = $conn1->prepare($sqldelete5);
 //    $querydelete5->execute();
     //Delete from casebatchstarttime table where batches are older than yesterday's cutoff time
-    $sqldelete4 = "DELETE FROM  printvis.casebatchstarttime WHERE starttime_whse = $whsesel and  date(starttime_starttime) <> '$today' ";
+    $sqldelete4 = "DELETE FROM  printvis.casebatchstarttime WHERE starttime_whse = $whsesel and  date(starttime_starttime) <> '$today' and starttime_build = $building";
     $querydelete4 = $conn1->prepare($sqldelete4);
     $querydelete4->execute();
 
@@ -126,12 +126,8 @@ foreach ($whsearray as $whse) {
 
     if ($arraycount > 0) {
         //Add to table casebatchstarttime
-        $values5 = implode(',', $casestartdata);
-        $sql5 = "INSERT IGNORE INTO printvis.casebatchstarttime ($casestartcols) VALUES $values5";
-        $query5 = $conn1->prepare($sql5);
-        $query5->execute();
-
-        $sql5 = "INSERT IGNORE INTO printvis.casebatchstarttime_hist ($casestartcols) VALUES $values5";
+        $values99 = implode(',', $casestartdata);
+        $sql5 = "INSERT IGNORE INTO printvis.casebatchstarttime ($casestartcols) VALUES $values99";
         $query5 = $conn1->prepare($sql5);
         $query5->execute();
     }
@@ -157,7 +153,8 @@ foreach ($whsearray as $whse) {
                                                                         FROM HSIPCORDTA.NOTWPD
                                                                         JOIN HSIPCORDTA.NOTWPB on PDWCS# = PBWCS# and PDWKNO = PBWKNO and PBBOX# = PDBOX# 
                                                                         LEFT JOIN HSIPCORDTA.NPFLSM on LMWHSE = PDWHSE and LMLOC# = PDLOC#
-                                                                        WHERE PDWHSE = $whsesel                                                                    
+                                                                        WHERE PDWHSE = $whsesel    
+                                                                            and CASE WHEN PBWHSE = 3 and PDLOC# >= 'W400000' then 2 else 1 end = $building
                                                                                 and PDBXSZ = 'CSE'                                                                    
                                                                                 and PDCART > 0                                                                     
                                                                                 and PDLOC# not like '%SDS%'      
@@ -1043,11 +1040,15 @@ $sqlupdate = "UPDATE printvis.casebatchstarttime
                                     INNER JOIN
                                 printvis.casebatches_time ON starttime_batch = casebatches_cart 
                             SET 
-                                starttime_build = 1
+                                starttime_build = 2
                             WHERE
                                 casebatches_whse = 3
-                                    AND casebatches_build = 1";
+                                    AND casebatches_build = 2";
 $queryupdate = $conn1->prepare($sqlupdate);
 $queryupdate->execute();
+
+$sql5 = "INSERT IGNORE INTO printvis.casebatchstarttime_hist ($casestartcols) VALUES $values99";
+$query5 = $conn1->prepare($sql5);
+$query5->execute();
 
 
