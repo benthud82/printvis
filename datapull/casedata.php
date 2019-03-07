@@ -6,8 +6,8 @@ ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
 //include '../../globalfunctions/custdbfunctions.php';
+$whsearray = array(3, 6, 9, 2);
 
-$whsearray = array(7,3,6,9,2);
 
 $today = date('Y-m-d');
 $dayofweek = date('w', strtotime($today));
@@ -125,11 +125,10 @@ foreach ($whsearray as $whsesel) {
         $sql5 = "INSERT IGNORE INTO printvis.casebatchstarttime ($casestartcols) VALUES $values5";
         $query5 = $conn1->prepare($sql5);
         $query5->execute();
-		
+
         $sql5 = "INSERT IGNORE INTO printvis.casebatchstarttime_hist ($casestartcols) VALUES $values5";
         $query5 = $conn1->prepare($sql5);
         $query5->execute();
-		
     }
 
 
@@ -145,7 +144,6 @@ foreach ($whsearray as $whsesel) {
                                                                                 sum(case when LMPRIM = 'P' then 1 else 0 end) as PRIM_PICKS, 
                                                                                 sum(case when LMTIER = 'C01' then 1 else 0 end) as BULK_PICKS,  
                                                                                 sum(case when LMTIER in ('C02','C04') then 1 else 0 end) as PTB_PICKS, 
-                                                                     --           sum(case when LMTIER = 'C03' and substr(LMLOC#,6,1) = '1' then 1 else 0 end) as PALLET_PICKS, 
                                                                                 sum(case when substr(LMLOC#,6,1) = '1' then 1 else 0 end) as PALLET_PICKS, 
                                                                                 sum(case when LMTIER in ('C05', 'C06')  and substr(LMLOC#,6,1) >= '2' then 1 else 0 end) as HALFDECK_PICKS,
                                                                                 sum(case when LMTIER not in ('C01', 'C02', 'C03', 'C05', 'C06') then 1 else 0 end) as OTHER_PICKS,
@@ -159,9 +157,8 @@ foreach ($whsearray as $whsesel) {
                                                                                 and PDCART > 0                                                                     
                                                                                 and PDLOC# not like '%SDS%'      
                                                                                  AND PBSHPC <> 'CPL'
-                                                                    --            and LMTIER like 'C%'
                                                                                 and LMLOC# <> 'WDN0000'
-                                                               --                 and PDCART = 30702
+                                                 --                               and PDCART = 90537
                                                                                 AND LMLOC# not like 'A%' and LMLOC# not like 'B%' and LMLOC# not like 'Y%'
                                                                         GROUP BY PBWHSE, CASE WHEN PBWHSE = 3 and PDLOC# >= 'W400000' then 2 else 1 end , PBCART, PBPTJD, PBPTHM                                                                 
                                                                         ORDER BY PBWHSE, CASE WHEN PBWHSE = 3 and PDLOC# >= 'W400000' then 2 else 1 end , PBCART, PBPTJD, PBPTHM");
@@ -295,7 +292,7 @@ foreach ($whsearray as $whsesel) {
                                                                                     AND PDLOC# NOT LIKE '%SDS%'
                                                                                     AND PCWHSE = 0
                                                                                     AND PBSHPC <> 'CPL'
-                                                                            --        AND PDCART = 30702
+                                                                 --                   AND PDCART = 90537
                                                                                     AND LMLOC# not like 'A%' and LMLOC# not like 'B%' and LMLOC# not like 'Y%'
                                                                               ORDER BY  PDCART asc, PDBIN# asc");
     $alldata->execute();
@@ -570,40 +567,13 @@ FROM
     LEFT JOIN
         printvis.casepm_baytobay on baytobay_whse = casebatch_whse and baytobay_aisle = casebatch_aisle
 WHERE
-    casebatch_whse = $whsesel
-        AND casebatch_build = $building
+    casebatch_whse = $whsesel and casebatch_build = $building
  --          and caseequip_batch = 30702
 ORDER BY casebatch_cart , casebatch_minbin");
     $opentotedata->execute();
     $opentotedataarray = $opentotedata->fetchAll(pdo::FETCH_ASSOC);
 
-    //What is CSTART
-    $cstart = $conn1->prepare("SELECT 
-                                                                            pickprediction_xcoor, casemap_zcoor
-                                                                        FROM
-                                                                            printvis.pickprediction_casemap
-                                                                        WHERE
-                                                                            casemap_whse = $whsesel
-                                                                                AND casemap_building = $building
-                                                                                AND casemap_loc = 'CSTART' ");
-    $cstart->execute();
-    $cstart_array = $cstart->fetchAll(pdo::FETCH_ASSOC);
-    $cstart_xcoor = $cstart_array[0]['pickprediction_xcoor'];
-    $cstart_zcoor = $cstart_array[0]['casemap_zcoor'];
 
-    //What is CSTOP
-    $cstop = $conn1->prepare("SELECT 
-                                                                            pickprediction_xcoor, casemap_zcoor
-                                                                        FROM
-                                                                            printvis.pickprediction_casemap
-                                                                        WHERE
-                                                                            casemap_whse = $whsesel
-                                                                                AND casemap_building = $building
-                                                                                AND casemap_loc = 'CSTOP' ");
-    $cstop->execute();
-    $cstop_array = $cstop->fetchAll(pdo::FETCH_ASSOC);
-    $cstop_xcoor = $cstop_array[0]['pickprediction_xcoor'];
-    $cstop_zcoor = $cstop_array[0]['casemap_zcoor'];
 
     //initiate batch variable
     $openbatchcount = 0;
@@ -618,6 +588,37 @@ ORDER BY casebatch_cart , casebatch_minbin");
         //calculate estimated completion times by batch/aisle key
         $casebatch_whse = $opentotedataarray[$key]['casebatch_whse'];
         $casebatch_build = $opentotedataarray[$key]['casebatch_build'];
+
+        //What is CSTART
+        $cstart = $conn1->prepare("SELECT 
+                                                                            pickprediction_xcoor, casemap_zcoor
+                                                                        FROM
+                                                                            printvis.pickprediction_casemap
+                                                                        WHERE
+                                                                            casemap_whse = $whsesel
+                                                                                AND casemap_building = $casebatch_build
+                                                                                AND casemap_loc = 'CSTART' ");
+        $cstart->execute();
+        $cstart_array = $cstart->fetchAll(pdo::FETCH_ASSOC);
+        $cstart_xcoor = $cstart_array[0]['pickprediction_xcoor'];
+        $cstart_zcoor = $cstart_array[0]['casemap_zcoor'];
+
+        //What is CSTOP
+        $cstop = $conn1->prepare("SELECT 
+                                                                            pickprediction_xcoor, casemap_zcoor
+                                                                        FROM
+                                                                            printvis.pickprediction_casemap
+                                                                        WHERE
+                                                                            casemap_whse = $whsesel
+                                                                                AND casemap_building = $casebatch_build
+                                                                                AND casemap_loc = 'CSTOP' ");
+        $cstop->execute();
+        $cstop_array = $cstop->fetchAll(pdo::FETCH_ASSOC);
+        $cstop_xcoor = $cstop_array[0]['pickprediction_xcoor'];
+        $cstop_zcoor = $cstop_array[0]['casemap_zcoor'];
+
+
+
         $casebatch_cart = intval($opentotedataarray[$key]['casebatch_cart']);
         $casebatch_aisle = $opentotedataarray[$key]['casebatch_aisle'];
         $casebatch_trips = $opentotedataarray[$key]['casebatch_trips'];
@@ -715,7 +716,6 @@ ORDER BY casebatch_cart , casebatch_minbin");
             $outeraisle_min = abs($FIRSTLOC_X - $cstart_xcoor) + abs($FIRSTLOC_Z - $cstart_zcoor);
             $openbatchcount += 1;
         } elseif ($key == $openarraycount) { //if last line of array do normal calc, go back to CSTOP
-
             $outeraisle_min += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
             $openbatchcount = 0;
         } elseif ($casebatch_cart != $nextcart && $openbatchcount == 0) {//if new batch is on next line and this is first line of batch, go from CSTART to Location the location back to CSTOP
@@ -723,7 +723,6 @@ ORDER BY casebatch_cart , casebatch_minbin");
             $outeraisle_min += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
             $openbatchcount = 0;
         } elseif ($casebatch_cart != $nextcart) {//if new batch is on next line do normal calc then add distance from last location and go back to CSTOP
-
             $outeraisle_min += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
             $openbatchcount = 0;
         } else { //calc distance from Last location to mid point , add to next mid point, add to next mid point to first loc of next aisle
@@ -731,7 +730,6 @@ ORDER BY casebatch_cart , casebatch_minbin");
             if (($whsesel == 3 || $whsesel == 6) && substr($opentotedataarray[$key - 1]['casebatch_lastloc'], 0, 3) == 'W49') {
                 $outeraisle_min = abs($opentotedataarray[$key - 1]['LASTLOC_X'] - $FIRSTLOC_X) + abs($opentotedataarray[$key - 1]['LASTLOC_Z'] - $FIRSTLOC_Z);
             } else { //normal calc
-
                 $openbatchcount += 1;
             }
         }
@@ -766,6 +764,9 @@ ORDER BY casebatch_cart , casebatch_minbin");
         }
 
         if ($casebatch_vertdist > 0 && $caseequip_equipment == 'ORDERPICKER') {
+            if ($casepm_vertinpermin == 0) {
+                echo 't';
+            }
             $calc_verttime = $casebatch_vertdist / $casepm_vertinpermin;
         } else {
             $calc_verttime = 0;
@@ -1032,6 +1033,16 @@ ORDER BY casebatch_cart , casebatch_minbin");
     $query6 = $conn1->prepare($sql6);
     $query6->execute();
 } //end of whsarray loop
-
+//update building number for sparks
+$sqlupdate = "UPDATE printvis.casebatchstarttime
+                                    INNER JOIN
+                                printvis.casebatches_time ON starttime_batch = casebatches_cart 
+                            SET 
+                                starttime_build = 1
+                            WHERE
+                                casebatches_whse = 3
+                                    AND casebatches_build = 1";
+$queryupdate = $conn1->prepare($sqlupdate);
+$queryupdate->execute();
 
 

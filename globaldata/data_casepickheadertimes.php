@@ -14,11 +14,11 @@ if (isset($_SESSION['MYUSER'])) {
     $var_whse = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
     $whsesel = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 
-    if ($var_whse == 3) {
-        $building = 2;
-    } else {
-        $building = 1;
-    }
+if(isset($_POST['building'])){
+    $building = intval($_POST['building']);
+} else{
+    echo '';
+}
 } else {
     $whsearray = array(7);
 }

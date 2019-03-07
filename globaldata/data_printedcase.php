@@ -10,14 +10,11 @@ if (isset($_SESSION['MYUSER'])) {
 
     $var_whse = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 
-    if ($var_whse == 3) {
-        $building = 2;
-    } else {
-        $building = 1;
-    }
+
 } else {
     $whsearray = array(7);
 }
+$building = $_POST['building'];
 
 if (isset($_POST['sort_class'])) {
     $asc_desc = $_POST['sort_class'];
