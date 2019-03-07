@@ -221,7 +221,7 @@ foreach ($whsearray as $whse) {
         if (empty($values)) {
             break;
         }
-        $sql = "INSERT INTO printvis.casesnotprinted ($notprintedcolumns) VALUES $values ";
+        $sql = "INSERT IGNORE INTO printvis.casesnotprinted ($notprintedcolumns) VALUES $values ";
         $query = $conn1->prepare($sql);
         $query->execute();
         $maxrange += 4000;
