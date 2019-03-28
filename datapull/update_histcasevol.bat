@@ -9,7 +9,7 @@ REM call rsript to forecast cases
 "C:\Program Files\R\R-3.5.0\bin\Rscript.exe" D:\xampp\htdocs\printvis\datapull\RDir\forecast_casepick\boosted_tree.R
 
 REM call rsript to forecast loose volume
-"C:\Program Files\R\R-3.5.0\bin\Rscript.exe" C:\Users\Bentley.Hudson\Desktop\RDir\forecast_whselines\whselines_byhour.R
+"C:\Program Files\R\R-3.5.0\bin\Rscript.exe" D:\xampp\htdocs\printvis\datapull\RDir\forecast_whselines\whselines_byhour.R
 
 
 REM update the case forecast hours table

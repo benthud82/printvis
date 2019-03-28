@@ -590,7 +590,8 @@ GROUP BY aisletime_whse , aisletime_cart)
         $BOX_NUM = $linespicked_array[$key]['BOX_NUM'];
         $TOTELOC = $linespicked_array[$key]['TOTELOCATION'];
         $SHIP_ZONE = $linespicked_array[$key]['SHIP_ZONE'];
-        $UserDescription = $linespicked_array[$key]['UserDescription'];
+        $UserDescription = htmlspecialchars($linespicked_array[$key]['UserDescription'],ENT_QUOTES);
+		
         $ReserveUSerID = $linespicked_array[$key]['ReserveUSerID'];
 
         $pickdata[] = "('$Pick_ID', $whsesel, $Batch_Num, $Status, $Short_Status, '$Location', '$Sect', '$Aisle', '$Bay', '$Lev', '$Pos', '$PickType', $LotReq, $QtyOrder, $QtyPick, $PackageUnit, $Drug, $Ice, $Haz, $SO, $SN, $NSI, '$Ped', $ExpyChkReq,  $ItemCode, '$NDC_Num', '$EachWeight', '$DateTimeFirstPick', '$DATECREATED', $BO, $PutAwayFlag, '$LOCJOIN', $WCS_NUM, $WORKORDER_NUM, $BOX_NUM, $TOTELOC,'$SHIP_ZONE', '$UserDescription', $ReserveUSerID)";
