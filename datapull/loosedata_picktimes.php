@@ -383,7 +383,8 @@ sum(aisletime_predshort) * voice_shortcomplete as TIME_SHORT,
 aisletime_printdatetime,
 aisletime_recdatetime,
 MIN(aisletime_shipzone),
-SUM(aisletime_colgcount) as COLG_COUNT
+SUM(aisletime_colgcount) as COLG_COUNT,
+0 as exported
 FROM
     printvis.looselines_aisletime
         JOIN
