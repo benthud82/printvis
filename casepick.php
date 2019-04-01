@@ -3,7 +3,6 @@
 
 
     <?php
-
     include 'sessioninclude.php';
     include_once '../Off_System_Slotting/connection/connection_details.php';
     ?>
@@ -34,18 +33,18 @@
                 }
                 if ($var_whse == 3) {
                     $buidlingclass = '';
+                    $selected = "selected='selected'";
                 } else {
                     $buidlingclass = 'hidden';
+                    $selected = '';
                 }
                 ?>
                 <div id="buildingcontainer" class="<?php echo $buidlingclass ?>">
                     <label>Select Building: </label>
                     <select class="selectstyle" id="building" name="building" style="width: 75px;" onChange="refreshall()">
                         <!--<option value="both">Pick and Replen Map</option>-->
-                        <option value="2">2</option>   
                         <option value="1">1</option>
-                        <!--<option value="pickhigh">Pick Map - HIGHS</option>-->
-                        <!--<option value="replen">Replen Map</option>-->
+                        <option value="2" <?php echo $selected ?>>2</option>
                     </select>
                 </div>
 
@@ -90,7 +89,7 @@
                         <div class="panel-body">
                             <!--forecasts stats data goes here-->
                             <div id="forecaststats"></div>
-                            <?php // include 'globaldata/forecaststats.php';   ?>
+                            <?php // include 'globaldata/forecaststats.php';    ?>
 
 
                             <div id="foretoact"  class="page-break" style="width: 100%">
