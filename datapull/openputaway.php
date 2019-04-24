@@ -9,6 +9,32 @@ include '../functions/functions_totetimes.php';
 $whsearray = array(2, 3, 6, 7, 9);
 foreach ($whsearray as $whsesel) {
     include '../timezoneset.php';
+//What is START location
+    $pcstart = $conn1->prepare("SELECT 
+                                                                            putcartmap_xcoor, putcartmap_zcoor
+                                                                        FROM
+                                                                            printvis.putprediction_putawaycartmap
+                                                                        WHERE
+                                                                            putcartmap_whse = $whsesel
+                                                                        AND putcartmap_location = 'PCSTART' ");
+    $pcstart->execute();
+    $pcstart_array = $pcstart->fetchAll(pdo::FETCH_ASSOC);
+    $pcstart_xcoor = $pcstart_array[0]['putcartmap_xcoor'];
+    $pcstart_zcoor = $pcstart_array[0]['putcartmap_zcoor'];
+
+    //What is stop location
+    $pcstop = $conn1->prepare("SELECT 
+                                                                        putcartmap_xcoor, putcartmap_zcoor
+                                                                        FROM
+                                                                            printvis.putprediction_putawaycartmap
+                                                                        WHERE
+                                                                            putcartmap_whse = $whsesel
+                                                                        AND putcartmap_location = 'PCSTOP' ");
+                                                                            
+    $pcstop->execute();
+    $pcstop_array = $pcstop->fetchAll(pdo::FETCH_ASSOC);
+    $pcstop_xcoor = $pcstop_array[0]['putcartmap_xcoor'];
+    $pcstop_zcoor = $pcstop_array[0]['putcartmap_zcoor'];
 
 
 
@@ -229,6 +255,12 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
     $openputdata->execute();
     $openputdataarray = $openputdata->fetchAll(pdo::FETCH_ASSOC);
     $openarraycount = count($openputdataarray) - 1;
+    
+    //initiate batch variable
+    $openbatchcount = 0;
+    
+    
+    
     foreach ($openputdataarray as $key => $value) {
         $openputaway_aisletime_whse = $openputdataarray[$key]['openputaway_aisletime_whse'];
         $openputaway_aisletime_log = $openputdataarray[$key]['openputaway_aisletime_log'];
@@ -284,8 +316,46 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
         $outeraisle_high = _casetravel($previousloc_X, $previousloc_Z, $previousaisleH_X, $previousaisleH_Z, $HIGHSTART_X, $HIGHSTART_Z, $FIRSTLOC_X, $FIRSTLOC_Z);
         $outeraisle_low = _casetravel($previousloc_X, $previousloc_Z, $previousaisleL_X, $previousaisleL_Z, $LOWSTART_X, $LOWSTART_Z, $FIRSTLOC_X, $FIRSTLOC_Z);
         $outeraisle_min = min($outeraisle_high, $outeraisle_low);
+        if (isset($openputdataarray[$key + 1]['openputaway_aisletime_log'])) {
+            $nextcart = intval($openputdataarray[$key + 1]['openputaway_aisletime_log']);
+        } else {
+            $nextcart = 0;
+        }
+
+        //calculate time from this P point to next P point.
+        if ($openputaway_aisletime_log != $nextcart && $openputaway_aisletime_log != intval($openputdataarray[$key - 1]['casebatch_cart'])) {
+            $outeraisle_min = abs($FIRSTLOC_X - $pcstart_xcoor) + abs($FIRSTLOC_Z - $pcstart_zcoor);
+            $outeraisle_min += abs($LASTLOC_X - $pcstop_xcoor) + abs($LASTLOC_Z - $pcstop_zcoor);
+            $openbatchcount = 0;
+        } elseif ($openbatchcount == 0) {  //first aisle on batch.  what is distance from CSTART to first location
+            $outeraisle_min = abs($FIRSTLOC_X - $pcstart_xcoor) + abs($FIRSTLOC_Z - $pcstart_zcoor);
+            $openbatchcount += 1;
+        } elseif ($key == $openarraycount) { //if last line of array do normal calc, go back to CSTOP
+            $outeraisle_min += abs($LASTLOC_X - $pcstop_xcoor) + abs($LASTLOC_Z - $pcstop_zcoor);
+            $openbatchcount = 0;
+        } elseif ($openputaway_aisletime_log != $nextcart && $openbatchcount == 0) {//if new batch is on next line and this is first line of batch, go from CSTART to Location the location back to CSTOP
+            $outeraisle_min = abs($FIRSTLOC_X - $pcstart_xcoor) + abs($FIRSTLOC_Z - $pcstart_zcoor);
+            $outeraisle_min += abs($LASTLOC_X - $pcstop_xcoor) + abs($LASTLOC_Z - $pcstop_zcoor);
+            $openbatchcount = 0;
+        } elseif ($openputaway_aisletime_log != $nextcart) {//if new batch is on next line do normal calc then add distance from last location and go back to CSTOP
+            $outeraisle_min += abs($LASTLOC_X - $pcstop_xcoor) + abs($LASTLOC_Z - $pcstop_zcoor);
+            $openbatchcount = 0;
+        } 
+//        //else { //calc distance from Last location to mid point , add to next mid point, add to next mid point to first loc of next aisle
+//            //make excpetion for aisle 49 in Sparks. Go from last location on w49 to first location on next aisle
+//            if (($whsesel == 3 || $whsesel == 6) && substr($openputdataarray[$key - 1]['casebatch_lastloc'], 0, 3) == 'W49') {
+//                $outeraisle_min = abs($openputdataarray[$key - 1]['LASTLOC_X'] - $FIRSTLOC_X) + abs($openputdataarray[$key - 1]['LASTLOC_Z'] - $FIRSTLOC_Z);
+//            } else { //normal calc
+//                $openbatchcount += 1;
+//            }
+//        }
+
+        if (is_null($outeraisle_min)) {
+            $outeraisle_min = 0;
+        }
     }
 }
+
 
     
 
