@@ -52,7 +52,7 @@ foreach ($whsearray as $whsesel) {
 
 
     $today = date('Y-m-d H:i:s');
-    $result1 = $aseriesconn->prepare("SELECT eawhse, a.EAITEM, a.EATRN#, a.EATRNQ, a.EATLOC, a.EALOG#, a.EATRND, a.EACMPT, a.EASEQ3, a.EASTAT, a.EATYPE, c.PCCPKU, c.PCIPKU, d.LOPKGU, d.LOPRIM, CASE WHEN c.PCCPKU > 0 then int(a.EATRNQ /  c.PCCPKU) else 0 end as CASEHANDLE,  CASE WHEN c.PCCPKU > 0 then mod(a.EATRNQ ,  c.PCCPKU) else a.EATRNQ end as EACHHANDLE,  EASP12, EAEXPD FROM HSIPCORDTA.NPFCPC c, HSIPCORDTA.NPFLOC d, HSIPCORDTA.NPFERA a LEFT JOIN HSIPCORDTA.NPFLER E ON A.EATLOC = E.LELOC# AND A.EATRN# = E.LETRND inner join (SELECT EATRN#, max(EASEQ3) as max_seq FROM HSIPCORDTA.NPFERA GROUP BY EATRN#) b on b.EATRN# = a.EATRN# and a.EASEQ3 = max_seq and EASTAT <> 'C'  WHERE PCITEM = EAITEM and PCWHSE = 0 and LOWHSE = EAWHSE and LOLOC# = EATLOC AND EAWHSE = $whsesel");
+    $result1 = $aseriesconn->prepare("SELECT eawhse, a.EAITEM, a.EATRN#, a.EATRNQ, a.EATLOC, a.EALOG#, a.EATRND, a.EACMPT, a.EASEQ3, a.EASTAT, d.LOPRIM, a.EATYPE, c.PCCPKU, c.PCIPKU, d.LOPKGU, a.EATYPE, CASE WHEN c.PCCPKU > 0 then int(a.EATRNQ /  c.PCCPKU) else 0 end as CASEHANDLE,  CASE WHEN c.PCCPKU > 0 then mod(a.EATRNQ ,  c.PCCPKU) else a.EATRNQ end as EACHHANDLE,  EASP12, EAEXPD FROM HSIPCORDTA.NPFCPC c, HSIPCORDTA.NPFLOC d, HSIPCORDTA.NPFERA a LEFT JOIN HSIPCORDTA.NPFLER E ON A.EATLOC = E.LELOC# AND A.EATRN# = E.LETRND inner join (SELECT EATRN#, max(EASEQ3) as max_seq FROM HSIPCORDTA.NPFERA GROUP BY EATRN#) b on b.EATRN# = a.EATRN# and a.EASEQ3 = max_seq and EASTAT <> 'C'  WHERE PCITEM = EAITEM and PCWHSE = 0 and LOWHSE = EAWHSE and LOLOC# = EATLOC AND EAWHSE = $whsesel");
     $result1->execute();
     $mindaysarray = $result1->fetchAll(pdo::FETCH_ASSOC);
 
@@ -81,6 +81,8 @@ foreach ($whsearray as $whsesel) {
                             openputaway_aisletime_traveltime,
                             openputaway_aisletime_timeexpirycheck,
                             openputaway_aisletime_timelotcheck,
+                            openputaway_aisletime_timedecarton,
+                            openputaway_aisletime_timecardboard,                         
                             openputaway_aisletime_putcartmap_smartseq,
                             openputaway_aisletimefirstlocation,
                             openputaway_aisletimelastlocation,
@@ -113,7 +115,7 @@ foreach ($whsearray as $whsesel) {
             $temp_openputaway_transdate = $mindaysarray[$counter]['EATRND'];
             $temp_openputaway_comptime = $mindaysarray[$counter]['EACMPT'];
             $temp_openputaway_seq = $mindaysarray[$counter]['EASEQ3'];
-            $temp_openputaway_type = $mindaysarray[$counter]['EATYPE'];
+            $temp_openputaway_type = $mindaysarray[$counter]['LOPRIM'];
             $temp_openputaway_casehandle = $mindaysarray[$counter]['CASEHANDLE'];
             $temp_openputaway_eachhandle = $mindaysarray[$counter]['EACHHANDLE'];
             $temp_openputaway_lot = $mindaysarray[$counter]['EASP12'];
@@ -205,8 +207,9 @@ foreach ($whsearray as $whsesel) {
     0 AS TOTAL_TRAVEL,
     0 AS TIME_TOTTRAVEL,
 SUM(CASE WHEN openputaway_expiry > 0 THEN put_expcheck ELSE 0 END) AS TIME_EXPCHECK,    
-SUM(CASE WHEN openputaway_lot <> ' ' THEN put_lotcheck ELSE 0 END) AS TIME_LOTCHECK, 
-     
+SUM(CASE WHEN openputaway_lot <> ' ' THEN put_lotcheck ELSE 0 END) AS TIME_LOTCHECK,
+SUM(CASE WHEN openputaway_type = 'P' THEN (openputaway_casehandle * put_decarton) ELSE 0 END) AS TIME_DECARTON,
+SUM(CASE WHEN openputaway_type = 'P' THEN (openputaway_casehandle * put_cardboard) ELSE 0 END) AS TIME_CARDBOARD,      
         putcartmap_smartseq,
     MAX(openputaway_location) as LAST_LOC,
     MIN(openputaway_location) as FIRST_LOC,
@@ -327,6 +330,8 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
         $openputaway_aisletime_timeputpullbin = $openputdataarray[$key]['openputaway_aisletime_timeputpullbin'];
         $openputaway_aisletime_timeputobtainall = $openputdataarray[$key]['openputaway_aisletime_timeputobtainall'];
         $openputaway_aisletime_timeputplaceall = $openputdataarray[$key]['openputaway_aisletime_timeputplaceall'];
+        $openputaway_aisletime_timedecaton = $openputdataarray[$key]['openputaway_aisletime_timedecarton'];
+        $openputaway_aisletime_timecardboard = $openputdataarray[$key]['openputaway_aisletime_timecardboard'];
         $openputaway_aisletime_putcartmap_smartseq = $openputdataarray[$key]['openputaway_aisletime_putcartmap_smartseq'];
         if (is_null($openputaway_aisletime_putcartmap_smartseq)) {
             $openputaway_aisletime_putcartmap_smartseq = 0;
@@ -410,9 +415,9 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
 
         $totaltravel = ($outeraisle_min + $openputaway_aisletime_inneraisletravel);
         $totaltravel_time = ($outeraisle_min + $openputaway_aisletime_inneraisletravel) / $foottraveltime;
-        $totalaisletime = $openputaway_aisletime_timeputlocation + $openputaway_aisletime_timeputindirect + $openputaway_aisletime_timeputladder + $openputaway_aisletime_timeputpullbin + $openputaway_aisletime_timeputobtainall + $openputaway_aisletime_timeputplaceall + $openputaway_aisletime_timeexpirycheck + $openputaway_aisletime_timelotcheck + $totaltravel_time;
+        $totalaisletime = $openputaway_aisletime_timeputlocation + $openputaway_aisletime_timeputindirect + $openputaway_aisletime_timeputladder + $openputaway_aisletime_timeputpullbin + $openputaway_aisletime_timeputobtainall + $openputaway_aisletime_timeputplaceall + $openputaway_aisletime_timeexpirycheck + $openputaway_aisletime_timelotcheck + $totaltravel_time + $openputaway_aisletime_timedecaton + $openputaway_aisletime_timecardboard;
 
-        $data[] = "($openputaway_aisletime_whse,$openputaway_aisletime_log,'$openputaway_aisletime_aisle','$openputaway_aisletime_main',$openputaway_aisletime_countline,$openputaway_aisletime_countunit,$openputaway_aisletime_countcases,$openputaway_aisletime_expirycount,$openputaway_aisletime_lotcount,$openputaway_aisletime_laddercount,$openputaway_aisletime_countpulbin,$openputaway_aisletime_inneraisletravel,'$openputaway_aisletime_timeputlocation','$openputaway_aisletime_timeputindirect','$openputaway_aisletime_timeputladder','$openputaway_aisletime_timeputpullbin','$openputaway_aisletime_timeputobtainall','$openputaway_aisletime_timeputplaceall',$outeraisle_min,$totaltravel, '$totaltravel_time','$openputaway_aisletime_timeexpirycheck','$openputaway_aisletime_timelotcheck', $openputaway_aisletime_putcartmap_smartseq,'$openputaway_aisletimefirstlocation','$openputaway_aisletimelastlocation','$totalaisletime','$openputaway_aisletime_datetime')";
+        $data[] = "($openputaway_aisletime_whse,$openputaway_aisletime_log,'$openputaway_aisletime_aisle','$openputaway_aisletime_main',$openputaway_aisletime_countline,$openputaway_aisletime_countunit,$openputaway_aisletime_countcases,$openputaway_aisletime_expirycount,$openputaway_aisletime_lotcount,$openputaway_aisletime_laddercount,$openputaway_aisletime_countpulbin,$openputaway_aisletime_inneraisletravel,'$openputaway_aisletime_timeputlocation','$openputaway_aisletime_timeputindirect','$openputaway_aisletime_timeputladder','$openputaway_aisletime_timeputpullbin','$openputaway_aisletime_timeputobtainall','$openputaway_aisletime_timeputplaceall',$outeraisle_min,$totaltravel, '$totaltravel_time','$openputaway_aisletime_timeexpirycheck','$openputaway_aisletime_timelotcheck', '$openputaway_aisletime_timedecaton', '$openputaway_aisletime_timecardboard', $openputaway_aisletime_putcartmap_smartseq,'$openputaway_aisletimefirstlocation','$openputaway_aisletimelastlocation','$totalaisletime','$openputaway_aisletime_datetime')";
     }
 
     //Add to table casebatches_time
@@ -430,6 +435,61 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
 }
 
 
-    
+
+$logsql = $conn1->prepare("insert into printvis.openputaway_logtime (SELECT
+openputaway_aisletime_whse AS PUTAWAY_WHSE,
+openputaway_aisletime_log AS PUTAWAY_LOG,
+SUM(openputaway_aisletime_countline) AS TOTAL_LINES,
+SUM(openputaway_aisletime_countunit) AS TOTAL_UNITS,
+SUM(openputaway_aisletime_countcases) AS TOTAL_CASES,
+SUM(openputaway_aisletime_expirycount) AS TOTAL_EXPIRY,
+SUM(openputaway_aisletime_lotcount) AS TOTAL_LOT,
+SUM(openputaway_aisletime_laddercount) AS TOTAL_LADDER,
+SUM(openputaway_aisletime_countpulbin) AS TOTAL_PULLBIN,
+SUM(openputaway_aisletime_inneraisletravel)AS TOTAL_INNERTRAVEL,
+SUM(openputaway_aisletime_timeputlocation) AS TOTAL_PUTLOCATION,
+SUM(openputaway_aisletime_timeputindirect) AS TOTAL_PUTINDIRECT,
+SUM(openputaway_aisletime_timeputladder) AS TOTAL_LADDERTIME,
+SUM(openputaway_aisletime_timeputpullbin) AS TOTAL_PULLBINTIME,
+SUM(openputaway_aisletime_timeputobtainall) AS TOTAL_OBTAINALLTIME,
+SUM(openputaway_aisletime_timeputplaceall) AS TOTAL_PLACEALLTIME,
+SUM(openputaway_aisletime_outeraisletravel) AS TOTAL_OUTERTRAVEL, 
+SUM(openputaway_aisletime_totaltravel)AS TOTAL_TRAVELFEET,
+SUM(openputaway_aisletime_traveltime)AS TOTAL_TRAVELTIME,
+SUM(openputaway_aisletime_timeexpirycheck)AS TOTAL_EXPIRYTIME,
+SUM(openputaway_aisletime_timelotcheck)AS TOTAL_LOTTIME,
+SUM(openputaway_aisletime_timedecarton)AS TOTAL_DECARTONTIME,
+SUM(openputaway_aisletime_timecardboard)AS TOTAL_CARDBOARDTIME,
+SUM(openputaway_aisletime_totaltime) + put_signon + put_complete AS TOTAL_LOGTIME,
+'$today'
+FROM printvis.openputaway_aisletime JOIN printvis.pm_putawaytimes ON put_whse = openputaway_aisletime_whse
+WHERE put_function = 'CRT'
+GROUP BY openputaway_aisletime_whse, openputaway_aisletime_log)
+ON DUPLICATE KEY UPDATE 
+openputaway_logtime_countline=VALUES(openputaway_logtime_countline),
+openputaway_logtime_countunit=VALUES(openputaway_logtime_countunit),
+openputaway_logtime_countcases=VALUES(openputaway_logtime_countcases),
+openputaway_logtime_expirycount=VALUES(openputaway_logtime_expirycount),
+openputaway_logtime_lotcount=VALUES(openputaway_logtime_lotcount),
+openputaway_logtime_laddercount=VALUES(openputaway_logtime_laddercount),
+openputaway_logtime_countpulbin=VALUES(openputaway_logtime_countpulbin),
+openputaway_logtime_inneraisletravel=VALUES(openputaway_logtime_inneraisletravel),
+openputaway_logtime_timeputlocation=VALUES(openputaway_logtime_timeputlocation),
+openputaway_logtime_timeputindirect=VALUES(openputaway_logtime_timeputindirect),
+openputaway_logtime_timeputladder=VALUES(openputaway_logtime_timeputladder),
+openputaway_logtime_timeputpullbin=VALUES(openputaway_logtime_timeputpullbin),
+openputaway_logtime_timeputobtainall=VALUES(openputaway_logtime_timeputobtainall),
+openputaway_logtime_timeputplaceall=VALUES(openputaway_logtime_timeputplaceall),
+openputaway_logtime_outeraisletravel=VALUES(openputaway_logtime_outeraisletravel),
+openputaway_logtime_totaltravel=VALUES(openputaway_logtime_totaltravel),
+openputaway_logtime_traveltime=VALUES(openputaway_logtime_traveltime),
+openputaway_logtime_timeexpirycheck=VALUES(openputaway_logtime_timeexpirycheck),
+openputaway_logtime_timelotcheck=VALUES(openputaway_logtime_timelotcheck),
+openputaway_logtime_timedecarton=VALUES(openputaway_logtime_timedecarton),
+openputaway_logtime_timecardboard=VALUES(openputaway_logtime_timecardboard),
+openputaway_logtime_totaltime=VALUES(openputaway_logtime_totaltime)
+");
+
+$logsql->execute();
 
 
