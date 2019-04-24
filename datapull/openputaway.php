@@ -36,21 +36,21 @@ foreach ($whsearray as $whsesel) {
                                                                         WHERE
                                                                             putcartmap_whse = $whsesel
                                                                         AND putcartmap_location = 'PCSTOP' ");
-                                                                            
+
     $pcstop->execute();
     $pcstop_array = $pcstop->fetchAll(pdo::FETCH_ASSOC);
     $pcstop_xcoor = $pcstop_array[0]['putcartmap_xcoor'];
     $pcstop_zcoor = $pcstop_array[0]['putcartmap_zcoor'];
-    
-    
-    
+
+
+
     $foottravel = $conn1->prepare("select put_foottraveltime from printvis.pm_putawaytimes where put_whse = $whsesel;");
-                                                                            
+
     $foottravel->execute();
     $foottravelarray = $foottravel->fetchAll(pdo::FETCH_ASSOC);
     $foottraveltime = $foottravelarray[0]['put_foottraveltime'];
-    
-   
+
+
     $today = date('Y-m-d H:i:s');
     $result1 = $aseriesconn->prepare("SELECT eawhse, a.EAITEM, a.EATRN#, a.EATRNQ, a.EATLOC, a.EALOG#, a.EATRND, a.EACMPT, a.EASEQ3, a.EASTAT, a.EATYPE, c.PCCPKU, c.PCIPKU, d.LOPKGU, d.LOPRIM, CASE WHEN c.PCCPKU > 0 then int(a.EATRNQ /  c.PCCPKU) else 0 end as CASEHANDLE,  CASE WHEN c.PCCPKU > 0 then mod(a.EATRNQ ,  c.PCCPKU) else a.EATRNQ end as EACHHANDLE,  EASP12, EAEXPD FROM HSIPCORDTA.NPFCPC c, HSIPCORDTA.NPFLOC d, HSIPCORDTA.NPFERA a LEFT JOIN HSIPCORDTA.NPFLER E ON A.EATLOC = E.LELOC# AND A.EATRN# = E.LETRND inner join (SELECT EATRN#, max(EASEQ3) as max_seq FROM HSIPCORDTA.NPFERA GROUP BY EATRN#) b on b.EATRN# = a.EATRN# and a.EASEQ3 = max_seq and EASTAT <> 'C'  WHERE PCITEM = EAITEM and PCWHSE = 0 and LOWHSE = EAWHSE and LOLOC# = EATLOC AND EAWHSE = $whsesel");
     $result1->execute();
@@ -58,6 +58,34 @@ foreach ($whsearray as $whsesel) {
 
 //create table on local
     $columns = 'temp_openputaway_whse,temp_openputaway_item, temp_openputaway_trans, temp_openputaway_status, temp_openputaway_quantity, temp_openputaway_location, temp_openputaway_log, temp_openputaway_transdate, temp_openputaway_comptime, temp_openputaway_seq, temp_openputaway_type, temp_openputaway_casehandle, temp_openputaway_eachhandle,temp_openputaway_lot, temp_openputaway_expiry';
+    $columns_aisletime = 'openputaway_aisletime_whse,
+                            openputaway_aisletime_log,
+                            openputaway_aisletime_aisle,
+                            openputaway_aisletime_main,
+                            openputaway_aisletime_countline,
+                            openputaway_aisletime_countunit,
+                            openputaway_aisletime_countcases,
+                            openputaway_aisletime_expirycount,
+                            openputaway_aisletime_lotcount,
+                            openputaway_aisletime_laddercount,
+                            openputaway_aisletime_countpulbin,
+                            openputaway_aisletime_inneraisletravel,
+                            openputaway_aisletime_timeputlocation,
+                            openputaway_aisletime_timeputindirect,
+                            openputaway_aisletime_timeputladder,
+                            openputaway_aisletime_timeputpullbin,
+                            openputaway_aisletime_timeputobtainall,
+                            openputaway_aisletime_timeputplaceall,
+                            openputaway_aisletime_outeraisletravel,
+                            openputaway_aisletime_totaltravel,
+                            openputaway_aisletime_traveltime,
+                            openputaway_aisletime_timeexpirycheck,
+                            openputaway_aisletime_timelotcheck,
+                            openputaway_aisletime_putcartmap_smartseq,
+                            openputaway_aisletimefirstlocation,
+                            openputaway_aisletimelastlocation,
+                            openputaway_aisletime_totaltime,
+                            openputaway_aisletime_datetime';
 
 //***KEEP**
     $values = array();
@@ -173,16 +201,16 @@ foreach ($whsearray as $whsesel) {
     END) AS TIME_PUTPULLBIN,
     put_obtainall * SUM(openputaway_eachhandle + openputaway_casehandle) AS TIME_PUTOBTAINALL,
     put_placeall * SUM(openputaway_eachhandle + openputaway_casehandle) AS TIME_PUTPLACEALL,
-    (put_foottraveltime * 12 + MAX(putcartmap_baydistance) + (CASE
-        WHEN putcartmap_main = 'AISLE' THEN ((COUNT(*) - 1) * 3.68)
-        ELSE 0
-    END)) AS TIME_AISLETRAVEL,
+    0 AS OUTERAISLE_TRAVEL,
+    0 AS TOTAL_TRAVEL,
+    0 AS TIME_TOTTRAVEL,
 SUM(CASE WHEN openputaway_expiry > 0 THEN put_expcheck ELSE 0 END) AS TIME_EXPCHECK,    
 SUM(CASE WHEN openputaway_lot <> ' ' THEN put_lotcheck ELSE 0 END) AS TIME_LOTCHECK, 
      
         putcartmap_smartseq,
     MAX(openputaway_location) as LAST_LOC,
     MIN(openputaway_location) as FIRST_LOC,
+    0 as TOTALTIME,
     '$today'
     
 FROM
@@ -192,9 +220,8 @@ FROM
 WHERE
     openputaway_whse = $whsesel
         AND openputaway_log <> 0
-GROUP BY openputaway_whse , openputaway_log , putcartmap_aisle , putcartmap_main , put_location , put_indirect , put_ladder , put_pullbin , put_obtainall , put_placeall , put_foottraveltime , putcartmap_smartseq)"        
-
-);
+GROUP BY openputaway_whse , openputaway_log , putcartmap_aisle , putcartmap_main , put_location , put_indirect , put_ladder , put_pullbin , put_obtainall , put_placeall , put_foottraveltime , putcartmap_smartseq)"
+    );
     $sql_aisletimes->execute();
 
     $openputdata = $conn1->prepare("SELECT 
@@ -206,7 +233,7 @@ GROUP BY openputaway_whse , openputaway_log , putcartmap_aisle , putcartmap_main
         WHERE
             aisle_location = 'L'
                 AND aisle_id = openputaway_aisletime_aisle
-                AND aisle_whse = 6) AS LOWSTART_X,
+                AND aisle_whse = $whsesel) AS LOWSTART_X,
     (SELECT 
             aisle_z
         FROM
@@ -214,7 +241,7 @@ GROUP BY openputaway_whse , openputaway_log , putcartmap_aisle , putcartmap_main
         WHERE
             aisle_location = 'L'
                 AND aisle_id = openputaway_aisletime_aisle
-                AND aisle_whse = 6) AS LOWSTART_Z,
+                AND aisle_whse = $whsesel) AS LOWSTART_Z,
     (SELECT 
             aisle_x
         FROM
@@ -222,7 +249,7 @@ GROUP BY openputaway_whse , openputaway_log , putcartmap_aisle , putcartmap_main
         WHERE
             aisle_location = 'H'
                 AND aisle_id = openputaway_aisletime_aisle
-                AND aisle_whse = 6) AS HIGHSTART_X,
+                AND aisle_whse = $whsesel) AS HIGHSTART_X,
     (SELECT 
             aisle_z
         FROM
@@ -230,7 +257,7 @@ GROUP BY openputaway_whse , openputaway_log , putcartmap_aisle , putcartmap_main
         WHERE
             aisle_location = 'H'
                 AND aisle_id = openputaway_aisletime_aisle
-                AND aisle_whse = 6) AS HIGHSTART_Z,
+                AND aisle_whse = $whsesel) AS HIGHSTART_Z,
     (SELECT 
             putcartmap_zcoor
         FROM
@@ -239,7 +266,7 @@ GROUP BY openputaway_whse , openputaway_log , putcartmap_aisle , putcartmap_main
             putcartmap_location = SUBSTR(openputaway_aisletimefirstlocation,
                 1,
                 6)
-                AND putcartmap_whse = 6) AS FIRSTLOCATION_Z,
+                AND putcartmap_whse = $whsesel) AS FIRSTLOCATION_Z,
     (SELECT 
             putcartmap_xcoor
         FROM
@@ -248,7 +275,7 @@ GROUP BY openputaway_whse , openputaway_log , putcartmap_aisle , putcartmap_main
             putcartmap_location = SUBSTR(openputaway_aisletimefirstlocation,
                 1,
                 6)
-                AND putcartmap_whse = 6) AS FIRSTLOCATION_X,
+                AND putcartmap_whse = $whsesel) AS FIRSTLOCATION_X,
     (SELECT 
             putcartmap_xcoor
         FROM
@@ -257,7 +284,7 @@ GROUP BY openputaway_whse , openputaway_log , putcartmap_aisle , putcartmap_main
             putcartmap_location = SUBSTR(openputaway_aisletimelastlocation,
                 1,
                 6)
-                AND putcartmap_whse = 6) AS LASTLOCATION_X,
+                AND putcartmap_whse = $whsesel) AS LASTLOCATION_X,
     (SELECT 
             putcartmap_zcoor
         FROM
@@ -266,21 +293,21 @@ GROUP BY openputaway_whse , openputaway_log , putcartmap_aisle , putcartmap_main
             putcartmap_location = SUBSTR(openputaway_aisletimelastlocation,
                 1,
                 6)
-                AND putcartmap_whse = 6) AS LASTLOCATION_Z
+                AND putcartmap_whse = $whsesel) AS LASTLOCATION_Z
 FROM
     printvis.openputaway_aisletime
 WHERE
-    openputaway_aisletime_whse = 6
+    openputaway_aisletime_whse = $whsesel
 ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq , openputaway_aisletime_aisle");
     $openputdata->execute();
     $openputdataarray = $openputdata->fetchAll(pdo::FETCH_ASSOC);
     $openarraycount = count($openputdataarray) - 1;
-    
+
     //initiate batch variable
     $openbatchcount = 0;
-    
-    
-    
+
+
+
     foreach ($openputdataarray as $key => $value) {
         $openputaway_aisletime_whse = $openputdataarray[$key]['openputaway_aisletime_whse'];
         $openputaway_aisletime_log = $openputdataarray[$key]['openputaway_aisletime_log'];
@@ -289,7 +316,7 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
         $openputaway_aisletime_countline = $openputdataarray[$key]['openputaway_aisletime_countline'];
         $openputaway_aisletime_countunit = $openputdataarray[$key]['openputaway_aisletime_countunit'];
         $openputaway_aisletime_countcases = $openputdataarray[$key]['openputaway_aisletime_countcases'];
-        $openputaway_aisletime_expitycount = $openputdataarray[$key]['openputaway_aisletime_expirycount'];
+        $openputaway_aisletime_expirycount = $openputdataarray[$key]['openputaway_aisletime_expirycount'];
         $openputaway_aisletime_lotcount = $openputdataarray[$key]['openputaway_aisletime_lotcount'];
         $openputaway_aisletime_laddercount = $openputdataarray[$key]['openputaway_aisletime_laddercount'];
         $openputaway_aisletime_countpulbin = $openputdataarray[$key]['openputaway_aisletime_countpulbin'];
@@ -300,14 +327,16 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
         $openputaway_aisletime_timeputpullbin = $openputdataarray[$key]['openputaway_aisletime_timeputpullbin'];
         $openputaway_aisletime_timeputobtainall = $openputdataarray[$key]['openputaway_aisletime_timeputobtainall'];
         $openputaway_aisletime_timeputplaceall = $openputdataarray[$key]['openputaway_aisletime_timeputplaceall'];
-        $openputaway_aisletime_sumaisletravel = $openputdataarray[$key]['openputaway_aisletime_sumaisletravel'];
         $openputaway_aisletime_putcartmap_smartseq = $openputdataarray[$key]['openputaway_aisletime_putcartmap_smartseq'];
+        if (is_null($openputaway_aisletime_putcartmap_smartseq)) {
+            $openputaway_aisletime_putcartmap_smartseq = 0;
+        }
         $openputaway_aisletimefirstlocation = $openputdataarray[$key]['openputaway_aisletimefirstlocation'];
         $openputaway_aisletimelastlocation = $openputdataarray[$key]['openputaway_aisletimelastlocation'];
         $openputaway_aisletime_datetime = $openputdataarray[$key]['openputaway_aisletime_datetime'];
         $openputaway_aisletime_timeexpirycheck = $openputdataarray[$key]['openputaway_aisletime_timeexpirycheck'];
         $openputaway_aisletime_timelotcheck = $openputdataarray[$key]['openputaway_aisletime_timelotcheck'];
-        
+
 
         $LOWSTART_X = $openputdataarray[$key]['LOWSTART_X'];
         $LOWSTART_Z = $openputdataarray[$key]['LOWSTART_Z'];
@@ -348,7 +377,7 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
         }
 
         //calculate time from this P point to next P point.
-        if ($openputaway_aisletime_log != $nextcart && $openputaway_aisletime_log != intval($openputdataarray[$key - 1]['casebatch_cart'])) {
+        if ($openputaway_aisletime_log != $nextcart && $openputaway_aisletime_log != intval($openputdataarray[$key - 1]['openputaway_aisletime_log'])) {
             $outeraisle_min = abs($FIRSTLOC_X - $pcstart_xcoor) + abs($FIRSTLOC_Z - $pcstart_zcoor);
             $outeraisle_min += abs($LASTLOC_X - $pcstop_xcoor) + abs($LASTLOC_Z - $pcstop_zcoor);
             $openbatchcount = 0;
@@ -365,7 +394,7 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
         } elseif ($openputaway_aisletime_log != $nextcart) {//if new batch is on next line do normal calc then add distance from last location and go back to CSTOP
             $outeraisle_min += abs($LASTLOC_X - $pcstop_xcoor) + abs($LASTLOC_Z - $pcstop_zcoor);
             $openbatchcount = 0;
-        } 
+        }
 //        //else { //calc distance from Last location to mid point , add to next mid point, add to next mid point to first loc of next aisle
 //            //make excpetion for aisle 49 in Sparks. Go from last location on w49 to first location on next aisle
 //            if (($whsesel == 3 || $whsesel == 6) && substr($openputdataarray[$key - 1]['casebatch_lastloc'], 0, 3) == 'W49') {
@@ -378,12 +407,26 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
         if (is_null($outeraisle_min)) {
             $outeraisle_min = 0;
         }
- 
-        $totaltravel = ($outeraisle_min + $openputaway_aisletime_inneraisletravel) / $foottraveltime;
-        $totalaisletime = $openputaway_aisletime_timeputlocation + $openputaway_aisletime_timeputindirect +  $openputaway_aisletime_timeputladder + $openputaway_aisletime_timeputpullbin + $openputaway_aisletime_timeputobtainall + $openputaway_aisletime_timeputplaceall + $openputaway_aisletime_timeexpirycheck + $openputaway_aisletime_timelotcheck + $totaltravel; 
-         
-        
-        }
+
+        $totaltravel = ($outeraisle_min + $openputaway_aisletime_inneraisletravel);
+        $totaltravel_time = ($outeraisle_min + $openputaway_aisletime_inneraisletravel) / $foottraveltime;
+        $totalaisletime = $openputaway_aisletime_timeputlocation + $openputaway_aisletime_timeputindirect + $openputaway_aisletime_timeputladder + $openputaway_aisletime_timeputpullbin + $openputaway_aisletime_timeputobtainall + $openputaway_aisletime_timeputplaceall + $openputaway_aisletime_timeexpirycheck + $openputaway_aisletime_timelotcheck + $totaltravel_time;
+
+        $data[] = "($openputaway_aisletime_whse,$openputaway_aisletime_log,'$openputaway_aisletime_aisle','$openputaway_aisletime_main',$openputaway_aisletime_countline,$openputaway_aisletime_countunit,$openputaway_aisletime_countcases,$openputaway_aisletime_expirycount,$openputaway_aisletime_lotcount,$openputaway_aisletime_laddercount,$openputaway_aisletime_countpulbin,$openputaway_aisletime_inneraisletravel,'$openputaway_aisletime_timeputlocation','$openputaway_aisletime_timeputindirect','$openputaway_aisletime_timeputladder','$openputaway_aisletime_timeputpullbin','$openputaway_aisletime_timeputobtainall','$openputaway_aisletime_timeputplaceall',$outeraisle_min,$totaltravel, '$totaltravel_time','$openputaway_aisletime_timeexpirycheck','$openputaway_aisletime_timelotcheck', $openputaway_aisletime_putcartmap_smartseq,'$openputaway_aisletimefirstlocation','$openputaway_aisletimelastlocation','$totalaisletime','$openputaway_aisletime_datetime')";
+    }
+
+    //Add to table casebatches_time
+    if (!is_null($data)) {
+        $values4 = implode(',', $data);
+        $sql4 = "INSERT INTO printvis.openputaway_aisletime ($columns_aisletime) VALUES $values4
+                        ON DUPLICATE KEY UPDATE 
+                            openputaway_aisletime_outeraisletravel=VALUES(openputaway_aisletime_outeraisletravel), 
+                            openputaway_aisletime_totaltravel=VALUES(openputaway_aisletime_totaltravel), 
+                            openputaway_aisletime_traveltime=VALUES(openputaway_aisletime_traveltime), 
+                            openputaway_aisletime_totaltime=VALUES(openputaway_aisletime_totaltime)";
+        $query4 = $conn1->prepare($sql4);
+        $query4->execute();
+    }
 }
 
 
