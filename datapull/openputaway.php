@@ -492,4 +492,6 @@ openputaway_logtime_totaltime=VALUES(openputaway_logtime_totaltime)
 
 $logsql->execute();
 
+$logsqlhistory = $conn1->prepare("insert IGNORE into printvis.openputaway_logtime_hist (SELECT * FROM printvis.openputaway_logtime)");
 
+$logsqlhistory->execute();
