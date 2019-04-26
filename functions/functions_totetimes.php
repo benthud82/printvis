@@ -473,3 +473,41 @@ function _diffprev($currloc, $prevloc) {
     }
     return $diff_prev;
 }
+
+function _logequip($logequip_totlines, $logequip_putflow, $logequip_putcart, $logequip_putdogp, $logequip_putturr, $logequip_putordp, $logequip_recvol) {
+    //default to CRT
+    $log_equip = 'CRT';
+
+    //cubic cm cutoff for tote putaway batch
+    $toteavg = 1200;
+    if ($logequip_recvol < $toteavg) {
+        $log_equip = 'TOT';
+        return $log_equip;
+    }
+    $perc_flow = $logequip_putflow / $logequip_totlines;
+    $perc_cart = $logequip_putcart / $logequip_totlines;
+    $perc_dogp = $logequip_putdogp / $logequip_totlines;
+    $perc_turr = $logequip_putturr / $logequip_totlines;
+    $perc_ordp = $logequip_putordp / $logequip_totlines;
+
+    $maxperc = max($perc_flow, $perc_cart, $perc_dogp, $perc_turr, $perc_ordp);
+
+    switch ($maxperc) {
+        case $perc_flow:
+            $log_equip = 'FLW';
+            break;
+        case $perc_cart:
+            $log_equip = 'CRT';
+            break;
+        case $perc_turr:
+            $log_equip = 'TUR';
+            break;
+        case $perc_ordp:
+            $log_equip = 'ORD';
+            break;
+        case $perc_dogp:
+            $log_equip = 'DOG';
+            break;
+    }
+    return $log_equip;
+}

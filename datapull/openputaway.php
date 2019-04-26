@@ -5,12 +5,17 @@ include '../../connections/conn_printvis.php';
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
+$today = date('Y-m-d H:i:s');
+$today_eraformat = intval(date('1ymd'));
 //put in connection includes (as400 printvis)
 $truncatetables = array('openputaway', 'openputaway_aisletime', 'temp_openputaway');
 foreach ($truncatetables as $value) {
     $querydelete2 = $conn1->prepare("TRUNCATE printvis.$value");
     $querydelete2->execute();
 }
+
+//call log equipment estimator
+include 'logequip.php';
 
 $whsearray = array(3, 6, 7);
 foreach ($whsearray as $whsesel) {
@@ -51,7 +56,7 @@ foreach ($whsearray as $whsesel) {
     $foottraveltime = $foottravelarray[0]['put_foottraveltime'];
 
 
-    $today = date('Y-m-d H:i:s');
+
     $result1 = $aseriesconn->prepare("SELECT eawhse, a.EAITEM, a.EATRN#, a.EATRNQ, a.EATLOC, a.EALOG#, a.EATRND, a.EACMPT, a.EASEQ3, a.EASTAT, d.LOPRIM, a.EATYPE, c.PCCPKU, c.PCIPKU, d.LOPKGU, a.EATYPE, CASE WHEN c.PCCPKU > 0 then int(a.EATRNQ /  c.PCCPKU) else 0 end as CASEHANDLE,  CASE WHEN c.PCCPKU > 0 then mod(a.EATRNQ ,  c.PCCPKU) else a.EATRNQ end as EACHHANDLE,  EASP12, EAEXPD FROM HSIPCORDTA.NPFCPC c, HSIPCORDTA.NPFLOC d, HSIPCORDTA.NPFERA a LEFT JOIN HSIPCORDTA.NPFLER E ON A.EATLOC = E.LELOC# AND A.EATRN# = E.LETRND inner join (SELECT EATRN#, max(EASEQ3) as max_seq FROM HSIPCORDTA.NPFERA GROUP BY EATRN#) b on b.EATRN# = a.EATRN# and a.EASEQ3 = max_seq and EASTAT <> 'C'  WHERE PCITEM = EAITEM and PCWHSE = 0 and LOWHSE = EAWHSE and LOLOC# = EATLOC AND EAWHSE = $whsesel");
     $result1->execute();
     $mindaysarray = $result1->fetchAll(pdo::FETCH_ASSOC);
