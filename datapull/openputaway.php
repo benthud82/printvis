@@ -5,8 +5,7 @@ include '../../connections/conn_printvis.php';
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
-$today = date('Y-m-d H:i:s');
-$today_eraformat = intval(date('1ymd'));
+    $today_eraformat = intval(date('1ymd'));
 //put in connection includes (as400 printvis)
 $truncatetables = array('openputaway', 'openputaway_aisletime', 'temp_openputaway');
 foreach ($truncatetables as $value) {
@@ -20,6 +19,8 @@ include 'logequip.php';
 $whsearray = array(3, 6, 7);
 foreach ($whsearray as $whsesel) {
     include '../timezoneset.php';
+    $today = date('Y-m-d H:i:s');
+
 //What is START location
     $pcstart = $conn1->prepare("SELECT 
                                                                             putcartmap_xcoor, putcartmap_zcoor
@@ -439,6 +440,18 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
     }
 }
 
+////write to temp table if first time log has been tracked
+//$sqltrack = "INSERT INTO printvis.openputaway_logtrackcount
+//                                (SELECT DISTINCT
+//                                    openputaway_aisletime_whse,
+//                                    openputaway_aisletime_log,
+//                                    '$today',
+//                                    1
+//                                FROM
+//                                    printvis.openputaway_aisletime)
+//                                    ON DUPLICATE KEY UPDATE logtrack_trackcount=logtrack_trackcount+1;";
+//$querytrack = $conn1->prepare($sqltrack);
+//$querytrack->execute();
 
 
 $logsql = $conn1->prepare("insert into printvis.openputaway_logtime (SELECT
@@ -497,6 +510,33 @@ openputaway_logtime_totaltime=VALUES(openputaway_logtime_totaltime)
 
 $logsql->execute();
 
-$logsqlhistory = $conn1->prepare("insert IGNORE into printvis.openputaway_logtime_hist (SELECT * FROM printvis.openputaway_logtime)");
+
+//only insert into log history
+$logsqlhistory = $conn1->prepare("insert into printvis.openputaway_logtime_hist 
+(SELECT * FROM printvis.openputaway_logtime) 
+on duplicate key update 
+openputaway_logtime_hist.openputaway_logtime_countline = IF(openputaway_logtime_hist.openputaway_logtime_countline < VALUES(openputaway_logtime_countline), VALUES(openputaway_logtime_countline), openputaway_logtime_hist.openputaway_logtime_countline),
+openputaway_logtime_hist.openputaway_logtime_countunit = IF(openputaway_logtime_hist.openputaway_logtime_countunit < VALUES(openputaway_logtime_countunit), VALUES(openputaway_logtime_countunit), openputaway_logtime_hist.openputaway_logtime_countunit),
+openputaway_logtime_hist.openputaway_logtime_countcases = IF(openputaway_logtime_hist.openputaway_logtime_countcases < VALUES(openputaway_logtime_countcases), VALUES(openputaway_logtime_countcases), openputaway_logtime_hist.openputaway_logtime_countcases),
+openputaway_logtime_hist.openputaway_logtime_expirycount = IF(openputaway_logtime_hist.openputaway_logtime_expirycount < VALUES(openputaway_logtime_expirycount), VALUES(openputaway_logtime_expirycount), openputaway_logtime_hist.openputaway_logtime_expirycount),
+openputaway_logtime_hist.openputaway_logtime_lotcount = IF(openputaway_logtime_hist.openputaway_logtime_lotcount < VALUES(openputaway_logtime_lotcount), VALUES(openputaway_logtime_lotcount), openputaway_logtime_hist.openputaway_logtime_lotcount),
+openputaway_logtime_hist.openputaway_logtime_laddercount = IF(openputaway_logtime_hist.openputaway_logtime_laddercount < VALUES(openputaway_logtime_laddercount), VALUES(openputaway_logtime_laddercount), openputaway_logtime_hist.openputaway_logtime_laddercount),
+openputaway_logtime_hist.openputaway_logtime_countpulbin = IF(openputaway_logtime_hist.openputaway_logtime_countpulbin < VALUES(openputaway_logtime_countpulbin), VALUES(openputaway_logtime_countpulbin), openputaway_logtime_hist.openputaway_logtime_countpulbin),
+openputaway_logtime_hist.openputaway_logtime_inneraisletravel = IF(openputaway_logtime_hist.openputaway_logtime_inneraisletravel < VALUES(openputaway_logtime_inneraisletravel), VALUES(openputaway_logtime_inneraisletravel), openputaway_logtime_hist.openputaway_logtime_inneraisletravel),
+openputaway_logtime_hist.openputaway_logtime_timeputlocation = IF(openputaway_logtime_hist.openputaway_logtime_timeputlocation < VALUES(openputaway_logtime_timeputlocation), VALUES(openputaway_logtime_timeputlocation), openputaway_logtime_hist.openputaway_logtime_timeputlocation),
+openputaway_logtime_hist.openputaway_logtime_timeputindirect = IF(openputaway_logtime_hist.openputaway_logtime_timeputindirect < VALUES(openputaway_logtime_timeputindirect), VALUES(openputaway_logtime_timeputindirect), openputaway_logtime_hist.openputaway_logtime_timeputindirect),
+openputaway_logtime_hist.openputaway_logtime_timeputladder = IF(openputaway_logtime_hist.openputaway_logtime_timeputladder < VALUES(openputaway_logtime_timeputladder), VALUES(openputaway_logtime_timeputladder), openputaway_logtime_hist.openputaway_logtime_timeputladder),
+openputaway_logtime_hist.openputaway_logtime_timeputpullbin = IF(openputaway_logtime_hist.openputaway_logtime_timeputpullbin < VALUES(openputaway_logtime_timeputpullbin), VALUES(openputaway_logtime_timeputpullbin), openputaway_logtime_hist.openputaway_logtime_timeputpullbin),
+openputaway_logtime_hist.openputaway_logtime_timeputobtainall = IF(openputaway_logtime_hist.openputaway_logtime_timeputobtainall < VALUES(openputaway_logtime_timeputobtainall), VALUES(openputaway_logtime_timeputobtainall), openputaway_logtime_hist.openputaway_logtime_timeputobtainall),
+openputaway_logtime_hist.openputaway_logtime_timeputplaceall = IF(openputaway_logtime_hist.openputaway_logtime_timeputplaceall < VALUES(openputaway_logtime_timeputplaceall), VALUES(openputaway_logtime_timeputplaceall), openputaway_logtime_hist.openputaway_logtime_timeputplaceall),
+openputaway_logtime_hist.openputaway_logtime_outeraisletravel = IF(openputaway_logtime_hist.openputaway_logtime_outeraisletravel < VALUES(openputaway_logtime_outeraisletravel), VALUES(openputaway_logtime_outeraisletravel), openputaway_logtime_hist.openputaway_logtime_outeraisletravel),
+openputaway_logtime_hist.openputaway_logtime_totaltravel = IF(openputaway_logtime_hist.openputaway_logtime_totaltravel < VALUES(openputaway_logtime_totaltravel), VALUES(openputaway_logtime_totaltravel), openputaway_logtime_hist.openputaway_logtime_totaltravel),
+openputaway_logtime_hist.openputaway_logtime_traveltime = IF(openputaway_logtime_hist.openputaway_logtime_traveltime < VALUES(openputaway_logtime_traveltime), VALUES(openputaway_logtime_traveltime), openputaway_logtime_hist.openputaway_logtime_traveltime),
+openputaway_logtime_hist.openputaway_logtime_timeexpirycheck = IF(openputaway_logtime_hist.openputaway_logtime_timeexpirycheck < VALUES(openputaway_logtime_timeexpirycheck), VALUES(openputaway_logtime_timeexpirycheck), openputaway_logtime_hist.openputaway_logtime_timeexpirycheck),
+openputaway_logtime_hist.openputaway_logtime_timelotcheck = IF(openputaway_logtime_hist.openputaway_logtime_timelotcheck < VALUES(openputaway_logtime_timelotcheck), VALUES(openputaway_logtime_timelotcheck), openputaway_logtime_hist.openputaway_logtime_timelotcheck),
+openputaway_logtime_hist.openputaway_logtime_timedecarton = IF(openputaway_logtime_hist.openputaway_logtime_timedecarton < VALUES(openputaway_logtime_timedecarton), VALUES(openputaway_logtime_timedecarton), openputaway_logtime_hist.openputaway_logtime_timedecarton),
+openputaway_logtime_hist.openputaway_logtime_timecardboard = IF(openputaway_logtime_hist.openputaway_logtime_timecardboard < VALUES(openputaway_logtime_timecardboard), VALUES(openputaway_logtime_timecardboard), openputaway_logtime_hist.openputaway_logtime_timecardboard),
+openputaway_logtime_hist.openputaway_logtime_totaltime = IF(openputaway_logtime_hist.openputaway_logtime_totaltime < VALUES(openputaway_logtime_totaltime), VALUES(openputaway_logtime_totaltime), openputaway_logtime_hist.openputaway_logtime_totaltime),
+openputaway_logtime_hist.openputaway_logtime_datetime = IF(openputaway_logtime_hist.openputaway_logtime_datetime < VALUES(openputaway_logtime_datetime), VALUES(openputaway_logtime_datetime), openputaway_logtime_hist.openputaway_logtime_datetime)");
 
 $logsqlhistory->execute();
