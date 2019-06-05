@@ -478,24 +478,24 @@ GROUP BY aisletime_whse , aisletime_cart)
 	
 	$sql_looselines_taskpred->execute();
 	$numrows = $sql_looselines_taskpred->rowCount();
-//	if ($numrows > 0)
-//	{
-//		$filename = "picktimes_whse".$whsesel."_".$ftpdatetime.".gol";
-//		$fp = fopen("./exports/$filename", "w"); //open for write
-//		$data = "";
-//		$updatearray = array();
-//		foreach($sql_looselines_taskpred as $picktimerow)
-//		{
-//			$data .= $picktimerow['batchnum'].$picktimerow['MAXTIME']."\r\n";
-//			$updatearray[] = $picktimerow['batchnum'];
-//		}
-//		fwrite ($fp, $data);
-//		fclose ($fp);
-//		$updatewhere = implode(',', $updatearray);
-//		$updateflag = $conn1->prepare("UPDATE printvis.looselines_batchtime SET batchtime_exported = 1 WHERE batchtime_cart IN($updatewhere)");
-//		$updateflag->execute();
-//		$sendftp = _ftpupload($filename,$whsesel);
-//	}
+	if ($numrows > 0)
+	{
+		$filename = "picktimes_whse".$whsesel."_".$ftpdatetime.".gol";
+		$fp = fopen("./exports/$filename", "w"); //open for write
+		$data = "";
+		$updatearray = array();
+		foreach($sql_looselines_taskpred as $picktimerow)
+		{
+			$data .= $picktimerow['batchnum'].$picktimerow['MAXTIME']."\r\n";
+			$updatearray[] = $picktimerow['batchnum'];
+		}
+		fwrite ($fp, $data);
+		fclose ($fp);
+		$updatewhere = implode(',', $updatearray);
+		$updateflag = $conn1->prepare("UPDATE printvis.looselines_batchtime SET batchtime_exported = 1 WHERE batchtime_cart IN($updatewhere)");
+		$updateflag->execute();
+		$sendftp = _ftpupload($filename,$whsesel);
+	}
 
 //END PICK TIME EXPORT	
 	
