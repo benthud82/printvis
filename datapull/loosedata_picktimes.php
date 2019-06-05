@@ -649,7 +649,7 @@ GROUP BY aisletime_whse , aisletime_cart)
         $ReserveUSerID = $linespicked_array[$key]['ReserveUSerID'];
 
         $pickdata[] = "('$Pick_ID', $whsesel, $Batch_Num, $Status, $Short_Status, '$Location', '$Sect', '$Aisle', '$Bay', '$Lev', '$Pos', '$PickType', $LotReq, $QtyOrder, $QtyPick, $PackageUnit, $Drug, $Ice, $Haz, $SO, $SN, $NSI, '$Ped', $ExpyChkReq,  $ItemCode, '$NDC_Num', '$EachWeight', '$DateTimeFirstPick', '$DATECREATED', $BO, $PutAwayFlag, '$LOCJOIN', $WCS_NUM, $WORKORDER_NUM, $BOX_NUM, $TOTELOC,'$SHIP_ZONE', '$UserDescription', $ReserveUSerID)";
-        $pickdata_hist[] = "(0, $whsesel, $Batch_Num, '$Location', $ItemCode,'$DateTimeFirstPick', $WCS_NUM, $WORKORDER_NUM, $BOX_NUM, '$UserDescription', $ReserveUSerID)";
+        $pickdata_hist[] = "('$Pick_ID', $whsesel, $Batch_Num, '$Location', $ItemCode,'$DateTimeFirstPick', $WCS_NUM, $WORKORDER_NUM, $BOX_NUM, '$UserDescription', $ReserveUSerID)";
     }
     if (!empty($pickdata)) {
         $values_pick = implode(', ', $pickdata);
