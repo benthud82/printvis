@@ -62,6 +62,8 @@ $querydelete4->execute();
 $col_loosetemp = 'temploose_whse, temploose_wcs, temploose_cart, temploose_loc, temploose_units, temploose_wcard, temploose_loctype, temploose_locjoin, temploose_picktype, temploose_predshort, temploose_printdatetime, temploose_recdatetime, temploose_shipzone,temploose_colg';
 $col_cartspicked = 'voice_whse, voice_batch, voice_startdatetime, voice_userid, voice_cartconfig, voice_cartshelves';
 $col_linespicked = 'Pick_ID, Whse, Batch_Num, Status, Short_Status, Location, Sect, Aisle, Bay, Lev, Pos, PickType, LotReq, QtyOrder, QtyPick, PackageUnit, Drug, Ice, Haz, SO, SN, NSI, Ped, ExpyChkReq, ItemCode, NDC_Num, EachWeight, DateTimeFirstPick, DATECREATED, BO, PutAwayFlag, LOCJOIN, WCS_NUM, WORKORDER_NUM, BOX_NUM, TOTELOC, SHIP_ZONE, UserDescription, ReserveUSerID';
+$col_linespicked_hist = 'Pick_ID, Whse, Batch_Num, Location, ItemCode, DateTimeFirstPick, WCS_NUM, WORKORDER_NUM, BOX_NUM, UserDescription, ReserveUSerID';
+
 
 foreach ($whsearray as $whsesel) {
     include '../timezoneset.php';
@@ -476,24 +478,24 @@ GROUP BY aisletime_whse , aisletime_cart)
 	
 	$sql_looselines_taskpred->execute();
 	$numrows = $sql_looselines_taskpred->rowCount();
-	if ($numrows > 0)
-	{
-		$filename = "picktimes_whse".$whsesel."_".$ftpdatetime.".gol";
-		$fp = fopen("./exports/$filename", "w"); //open for write
-		$data = "";
-		$updatearray = array();
-		foreach($sql_looselines_taskpred as $picktimerow)
-		{
-			$data .= $picktimerow['batchnum'].$picktimerow['MAXTIME']."\r\n";
-			$updatearray[] = $picktimerow['batchnum'];
-		}
-		fwrite ($fp, $data);
-		fclose ($fp);
-		$updatewhere = implode(',', $updatearray);
-		$updateflag = $conn1->prepare("UPDATE printvis.looselines_batchtime SET batchtime_exported = 1 WHERE batchtime_cart IN($updatewhere)");
-		$updateflag->execute();
-		$sendftp = _ftpupload($filename,$whsesel);
-	}
+//	if ($numrows > 0)
+//	{
+//		$filename = "picktimes_whse".$whsesel."_".$ftpdatetime.".gol";
+//		$fp = fopen("./exports/$filename", "w"); //open for write
+//		$data = "";
+//		$updatearray = array();
+//		foreach($sql_looselines_taskpred as $picktimerow)
+//		{
+//			$data .= $picktimerow['batchnum'].$picktimerow['MAXTIME']."\r\n";
+//			$updatearray[] = $picktimerow['batchnum'];
+//		}
+//		fwrite ($fp, $data);
+//		fclose ($fp);
+//		$updatewhere = implode(',', $updatearray);
+//		$updateflag = $conn1->prepare("UPDATE printvis.looselines_batchtime SET batchtime_exported = 1 WHERE batchtime_cart IN($updatewhere)");
+//		$updateflag->execute();
+//		$sendftp = _ftpupload($filename,$whsesel);
+//	}
 
 //END PICK TIME EXPORT	
 	
@@ -647,14 +649,16 @@ GROUP BY aisletime_whse , aisletime_cart)
         $ReserveUSerID = $linespicked_array[$key]['ReserveUSerID'];
 
         $pickdata[] = "('$Pick_ID', $whsesel, $Batch_Num, $Status, $Short_Status, '$Location', '$Sect', '$Aisle', '$Bay', '$Lev', '$Pos', '$PickType', $LotReq, $QtyOrder, $QtyPick, $PackageUnit, $Drug, $Ice, $Haz, $SO, $SN, $NSI, '$Ped', $ExpyChkReq,  $ItemCode, '$NDC_Num', '$EachWeight', '$DateTimeFirstPick', '$DATECREATED', $BO, $PutAwayFlag, '$LOCJOIN', $WCS_NUM, $WORKORDER_NUM, $BOX_NUM, $TOTELOC,'$SHIP_ZONE', '$UserDescription', $ReserveUSerID)";
+        $pickdata_hist[] = "(0, $whsesel, $Batch_Num, '$Location', $ItemCode,'$DateTimeFirstPick', $WCS_NUM, $WORKORDER_NUM, $BOX_NUM, '$UserDescription', $ReserveUSerID)";
     }
     if (!empty($pickdata)) {
         $values_pick = implode(', ', $pickdata);
+        $values_pick_hist = implode(', ', $pickdata_hist);
 
         $sql = "INSERT IGNORE INTO printvis.voicepicks ($col_linespicked) VALUES $values_pick";
         $query = $conn1->prepare($sql);
         $query->execute();
-        $sql2 = "INSERT IGNORE INTO printvis.voicepicks_hist ($col_linespicked) VALUES $values_pick";
+        $sql2 = "INSERT IGNORE INTO printvis.voicepicks_hist ($col_linespicked_hist) VALUES $values_pick_hist";
         $query2 = $conn1->prepare($sql2);
         $query2->execute();
     }
