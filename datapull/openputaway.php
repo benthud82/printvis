@@ -5,7 +5,7 @@ include '../../connections/conn_printvis.php';
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
-    $today_eraformat = intval(date('1ymd'));
+$today_eraformat = intval(date('1ymd'));
 //put in connection includes (as400 printvis)
 $truncatetables = array('openputaway', 'openputaway_aisletime', 'temp_openputaway');
 foreach ($truncatetables as $value) {
@@ -20,6 +20,7 @@ $whsearray = array(3, 6, 7);
 foreach ($whsearray as $whsesel) {
     include '../timezoneset.php';
     $today = date('Y-m-d H:i:s');
+    $todaydatetime = date('Y-m-d H:i:s');
 
 //What is START location
     $pcstart = $conn1->prepare("SELECT 
@@ -540,3 +541,31 @@ openputaway_logtime_hist.openputaway_logtime_totaltime = IF(openputaway_logtime_
 openputaway_logtime_hist.openputaway_logtime_datetime = IF(openputaway_logtime_hist.openputaway_logtime_datetime < VALUES(openputaway_logtime_datetime), VALUES(openputaway_logtime_datetime), openputaway_logtime_hist.openputaway_logtime_datetime)");
 
 $logsqlhistory->execute();
+
+
+//add to taskpred table
+$taskpredcolumns = 'taskpred_id, taskpred_whse, taskpred_function, taskpred_type, taskpred_mintime, taskpred_maxtime, taskpred_updatetime';
+$sql_looselines_taskpred = $conn1->prepare("INSERT INTO printvis.taskpred
+                                                                                            SELECT 
+                                                                                                openputaway_logtime_log AS BATCH,
+                                                                                                openputaway_logtime_whse,
+                                                                                                'CRT',
+                                                                                                'PUTAWAY',
+                                                                                                CASE
+                                                                                                    WHEN CAST(openputaway_logtime_totaltime AS UNSIGNED) - 1 > 999 THEN 999
+                                                                                                    ELSE CAST(openputaway_logtime_totaltime AS UNSIGNED) - 1
+                                                                                                END AS MINTIME,
+                                                                                                CASE
+                                                                                                    WHEN CAST(openputaway_logtime_totaltime AS UNSIGNED) > 999 THEN 999
+                                                                                                    ELSE CAST(openputaway_logtime_totaltime AS UNSIGNED)
+                                                                                                END AS MAXTIME,
+                                                                                                '$todaydatetime'
+                                                                                            FROM
+                                                                                                printvis.openputaway_logtime_hist
+                                                                                                JOIN printvis.log_equip on openputaway_logtime_log = logequip_log and logequip_whse = openputaway_logtime_whse
+                                                                                            WHERE
+                                                                                                openputaway_logtime_whse = 6
+                                                                                                    AND DATE(openputaway_logtime_datetime) = CURDATE()
+                                                                                                    and logequip_equip = 'CRT'
+                                                                                                    ON DUPLICATE KEY UPDATE taskpred_mintime = values(taskpred_mintime),taskpred_maxtime = values(taskpred_maxtime)");
+$sql_looselines_taskpred->execute();
