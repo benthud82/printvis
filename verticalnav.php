@@ -26,8 +26,11 @@ if (isset($_SESSION['MYUSER'])) {
                 <li><a href="highpicktimes.php">Long Pick Times</a></li> 
             </ul> 
         </li>
-        <?php if ($whsesel == 3 || $whsesel == 7 || $whsesel == 9|| $whsesel == 6|| $whsesel == 2) {  //only include casepick for sparks currently?>
+        <?php if ($whsesel == 3 || $whsesel == 7 || $whsesel == 9 || $whsesel == 6 || $whsesel == 2) {  //only include casepick for sparks currently?>
             <li id="casepick"><a href="casepick.php"><i class="fa fa-cubes fa-lg"></i><span style="white-space: nowrap;">Case Pick</span></a></li> 
+            <ul class="dropdown-menu"> 
+                <li><a href="unscannedcases.php">Unscanned Cases</a></li> 
+            </ul> 
         <?php } ?>
         <li id="scheduler"><a href="scheduler.php"><i class="fa fa-calendar fa-lg"></i><span style="white-space: nowrap;">Scheduler</span></a></li> 
         <li id="shipzones"><a href="shipzones.php"><i class="fa fa-truck fa-lg"></i><span style="white-space: nowrap;">Ship Zones</span></a></li> 
