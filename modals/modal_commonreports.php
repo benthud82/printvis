@@ -82,7 +82,14 @@
                 <h4 class="modal-title">Search by Bill To #</h4>
             </div>
             <div class="modal-body">
-
+                <div class="" style="margin-left: 15px" >
+                    <label>Enter Bill To #</label>
+                    <input name='billto' class='datainput selectstyle' id='billto' onKeyDown="if (event.keyCode === 13)
+                                getmodaldata('billto', 'modal_billto');" style="min-width: 300px;"/>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onclick="getmodaldata('billto', 'modal_billto');" style="margin-bottom: 5px;">Load Data</button>
             </div>
         </div>
     </div>
@@ -98,16 +105,23 @@
                 <h4 class="modal-title">Search by Ship To #</h4>
             </div>
             <div class="modal-body">
-
+                <div class="" style="margin-left: 15px" >
+                    <label>Enter Ship To #</label>
+                    <input name='shipto' class='datainput selectstyle' id='shipto' onKeyDown="if (event.keyCode === 13)
+                                getmodaldata('shipto', 'modal_shipto');" style="min-width: 300px;"/>
+                </div>
+            </div>
+            <div class="modal-footer" >
+                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onclick="getmodaldata('shipto', 'modal_shipto');" style="margin-bottom: 5px;">Load Data</button>
             </div>
         </div>
     </div>
 </div>
 
 <!--Modal to search by complaint code-->
-<div id="modal_code" class="modal fade " role="dialog">
+<!--<div id="modal_code" class="modal fade " role="dialog">
     <div class="modal-dialog modal-lg">
-        <!-- Modal content-->
+         Modal content
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close_visible" data-dismiss="modal">&times;</button>
@@ -118,7 +132,7 @@
             </div>
         </div>
     </div>
-</div>
+</div>-->
 
 <script>
     //autocomplete when searched for pick TSM
@@ -145,7 +159,7 @@
 
     //populate the options for picktsm
     $("#picktsm").easyAutocomplete(options_picktsm);
-    
+
     //autocomplete when searched for pack TSM
     var options_packtsm = {
         url: "globaldata/dropdown_picktsm.php",

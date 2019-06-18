@@ -11,7 +11,28 @@ if (isset($_SESSION['MYUSER'])) {
     $var_whse = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
     $whsesel = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 }
-$slottingtable = $var_whse . 'invlinesshipped';
+switch ($var_whse) {
+    case 2:
+        $slottingtable = 'slotting.2invlinesshipped';
+        break;
+    case 3:
+        $slottingtable = 'slotting.3invlinesshipped';
+        break;
+    case 6:
+        $slottingtable = 'slotting.6invlinesshipped';
+        break;
+    case 7:
+        $slottingtable = 'slotting.7invlinesshipped';
+        break;
+    case 9:
+        $slottingtable = 'slotting.9invlinesshipped';
+        break;
+
+    default:
+        break;
+}
+
+
 
 $today = date('Y-m-d');
 $dayofweek = date('w', strtotime($today));
@@ -38,10 +59,9 @@ $hdr_percent = $conn1->prepare("SELECT
                                                                 1 - (COUNT(*) / (SELECT 
                                                                             SUM(INVLINES)
                                                                         FROM
-                                                                            slotting.$slottingtable
+                                                                            $slottingtable
                                                                         WHERE
-                                                                            INVDATE >= NOW() - INTERVAL 7 DAY
-                                                                            and INVWHSE = WHSE)) AS PERCENTACC
+                                                                            INVDATE >= NOW() - INTERVAL 7 DAY)) AS PERCENTACC
                                                             FROM
                                                                 custaudit.custreturns
                                                             WHERE
