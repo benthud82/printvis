@@ -10,11 +10,7 @@
         <script src="../timelinejs/jquery-3.1.1.min.js" type="text/javascript"></script>
         <script src="../timelinejs/modernizr.js" type="text/javascript"></script>
         <link href="../timelinecss/reset.css" rel="stylesheet" type="text/css"/>
-        <?php
-        include_once '../Off_System_Slotting/connection/connection_details.php';
 
-        include_once '../Off_System_Slotting/headerincludes.php';
-        ?>
         <script src="../timelinejs/jquery.mousewheel-3.0.6.min.js" type="text/javascript"></script>
         <script src="../timelinejs/jquery.mousewheel.min.js" type="text/javascript"></script>
         <script src="../timelinejs/frst-timeline.js" type="text/javascript"></script>
@@ -26,6 +22,12 @@
         <script src="../app.min.js" type="text/javascript"></script>
         <script src="../jquery.counterup.min.js" type="text/javascript"></script>
         <script src="../jquery.waypoints.min.js" type="text/javascript"></script>
+        
+                <?php
+        include_once '../Off_System_Slotting/connection/connection_details.php';
+        include_once '../Off_System_Slotting/headerincludes.php';
+
+        ?>
     </head>
 
     <body style="">

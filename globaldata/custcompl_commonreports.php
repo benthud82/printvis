@@ -26,7 +26,8 @@ $reportsql = $conn1->prepare("SELECT
                                                             comm_fa as FADESC,
                                                             comm_modalid                                                            
                                                         FROM
-                                                            printvis.custcompl_commonreports;");
+                                                            printvis.custcompl_commonreports
+                                                        WHERE idcustcompl_commonreports <> 6;");
 $reportsql->execute();
 $reportsql_array = $reportsql->fetchAll(pdo::FETCH_ASSOC);
 ?>
