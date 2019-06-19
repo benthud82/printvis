@@ -28,9 +28,9 @@ if (isset($_SESSION['MYUSER'])) {
         </li>
         <li id="casepick" class="dropdown-submenu" style="cursor: pointer;  "> <a href="casepick.php"><i class="fa fa-stack-overflow fa-lg"></i><span style="white-space: nowrap;">Case Pick</span></a> 
 
-            <ul class="dropdown-menu"> 
+<!--            <ul class="dropdown-menu"> 
                 <li><a href="unscannedcases.php">Unscanned Cases</a></li> 
-            </ul> 
+            </ul> -->
         </li> 
 
         <li id="scheduler"><a href="scheduler.php"><i class="fa fa-calendar fa-lg"></i><span style="white-space: nowrap;">Scheduler</span></a></li> 
