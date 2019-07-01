@@ -20,6 +20,7 @@ if (isset($_SESSION['MYUSER'])) {
         <li id="loosepick" class="dropdown-submenu" style="cursor: pointer;  "> <a ><i class="fa fa-stack-overflow fa-lg"></i><span style="white-space: nowrap;">Loose Pick</span></a> 
             <ul class="dropdown-menu"> 
                 <li><a href="packtimes.php">Pack Times</a></li> 
+                <li><a href="monitor_packtimes.php">Pack Times (Monitor)</a></li> 
                 <li><a href="picktimes.php">Pick Times</a></li> 
                 <li><a href="loosepriority.php">Loose Priorities</a></li> 
                 <li><a href="unscannedtotes.php">Unscanned Totes</a></li> 
