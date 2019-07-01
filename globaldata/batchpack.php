@@ -13,26 +13,38 @@ $prepickcutoff = 1820;
 include '../timezoneset.php';
 
 $batches = $conn1->prepare("SELECT 
-                                                            totetimes_cart AS BATCHCART, SUM(totetimes_totalPFD) as BATCHTIME
+                                                    totetimes_cart AS BATCHCART,
+                                                    SUM(totetimes_totalPFD) as BATCHTIME,
+                                                    MIN(B.cutoff_rank),
+                                                    (SELECT 
+                                                            X.cutoff_zone
                                                         FROM
-                                                            printvis.totetimes
-                                                                LEFT JOIN
-                                                            printvis.batch_start A ON batch_start_whse = totetimes_whse
-                                                                AND batch_start_batch = totetimes_cart
-                                                                JOIN
-                                                            printvis.pm_packtimes ON loosepm_function = totetimes_packfunction
-                                                                AND totetimes_whse = loosepm_whse
+                                                            printvis.printcutoff X
                                                         WHERE
-                                                            totetimes_whse = $whsesel
-                                                                AND batch_start_time IS NULL
-                                                                AND totetimes_cart NOT IN (SELECT DISTINCT
-                                                                    tote_end_batch
-                                                                FROM
-                                                                    printvis.tote_end
-                                                                WHERE
-                                                                    tote_end_whse = $whsesel)
-                                                        GROUP BY totetimes_cart
-                                                        HAVING SUM(totetimes_line) > 5
+                                                            X.cutoff_rank = MIN(B.cutoff_rank)
+                                                                AND X.cutoff_DC = B.cutoff_DC) AS SHIPZONE
+                                                FROM
+                                                    printvis.totetimes
+                                                        LEFT JOIN
+                                                    printvis.batch_start A ON batch_start_whse = totetimes_whse
+                                                        AND batch_start_batch = totetimes_cart
+                                                        LEFT JOIN
+                                                    printvis.printcutoff B ON B.cutoff_DC = totetimes_whse
+                                                        AND SUBSTRING(B.cutoff_zone, 1, 2) = SUBSTR(totetimes_shipzone, 1, 2)
+                                                        JOIN
+                                                    printvis.pm_packtimes ON loosepm_function = totetimes_packfunction
+                                                        AND totetimes_whse = loosepm_whse
+                                                WHERE
+                                                    totetimes_whse = $whsesel
+                                                        AND batch_start_time IS NULL
+                                                        AND totetimes_cart NOT IN (SELECT DISTINCT
+                                                            tote_end_batch
+                                                        FROM
+                                                            printvis.tote_end
+                                                        WHERE
+                                                            tote_end_whse = $whsesel)
+                                                GROUP BY totetimes_cart
+                                                HAVING SUM(totetimes_line) > 5
 ");
 $batches->execute();
 $batches_array = $batches->fetchAll(pdo::FETCH_ASSOC);
@@ -45,6 +57,7 @@ $batches_array = $batches->fetchAll(pdo::FETCH_ASSOC);
                 <tr>
                     <th style="font-size: 20px; font-family: Calibri; text-align: center">BATCH</th>
                     <th style="font-size: 20px; font-family: Calibri; text-align: center">MINUTES</th>
+                    <th style="font-size: 20px; font-family: Calibri; text-align: center">SHIP ZONE</th>
                 </tr>
             </thead>
             <?php
@@ -68,6 +81,7 @@ $batches_array = $batches->fetchAll(pdo::FETCH_ASSOC);
                         <tr>
                             <th style="font-size: 20px; font-family: Calibri; text-align: center">BATCH</th>
                             <th style="font-size: 20px; font-family: Calibri; text-align: center">MINUTES</th>
+                            <th style="font-size: 20px; font-family: Calibri; text-align: center">SHIP ZONE</th>
                         </tr>
                     </thead>
                     <?php
@@ -75,6 +89,7 @@ $batches_array = $batches->fetchAll(pdo::FETCH_ASSOC);
                 echo'<tr>';
                 echo '<td style="font-size: 20px; font-family: Calibri; text-align: center"><b>' . $batches_array[$key]['BATCHCART'] . "</b></td>";
                 echo '<td style="font-size: 20px; font-family: Calibri; text-align: center"><b>' . intval($batches_array[$key]['BATCHTIME']) . "</b></td>";
+                echo '<td style="font-size: 20px; font-family: Calibri; text-align: center"><b>' . ($batches_array[$key]['SHIPZONE']) . "</b></td>";
                 echo'</tr>';
             }
             ?>
