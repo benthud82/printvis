@@ -6,7 +6,7 @@ ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
 //include '../../globalfunctions/custdbfunctions.php';
-$whsearray = array(3.1, 3.2, 6, 9, 2);
+$whsearray = array(3.1, 3.2, 6, 9, 2, 7);
 
 
 $today = date('Y-m-d');
