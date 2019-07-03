@@ -27,7 +27,7 @@ $casetotetimes_cols = 'casetote_time_whse, casetote_time_build, casetote_time_ca
 
 $casebatchtimes_cols = 'casebatches_whse,casebatches_build,casebatches_cart,casebatches_equipment,casebatches_time_kiosk,casebatches_time_batch,casebatches_time_complete,casebatches_time_short,casebatches_trip,casebatches_totaltrips,casebatches_time_tripcube,casebatches_lines,casebatches_firstloc,casebatches_lastloc,casebatches_time_pickloc,casebatches_time_unit,casebatches_time_indirect,casebatches_time_dropoff,casebatches_time_noncon,casebatches_aisleinches,casebatches_time_aisletravel,casebatches_starttofirst,casebatches_lasttostop,casebatches_inchpermin,casebatches_startstopinches,casebatches_time_startstop,casebatches_time_final';
 
-$whsearray = array(3.1, 3.2, 9, 2, 6);
+$whsearray = array(3.1, 3.2, 9, 2, 6,7);
 
 foreach ($whsearray as $whse) {
     if ($whse == 3.1) {
