@@ -305,6 +305,10 @@ foreach ($whsearray as $whse) {
 }
 
 //update casevol by equipment and date for slotting case dashboard at http://usnymeslot1/Off_System_Slotting/casedashboard.php
+
+$currentdate = date('Y-m-d');
+$startdate = date('Y-m-d', strtotime('-8 days'));
+
     $sqlinsert2 = "INSERT INTO printvis.casedash_equippicks
 SELECT 
     hist_whse,
@@ -358,9 +362,8 @@ FROM
     slotting.my_npfmvc_cse ON hist_whse = WAREHOUSE
         AND hist_item = ITEM_NUMBER
 WHERE
-    hist_whse = 7
-        AND predicted_availdate >= '2019-07-01'
-        AND predicted_availdate < '2019-07-04'
+     predicted_availdate >= '$startdate'
+        AND predicted_availdate < '$currentdate'
 GROUP BY hist_whse , predicted_availdate
 ON duplicate key update 
 equippicks_currop=values(equippicks_currop),
