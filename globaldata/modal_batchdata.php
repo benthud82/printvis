@@ -30,10 +30,13 @@ $packstagesql = $conn1->prepare("SELECT
                                                                 printvis.looselines_batchtime
                                                                     LEFT JOIN
                                                                 printvis.looselines_cartsinprocess ON cartpick_cart = batchtime_cart
+                                                                    AND cartpick_whse = batchtime_whse
                                                                     LEFT JOIN
                                                                 printvis.batch_start ON batch_start_batch = batchtime_cart
-                                                                        LEFT JOIN
+                                                                    AND batch_start_whse = batchtime_whse
+                                                                    LEFT JOIN
                                                                 printvis.voice_batchespicked ON voice_batch = batchtime_cart
+                                                                    AND voice_whse = batchtime_whse
                                                             WHERE
                                                                 batchtime_whse = $whsesel
                                                                     AND batchtime_cart = $batch
@@ -49,7 +52,7 @@ $pickstagesql = $conn1->prepare("SELECT
                                                             FROM
                                                                 printvis.looselines_batchtime
                                                                     LEFT JOIN
-                                                                voice_batchespicked ON voice_whse = batchtime_whse
+                                                                printvis.voice_batchespicked ON voice_whse = batchtime_whse
                                                                     AND voice_batch = batchtime_cart
                                                             WHERE
                                                                 batchtime_whse = $whsesel AND voice_userid = 0 AND batchtime_cart = $batch ");
