@@ -38,10 +38,13 @@ $batches = $conn1->prepare("SELECT
                                                         AND totetimes_whse = loosepm_whse
                                                         LEFT JOIN
                                                                 printvis.looselines_cartsinprocess ON cartpick_cart = totetimes_cart
+                                                                LEFT JOIN
+                                                                printvis.voice_batchespicked ON voice_batch = totetimes_cart
                                                 WHERE
                                                     totetimes_whse = $whsesel
                                                         AND batch_start_time IS NULL
                                                         AND cartpick_cart IS NULL
+                                                        AND voice_userid > 0 
                                                         AND totetimes_cart NOT IN (SELECT DISTINCT
                                                             tote_end_batch
                                                         FROM
