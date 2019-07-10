@@ -10,6 +10,8 @@ $whsesel = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 
 $prepickcutoff = 1820;
 
+
+
 include '../timezoneset.php';
 
 $batches = $conn1->prepare("SELECT 
@@ -34,9 +36,12 @@ $batches = $conn1->prepare("SELECT
                                                         JOIN
                                                     printvis.pm_packtimes ON loosepm_function = totetimes_packfunction
                                                         AND totetimes_whse = loosepm_whse
+                                                        LEFT JOIN
+                                                                printvis.looselines_cartsinprocess ON cartpick_cart = totetimes_cart
                                                 WHERE
                                                     totetimes_whse = $whsesel
                                                         AND batch_start_time IS NULL
+                                                        AND cartpick_cart IS NULL
                                                         AND totetimes_cart NOT IN (SELECT DISTINCT
                                                             tote_end_batch
                                                         FROM
