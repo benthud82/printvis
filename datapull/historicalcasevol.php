@@ -303,3 +303,72 @@ foreach ($whsearray as $whse) {
     $queryinsert = $conn1->prepare($sqlinsert);
     $queryinsert->execute();
 }
+
+//update casevol by equipment and date for slotting case dashboard at http://usnymeslot1/Off_System_Slotting/casedashboard.php
+    $sqlinsert2 = "INSERT INTO printvis.casedash_equippicks
+SELECT 
+    hist_whse,
+    predicted_availdate,
+    SUM(CASE
+        WHEN hist_equip = 'ORDERPICKER' THEN 1
+        ELSE 0
+    END) AS CURR_OP,
+    SUM(CASE
+        WHEN SUGG_EQUIP = 'ORDERPICKER' THEN 1
+        ELSE 0
+    END) AS SUGG_OP,
+    SUM(CASE
+        WHEN hist_equip = 'BELTLINE' THEN 1
+        ELSE 0
+    END) AS CURR_PTB,
+    SUM(CASE
+        WHEN SUGG_EQUIP = 'BELTLINE' THEN 1
+        ELSE 0
+    END) AS SUGG_PTB,
+    SUM(CASE
+        WHEN hist_equip = 'PALLETJACK' THEN 1
+        ELSE 0
+    END) AS CURR_PJ,
+    SUM(CASE
+        WHEN SUGG_EQUIP = 'PALLETJACK' THEN 1
+        ELSE 0
+    END) AS SUGG_PJ,
+    ((SUM(CASE
+        WHEN hist_equip = 'ORDERPICKER' THEN 1
+        ELSE 0
+    END) / 80) + (SUM(CASE
+        WHEN hist_equip = 'BELTLINE' THEN 1
+        ELSE 0
+    END) / 200) + (SUM(CASE
+        WHEN hist_equip = 'PALLETJACK' THEN 1
+        ELSE 0
+    END) / 110)) - ((SUM(CASE
+        WHEN SUGG_EQUIP = 'ORDERPICKER' THEN 1
+        ELSE 0
+    END) / 80) + (SUM(CASE
+        WHEN SUGG_EQUIP = 'BELTLINE' THEN 1
+        ELSE 0
+    END) / 200) + (SUM(CASE
+        WHEN SUGG_EQUIP = 'PALLETJACK' THEN 1
+        ELSE 0
+    END) / 110)) AS HOUR_RED
+FROM
+    printvis.hist_casevol
+        JOIN
+    slotting.my_npfmvc_cse ON hist_whse = WAREHOUSE
+        AND hist_item = ITEM_NUMBER
+WHERE
+    hist_whse = 7
+        AND predicted_availdate >= '2019-07-01'
+        AND predicted_availdate < '2019-07-04'
+GROUP BY hist_whse , predicted_availdate
+ON duplicate key update 
+equippicks_currop=values(equippicks_currop),
+equippicks_suggop=values(equippicks_suggop),
+equippicks_currptb=values(equippicks_currptb),
+equippicks_suggptb=values(equippicks_suggptb),
+equippicks_currpj=values(equippicks_currpj),
+equippicks_suggpj=values(equippicks_suggpj),
+equippicks_hourred=values(equippicks_hourred)";
+    $queryinsert2 = $conn1->prepare($sqlinsert2);
+    $queryinsert2->execute();
