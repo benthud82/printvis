@@ -23,7 +23,11 @@
         <!--Main Content-->
         <section id="content"> 
             <section class="main padder"> 
-                <div class="row" style="padding-bottom: 75px; padding-top: 75px;"> 
+                <div class="row" style="padding-bottom: 0px; padding-top: 75px;"> 
+                    <h3 style="margin-left: 10px">Packing Times</h3>
+                    
+                </div>
+                <div class="row">
                     <div  class="col-sm-12"id="batchdisplay" style="font-size: 16px; text-align: center"></div>
                 </div>
 

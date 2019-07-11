@@ -82,7 +82,7 @@ $batches_array = $batches->fetchAll(pdo::FETCH_ASSOC);
 //                }
 
                 //close out table and create new table every 30 batches
-                $mod = $key % 32;
+                $mod = $key % 30;
                 if ($mod == 0 && $key !== 0) {
                     ?>
                 </table>
