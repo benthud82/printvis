@@ -312,6 +312,7 @@ $startdate = date('Y-m-d', strtotime('-8 days'));
     $sqlinsert2 = "INSERT INTO printvis.casedash_equippicks
 SELECT 
     hist_whse,
+    hist_build,
     predicted_availdate,
     SUM(CASE
         WHEN hist_equip = 'ORDERPICKER' THEN 1
@@ -364,7 +365,7 @@ FROM
 WHERE
      predicted_availdate >= '$startdate'
         AND predicted_availdate < '$currentdate'
-GROUP BY hist_whse , predicted_availdate
+GROUP BY hist_whse , hist_build, predicted_availdate
 ON duplicate key update 
 equippicks_currop=values(equippicks_currop),
 equippicks_suggop=values(equippicks_suggop),
