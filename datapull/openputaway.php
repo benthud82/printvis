@@ -176,7 +176,7 @@ foreach ($whsearray as $whsesel) {
 
     $sql_putawaylines_joined->execute();
 
-    $sql_aisletimes = $conn1->prepare("INSERT INTO  printvis.openputaway_aisletime (SELECT 
+    $sql_aisletimes = $conn1->prepare("INSERT IGNORE INTO  printvis.openputaway_aisletime (SELECT 
     openputaway_whse,
     openputaway_log,
     putcartmap_aisle,
