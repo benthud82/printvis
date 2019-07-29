@@ -441,18 +441,6 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
     }
 }
 
-////write to temp table if first time log has been tracked
-//$sqltrack = "INSERT INTO printvis.openputaway_logtrackcount
-//                                (SELECT DISTINCT
-//                                    openputaway_aisletime_whse,
-//                                    openputaway_aisletime_log,
-//                                    '$today',
-//                                    1
-//                                FROM
-//                                    printvis.openputaway_aisletime)
-//                                    ON DUPLICATE KEY UPDATE logtrack_trackcount=logtrack_trackcount+1;";
-//$querytrack = $conn1->prepare($sqltrack);
-//$querytrack->execute();
 
 
 $logsql = $conn1->prepare("insert into printvis.openputaway_logtime (SELECT
