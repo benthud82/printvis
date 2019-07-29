@@ -97,7 +97,8 @@
                                                 <th>Previous Location</th>
                                                 <th>Previous Log</th>
                                                 <th>Minute Difference</th>
-                                                <th data-toggle='tooltip' title='Was elapsed time between end of one batch and start of a different batch?' data-placement='top' data-container='body'>New Batch?</th>
+                                                <th>Break/Lunch</th>
+                                                <th data-toggle='tooltip' title='Was elapsed time between end of one log and start of a different log?' data-placement='top' data-container='body'>New Log?</th>
                                             </tr>
                                         </thead>
                                     </table>

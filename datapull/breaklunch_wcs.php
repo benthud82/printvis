@@ -67,3 +67,16 @@ do {
     $maxrange += 4000;
 } while ($counter <= $rowcount);
 
+
+
+$sql = "INSERT IGNORE into printvis.breaklunch_combined SELECT 
+    *
+FROM
+    printvis.breaklunch 
+UNION SELECT 
+    *
+FROM
+    printvis.breaklunch_wcs";
+$query = $conn1->prepare($sql);
+$query->execute();
+
