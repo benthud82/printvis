@@ -229,7 +229,7 @@ FROM
     printvis.pm_putawaytimes ON put_whse = openputaway_whse
 WHERE
     openputaway_whse = $whsesel
-        AND openputaway_log <> 0
+        AND openputaway_log <> 0 AND put_function = 'CRT'
 GROUP BY openputaway_whse , openputaway_log , putcartmap_aisle , putcartmap_main , put_location , put_indirect , put_ladder , put_pullbin , put_obtainall , put_placeall , put_foottraveltime , putcartmap_smartseq)"
     );
     $sql_aisletimes->execute();
