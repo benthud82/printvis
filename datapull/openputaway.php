@@ -16,7 +16,7 @@ foreach ($truncatetables as $value) {
 //call log equipment estimator
 include 'logequip.php';
 
-$whsearray = array(3, 6, 7,9);
+$whsearray = array(2, 3, 6, 7,9);
 foreach ($whsearray as $whsesel) {
     include '../timezoneset.php';
     $today = date('Y-m-d H:i:s');
