@@ -7,7 +7,7 @@ ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
 $today_eraformat = intval(date('1ymd'));
 //put in connection includes (as400 printvis)
-$truncatetables = array('openputaway', 'openputaway_aisletime', 'temp_openputaway');
+$truncatetables = array('openputaway', 'openputaway_aisletime', 'temp_openputaway', 'log_equip');
 foreach ($truncatetables as $value) {
     $querydelete2 = $conn1->prepare("TRUNCATE printvis.$value");
     $querydelete2->execute();
