@@ -508,9 +508,14 @@ SUM(openputaway_aisletime_timedecarton)AS TOTAL_DECARTONTIME,
 SUM(openputaway_aisletime_timecardboard)AS TOTAL_CARDBOARDTIME,
 SUM(openputaway_aisletime_totaltime) + put_signon + put_complete AS TOTAL_LOGTIME,
 '$today'
-FROM printvis.openputaway_aisletime JOIN printvis.pm_putawaytimes ON put_whse = openputaway_aisletime_whse
-WHERE put_function = 'CRT'
-GROUP BY openputaway_aisletime_whse, openputaway_aisletime_log)
+FROM
+    printvis.openputaway_aisletime
+        JOIN
+    printvis.log_equip ON logequip_log = openputaway_aisletime_log
+        JOIN
+    printvis.pm_putawaytimes ON put_whse = openputaway_aisletime_whse
+        AND logequip_equip = put_function
+GROUP BY openputaway_aisletime_whse , openputaway_aisletime_log)
 ON DUPLICATE KEY UPDATE 
 openputaway_logtime_countline=VALUES(openputaway_logtime_countline),
 openputaway_logtime_countunit=VALUES(openputaway_logtime_countunit),
