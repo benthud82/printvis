@@ -39,7 +39,7 @@ if (isset($_SESSION['MYUSER'])) {
         
         <li id="putaway" class="dropdown-submenu" style="cursor: pointer;  "> <a ><i class="fa fa-stack-overflow fa-lg"></i><span style="white-space: nowrap;">Putaway</span></a> 
             <ul class="dropdown-menu"> 
-                <li><a href="highputitmes.php">High Put Times</a></li>                
+                <li><a href="highputtimes.php">High Put Times</a></li>                
             </ul> 
 
 <!--        <li id="custcomplaint" class="dropdown-submenu" style="cursor: pointer;  "> <a  href="custcomplaints.php"><i class="fa fa-frown-o fa-lg"></i><span style="white-space: nowrap;">Customer<br> Complaints</span></a> 
