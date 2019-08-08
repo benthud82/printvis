@@ -68,7 +68,7 @@
                                 <th>Scheduled OT</th>
                                 <th>Include Hours?</th>
                                 <th>Department</th>
-                                <th>Active?</th>
+                                <th>Include Hours?</th>
                             </tr>
                         </thead>
                     </table>
@@ -95,11 +95,18 @@
                     select: true,
                     "order": [[0, "asc"]],
                     "scrollX": true,
+                    "columnDefs": [
+                        {
+                            "targets": [13],
+                            "visible": false,
+                            "searchable": false
+                        }
+                    ],
                     "fnCreatedRow": function (nRow, aData, iDataIndex) {
                         if (aData[13] === 1) {
-                            $('td:eq(15)', nRow).append("<div class='text-center'><input  id='" + aData[0] + "' type='checkbox'  class='input_checkbox' checked='checked' /> </div>");
+                            $('td:eq(14)', nRow).append("<div class='text-center'><input  id='" + aData[0] + "' type='checkbox'  class='input_checkbox' checked='checked'  onchange='active_tsm(this)'/> </div>");
                         } else {
-                            $('td:eq(15)', nRow).append("<div class='text-center'><input  id='" + aData[0] + "' type='checkbox'  class='input_checkbox'  /> </div>");
+                            $('td:eq(14)', nRow).append("<div class='text-center'><input  id='" + aData[0] + "' type='checkbox'  class='input_checkbox'   onchange='active_tsm(this)'/> </div>");
                         }
                     },
                     'sAjaxSource': "globaldata/dt_shift.php?sel_position=" + sel_position + "&sel_building=" + sel_building,
@@ -131,11 +138,6 @@
                                 var modifytsm_lunchtime = oTable.cell('.selected', 11).data();
                                 var modifytsm_othours = oTable.cell('.selected', 12).data();
                                 var modifytsm_includehours = oTable.cell('.selected', 13).data();
-                                if (modifytsm_includehours === 'YES') {
-                                    modifytsm_includehours = 1;
-                                } else {
-                                    modifytsm_includehours = 0;
-                                }
                                 var modifytsm_dept = oTable.cell('.selected', 14).data();
 
 
@@ -172,6 +174,28 @@
                 $('#tablecontainer').removeClass('hidden');
 
             }
+
+            function active_tsm(obj) {
+            debugger;
+                var tsmid = $(obj).attr("id");
+                if ($(obj).is(":checked")) {
+                    var active = 1;
+                } else {
+                    var active = 0;
+                }
+                var postData = 'active=' + active + '&tsmid=' + tsmid;
+                $.ajax({
+                    url: 'formpost/tsm_activate.php',
+                    type: 'POST',
+                    data: postData,
+                    success: function (result) {
+//                            $('#modal_modifytsm').modal('hide');
+//                            $('#shifttable').DataTable().ajax.reload();
+                    }
+                });
+            }
+
+
         </script>
         <?php include_once 'globaldata/modal_addnewtsm.php'; ?>
         <?php include_once 'globaldata/modal_modifytsm.php'; ?>
