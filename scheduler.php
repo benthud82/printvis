@@ -68,6 +68,7 @@
                                 <th>Scheduled OT</th>
                                 <th>Include Hours?</th>
                                 <th>Department</th>
+                                <th>Active?</th>
                             </tr>
                         </thead>
                     </table>
@@ -96,9 +97,9 @@
                     "scrollX": true,
                     "fnCreatedRow": function (nRow, aData, iDataIndex) {
                         if (aData[13] === 1) {
-                            $('td:eq(13)', nRow).append("<div class='text-center'><input  id='" + aData[0] + "' type='checkbox'  class='input_checkbox' checked='checked' /> </div>");
+                            $('td:eq(15)', nRow).append("<div class='text-center'><input  id='" + aData[0] + "' type='checkbox'  class='input_checkbox' checked='checked' /> </div>");
                         } else {
-                            $('td:eq(13)', nRow).append("<div class='text-center'><input  id='" + aData[0] + "' type='checkbox'  class='input_checkbox'  /> </div>");
+                            $('td:eq(15)', nRow).append("<div class='text-center'><input  id='" + aData[0] + "' type='checkbox'  class='input_checkbox'  /> </div>");
                         }
                     },
                     'sAjaxSource': "globaldata/dt_shift.php?sel_position=" + sel_position + "&sel_building=" + sel_building,
