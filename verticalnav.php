@@ -36,6 +36,11 @@ if (isset($_SESSION['MYUSER'])) {
 
         <li id="scheduler"><a href="scheduler.php"><i class="fa fa-calendar fa-lg"></i><span style="white-space: nowrap;">Scheduler</span></a></li> 
         <li id="shipzones"><a href="shipzones.php"><i class="fa fa-truck fa-lg"></i><span style="white-space: nowrap;">Ship Zones</span></a></li> 
+        
+        <li id="putaway" class="dropdown-submenu" style="cursor: pointer;  "> <a ><i class="fa fa-stack-overflow fa-lg"></i><span style="white-space: nowrap;">Putaway</span></a> 
+            <ul class="dropdown-menu"> 
+                <li><a href="highputitmes.php">High Put Times</a></li>                
+            </ul> 
 
 <!--        <li id="custcomplaint" class="dropdown-submenu" style="cursor: pointer;  "> <a  href="custcomplaints.php"><i class="fa fa-frown-o fa-lg"></i><span style="white-space: nowrap;">Customer<br> Complaints</span></a> 
             <ul class="dropdown-menu"> 
