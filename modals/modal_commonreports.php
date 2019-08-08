@@ -118,23 +118,10 @@
     </div>
 </div>
 
-<!--Modal to search by complaint code-->
-<!--<div id="modal_code" class="modal fade " role="dialog">
-    <div class="modal-dialog modal-lg">
-         Modal content
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close_visible" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Search by Complaint Reason Code</h4>
-            </div>
-            <div class="modal-body">
-
-            </div>
-        </div>
-    </div>
-</div>-->
 
 <script>
+
+
     //autocomplete when searched for pick TSM
     var options_picktsm = {
         url: "globaldata/dropdown_picktsm.php",
@@ -156,9 +143,6 @@
         },
         theme: "plate-dark"
     };
-
-    //populate the options for picktsm
-    $("#picktsm").easyAutocomplete(options_picktsm);
 
     //autocomplete when searched for pack TSM
     var options_packtsm = {
@@ -185,39 +169,8 @@
     //populate the options for packtsm
     $("#packtsm").easyAutocomplete(options_packtsm);
 
-    //data when searched by LP#
-    function getmodaldata(idval, modal) {
-        $('#' + modal).modal('toggle');
-        $('#datareturn').addClass('hidden');
-        $('#datareturn').removeClass('hidden');
-        debugger;
-        var sqldata = $('#' + idval).val();
-        var reporttype = idval;
-        //ajax to pull data by lpnum
-        $.ajax({
-            url: 'globaldata/custcomplaint_data.php',
-            type: 'POST',
-            data: {sqldata: sqldata, reporttype: reporttype},
-            dataType: 'html',
-            success: function (ajaxresult) {
-                $("#datareturn").html(ajaxresult);
-            }
-        });
-    }
-
-
-    //clear modal input on hide
-    $('.modal').on('hidden.bs.modal', function (e) {
-        $(this)
-                .find("input,textarea,select")
-                .val('')
-                .end()
-                .find("input[type=checkbox], input[type=radio]")
-                .prop("checked", "")
-                .end();
-    });
+    //populate the options for picktsm
+    $("#picktsm").easyAutocomplete(options_picktsm);
 </script>
-
-
 
 

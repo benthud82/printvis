@@ -80,13 +80,13 @@ $YESTRETURNS_array = $YESTRETURNS->fetchAll(pdo::FETCH_ASSOC);
                             </div>
                             <?php foreach ($YESTRETURNS_array as $key => $value) { ?>
                                 <div class='divtablerow itemdetailexpand'>
-                                    <div class='divtabledata width14_28 clickable custcomplaint' data-postdesc="ORD_RETURNDATE"> <?php echo $YESTRETURNS_array[$key]['ORD_RETURNDATE']; ?> </div>
-                                    <div class='divtabledata width14_28 ' data-postdesc="SHIPDATEJ"> <?php echo date('Y-m-d', strtotime(_yydddtogregdate($YESTRETURNS_array[$key]['SHIPDATEJ']))); ?> </div>
-                                    <div class='divtabledata width14_28 clickable custcomplaint' data-postdesc="RETURNCODE"> <?php echo $YESTRETURNS_array[$key]['RETURNCODE']; ?> </div>
-                                    <div class='divtabledata width14_28 clickable custcomplaint' data-postdesc="ITEMCODE"> <?php echo $YESTRETURNS_array[$key]['ITEMCODE']; ?> </div>
-                                    <div class='divtabledata width14_28 clickable custcomplaint' data-postdesc="WCSNUM"> <?php echo $YESTRETURNS_array[$key]['WCSNUM']; ?> </div>
+                                    <div class='divtabledata width14_28 clickable custcomplaint' data-postdesc="ORD_RETURNDATE" data-postval="<?php echo $YESTRETURNS_array[$key]['ORD_RETURNDATE']; ?>"> <?php echo $YESTRETURNS_array[$key]['ORD_RETURNDATE']; ?> </div>
+                                    <div class='divtabledata width14_28 ' data-postdesc="SHIPDATEJ" data-postval="<?php echo date('Y-m-d', strtotime(_yydddtogregdate($YESTRETURNS_array[$key]['SHIPDATEJ']))); ?>"> <?php echo date('Y-m-d', strtotime(_yydddtogregdate($YESTRETURNS_array[$key]['SHIPDATEJ']))); ?> </div>
+                                    <div class='divtabledata width14_28 clickable custcomplaint' data-postdesc="RETURNCODE" data-postval="<?php echo $YESTRETURNS_array[$key]['RETURNCODE']; ?>"> <?php echo $YESTRETURNS_array[$key]['RETURNCODE']; ?> </div>
+                                    <div class='divtabledata width14_28 clickable custcomplaint' data-postdesc="ITEMCODE" data-postval="<?php echo $YESTRETURNS_array[$key]['ITEMCODE']; ?>" > <?php echo $YESTRETURNS_array[$key]['ITEMCODE']; ?> </div>
+                                    <div class='divtabledata width14_28 clickable custcomplaint' data-postdesc="WCSNUM" data-postval="<?php echo $YESTRETURNS_array[$key]['WCSNUM']; ?>"> <?php echo $YESTRETURNS_array[$key]['WCSNUM']; ?> </div>
                                     <div class='divtabledata width14_28' data-postdesc=""> <?php echo $YESTRETURNS_array[$key]['WONUM']; ?> </div>
-                                    <div class='divtabledata width14_28 clickable custcomplaint' data-postdesc="LPNUM"> <?php echo $YESTRETURNS_array[$key]['LPNUM']; ?> </div>
+                                    <div class='divtabledata width14_28 clickable custcomplaint' data-postdesc="LPNUM" data-postval="<?php echo $YESTRETURNS_array[$key]['LPNUM']; ?>"> <?php echo $YESTRETURNS_array[$key]['LPNUM']; ?> </div>
                                 </div>
                             <?php } ?>
                         </div>
