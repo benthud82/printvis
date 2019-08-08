@@ -94,6 +94,13 @@
                     select: true,
                     "order": [[0, "asc"]],
                     "scrollX": true,
+                    "fnCreatedRow": function (nRow, aData, iDataIndex) {
+                        if (aData[13] === 1) {
+                            $('td:eq(13)', nRow).append("<div class='text-center'><input  id='" + aData[0] + "' type='checkbox'  class='input_checkbox' checked='checked' /> </div>");
+                        } else {
+                            $('td:eq(13)', nRow).append("<div class='text-center'><input  id='" + aData[0] + "' type='checkbox'  class='input_checkbox'  /> </div>");
+                        }
+                    },
                     'sAjaxSource': "globaldata/dt_shift.php?sel_position=" + sel_position + "&sel_building=" + sel_building,
                     buttons: [
                         {
@@ -123,9 +130,9 @@
                                 var modifytsm_lunchtime = oTable.cell('.selected', 11).data();
                                 var modifytsm_othours = oTable.cell('.selected', 12).data();
                                 var modifytsm_includehours = oTable.cell('.selected', 13).data();
-                                if(modifytsm_includehours === 'YES'){
+                                if (modifytsm_includehours === 'YES') {
                                     modifytsm_includehours = 1;
-                                } else{
+                                } else {
                                     modifytsm_includehours = 0;
                                 }
                                 var modifytsm_dept = oTable.cell('.selected', 14).data();
