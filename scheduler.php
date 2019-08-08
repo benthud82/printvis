@@ -77,123 +77,122 @@
 
 
             </section>
-        </section>
-
+        </section>  
+        <script src="https://cdn.datatables.net/plug-ins/1.10.16/sorting/custom-data-source/dom-checkbox.js"></script>
         <script>
-            $("body").tooltip({selector: '[data-toggle="tooltip"]'});
-            $("#scheduler").addClass('active');
+                            $("body").tooltip({selector: '[data-toggle="tooltip"]'});
+                            $("#scheduler").addClass('active');
 
-            // Load Datable on click
-            function gettable() {
-                $('#tablecontainer').addClass('hidden');
-                var sel_position = $('#sel_position').val();
-                var sel_building = $('#sel_building').val();
+                            // Load Datable on click
+                            function gettable() {
+                                $('#tablecontainer').addClass('hidden');
+                                var sel_position = $('#sel_position').val();
+                                var sel_building = $('#sel_building').val();
+                                oTable = $('#shifttable').DataTable({
+                                    dom: "<'row'<'col-sm-4 pull-left'l><'col-sm-4 text-center'B><'col-sm-4 pull-right'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-4 pull-left'i><'col-sm-8 pull-right'p>>",
+                                    destroy: true,
+                                    select: true,
+                                    "scrollX": true,
 
-                oTable = $('#shifttable').DataTable({
-                    dom: "<'row'<'col-sm-4 pull-left'l><'col-sm-4 text-center'B><'col-sm-4 pull-right'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-4 pull-left'i><'col-sm-8 pull-right'p>>",
-                    destroy: true,
-                    select: true,
-                    "order": [[0, "asc"]],
-                    "scrollX": true,
-                    "columnDefs": [
-                        {
-                            "targets": [13],
-                            "visible": false,
-                            "searchable": false
-                        }
-                    ],
-                    "fnCreatedRow": function (nRow, aData, iDataIndex) {
-                        if (aData[13] === 1) {
-                            $('td:eq(14)', nRow).append("<div class='text-center'><input  id='" + aData[0] + "' type='checkbox'  class='input_checkbox' checked='checked'  onchange='active_tsm(this)'/> </div>");
-                        } else {
-                            $('td:eq(14)', nRow).append("<div class='text-center'><input  id='" + aData[0] + "' type='checkbox'  class='input_checkbox'   onchange='active_tsm(this)'/> </div>");
-                        }
-                    },
-                    'sAjaxSource': "globaldata/dt_shift.php?sel_position=" + sel_position + "&sel_building=" + sel_building,
-                    buttons: [
-                        {
-                            text: 'Add New TSM',
-                            className: 'bg-success separatedbutton',
-                            action: function () {
-                                $('#modal_addnewtsm').modal('toggle');
+                                    "columnDefs": [
+                                        {
+                                            "targets": [13],
+                                            "visible": false,
+                                            "searchable": false
+                                        },
+                                        {
+                                            "targets": 15,
+                                            "orderDataType": "dom-checkbox"
+                                        }
+                                    ],
+                                    "fnCreatedRow": function (nRow, aData, iDataIndex) {
+                                        if (aData[13] === 1) {
+                                            $('td:eq(14)', nRow).append("<input  id='" + aData[0] + "' type='checkbox'  class='input_checkbox' checked='checked'  onchange='active_tsm(this)'/>");
+                                        } else {
+                                            $('td:eq(14)', nRow).append("<input  id='" + aData[0] + "' type='checkbox'  class='input_checkbox'   onchange='active_tsm(this)'/> ");
+                                        }
+                                    },
+                                    'sAjaxSource': "globaldata/dt_shift.php?sel_position=" + sel_position + "&sel_building=" + sel_building,
+                                    buttons: [
+                                        {
+                                            text: 'Add New TSM',
+                                            className: 'bg-success separatedbutton',
+                                            action: function () {
+                                                $('#modal_addnewtsm').modal('toggle');
+                                            }
+                                        },
+                                        {
+                                            text: 'Modify TSM',
+                                            className: 'bg-info separatedbutton',
+                                            action: function () {
+                                                debugger;
+                                                $('#modal_modifytsm').modal('toggle');
+                                                var modifytsm_tsmid = oTable.cell('.selected', 0).data();
+                                                var modifytsm_firstname = oTable.cell('.selected', 1).data();
+                                                var modifytsm_lastname = oTable.cell('.selected', 2).data();
+                                                var modifytsm_whse = oTable.cell('.selected', 3).data();
+                                                var modifytsm_building = oTable.cell('.selected', 4).data();
+                                                var modifytsm_position = oTable.cell('.selected', 5).data();
+                                                var modifytsm_stdhours = oTable.cell('.selected', 6).data();
+                                                var modifytsm_starttime = oTable.cell('.selected', 7).data();
+                                                var modifytsm_endtime = oTable.cell('.selected', 8).data();
+                                                var modifytsm_breaktime1 = oTable.cell('.selected', 9).data();
+                                                var modifytsm_breaktime2 = oTable.cell('.selected', 10).data();
+                                                var modifytsm_lunchtime = oTable.cell('.selected', 11).data();
+                                                var modifytsm_othours = oTable.cell('.selected', 12).data();
+                                                var modifytsm_includehours = oTable.cell('.selected', 13).data();
+                                                var modifytsm_dept = oTable.cell('.selected', 14).data();
+                                                $('#modifytsm_tsmid').val(modifytsm_tsmid);
+                                                $('#modifytsm_firstname').val(modifytsm_firstname);
+                                                $('#modifytsm_lastname').val(modifytsm_lastname);
+                                                $('#modifytsm_whse').val(modifytsm_whse);
+                                                $('#modifytsm_building').val(modifytsm_building);
+                                                $('#modifytsm_position').val(modifytsm_position);
+                                                $('#modifytsm_stdhours').val(modifytsm_stdhours);
+                                                $('#modifytsm_starttime').val(modifytsm_starttime);
+                                                $('#modifytsm_endtime').val(modifytsm_endtime);
+                                                $('#modifytsm_breaktime1').val(modifytsm_breaktime1);
+                                                $('#modifytsm_breaktime2').val(modifytsm_breaktime2);
+                                                $('#modifytsm_lunchtime').val(modifytsm_lunchtime);
+                                                $('#modifytsm_othours').val(modifytsm_othours);
+                                                $('#modifytsm_includehours').val(modifytsm_includehours);
+                                                $('#modifytsm_dept').val(modifytsm_dept);
+                                            }
+                                        },
+                                        {
+                                            text: 'Delete TSM',
+                                            className: 'bg-danger separatedbutton',
+                                            action: function () {
+                                                var selectedtsm = oTable.cell('.selected', 0).data();
+                                                $('#modal_deletetsm').modal('toggle');
+                                                $('#delete_tsmid').val(selectedtsm);
+                                            }
+                                        }
+                                    ]
+
+                                });
+                                $('#tablecontainer').removeClass('hidden');
                             }
-                        },
-                        {
-                            text: 'Modify TSM',
-                            className: 'bg-info separatedbutton',
-                            action: function () {
+
+                            function active_tsm(obj) {
                                 debugger;
-                                $('#modal_modifytsm').modal('toggle');
-                                var modifytsm_tsmid = oTable.cell('.selected', 0).data();
-                                var modifytsm_firstname = oTable.cell('.selected', 1).data();
-                                var modifytsm_lastname = oTable.cell('.selected', 2).data();
-                                var modifytsm_whse = oTable.cell('.selected', 3).data();
-                                var modifytsm_building = oTable.cell('.selected', 4).data();
-                                var modifytsm_position = oTable.cell('.selected', 5).data();
-                                var modifytsm_stdhours = oTable.cell('.selected', 6).data();
-                                var modifytsm_starttime = oTable.cell('.selected', 7).data();
-                                var modifytsm_endtime = oTable.cell('.selected', 8).data();
-                                var modifytsm_breaktime1 = oTable.cell('.selected', 9).data();
-                                var modifytsm_breaktime2 = oTable.cell('.selected', 10).data();
-                                var modifytsm_lunchtime = oTable.cell('.selected', 11).data();
-                                var modifytsm_othours = oTable.cell('.selected', 12).data();
-                                var modifytsm_includehours = oTable.cell('.selected', 13).data();
-                                var modifytsm_dept = oTable.cell('.selected', 14).data();
-
-
-                                $('#modifytsm_tsmid').val(modifytsm_tsmid);
-                                $('#modifytsm_firstname').val(modifytsm_firstname);
-                                $('#modifytsm_lastname').val(modifytsm_lastname);
-                                $('#modifytsm_whse').val(modifytsm_whse);
-                                $('#modifytsm_building').val(modifytsm_building);
-                                $('#modifytsm_position').val(modifytsm_position);
-                                $('#modifytsm_stdhours').val(modifytsm_stdhours);
-                                $('#modifytsm_starttime').val(modifytsm_starttime);
-                                $('#modifytsm_endtime').val(modifytsm_endtime);
-                                $('#modifytsm_breaktime1').val(modifytsm_breaktime1);
-                                $('#modifytsm_breaktime2').val(modifytsm_breaktime2);
-                                $('#modifytsm_lunchtime').val(modifytsm_lunchtime);
-                                $('#modifytsm_othours').val(modifytsm_othours);
-                                $('#modifytsm_includehours').val(modifytsm_includehours);
-                                $('#modifytsm_dept').val(modifytsm_dept);
-
-
-                            }
-                        },
-                        {
-                            text: 'Delete TSM',
-                            className: 'bg-danger separatedbutton',
-                            action: function () {
-                                var selectedtsm = oTable.cell('.selected', 0).data();
-                                $('#modal_deletetsm').modal('toggle');
-                                $('#delete_tsmid').val(selectedtsm);
-                            }
-                        }
-                    ]
-                });
-                $('#tablecontainer').removeClass('hidden');
-
-            }
-
-            function active_tsm(obj) {
-            debugger;
-                var tsmid = $(obj).attr("id");
-                if ($(obj).is(":checked")) {
-                    var active = 1;
-                } else {
-                    var active = 0;
-                }
-                var postData = 'active=' + active + '&tsmid=' + tsmid;
-                $.ajax({
-                    url: 'formpost/tsm_activate.php',
-                    type: 'POST',
-                    data: postData,
-                    success: function (result) {
+                                var tsmid = $(obj).attr("id");
+                                if ($(obj).is(":checked")) {
+                                    var active = 1;
+                                } else {
+                                    var active = 0;
+                                }
+                                var postData = 'active=' + active + '&tsmid=' + tsmid;
+                                $.ajax({
+                                    url: 'formpost/tsm_activate.php',
+                                    type: 'POST',
+                                    data: postData,
+                                    success: function (result) {
 //                            $('#modal_modifytsm').modal('hide');
 //                            $('#shifttable').DataTable().ajax.reload();
-                    }
-                });
-            }
+                                    }
+                                });
+                            }
 
 
         </script>

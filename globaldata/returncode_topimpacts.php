@@ -13,14 +13,6 @@ if (isset($_SESSION['MYUSER'])) {
 }
 
 
-$today = date('Y-m-d');
-$dayofweek = date('w', strtotime($today));
-if ($dayofweek == 1) {
-    $yesterday = date('Y-m-d', strtotime("-3 days"));
-} else {
-    $yesterday = date('Y-m-d', strtotime("-1 day"));
-}
-
 //complaint count for yesterday for WQSP
 $top_wqsp = $conn1->prepare("SELECT 
                                                         ITEMCODE, ITEM_DESC, COUNT(*) AS TRENDCOUNT
@@ -76,10 +68,29 @@ $top_ibns = $conn1->prepare("SELECT
                                                     LIMIT 10");
 $top_ibns->execute();
 $top_ibns_array = $top_ibns->fetchAll(pdo::FETCH_ASSOC);
+
+//complaint count for yesterday for IBNS
+$top_dmg = $conn1->prepare("SELECT 
+                                                        ITEMCODE, ITEM_DESC, COUNT(*) AS TRENDCOUNT
+                                                    FROM
+                                                        custaudit.custreturns A
+                                                            LEFT JOIN
+                                                        slotting.itemdesignation B ON A.WHSE = B.WHSE AND A.ITEMCODE = B.ITEM
+                                                    WHERE
+                                                        WEEKDAY(ORD_RETURNDATE) NOT IN (5 , 6)
+                                                            AND A.WHSE = $var_whse
+                                                            AND RETURNCODE IN ('TDNR', 'CRID')
+                                                            AND YEARWEEK(ORD_RETURNDATE) >= YEARWEEK(CURDATE() - INTERVAL 13 WEEK)
+                                                    GROUP BY ITEMCODE , ITEM_DESC , RETURNCODE
+                                                    HAVING TRENDCOUNT > 1
+                                                    ORDER BY TRENDCOUNT DESC
+                                                    LIMIT 10");
+$top_dmg->execute();
+$top_dmg_array = $top_dmg->fetchAll(pdo::FETCH_ASSOC);
 ?>
 
 <!--TOP WQSP-->
-<div class="col-md-4 ">
+<div class="col-md-6 col-xl-3 ">
     <!-- BEGIN Portlet PORTLET-->
     <div class="portlet box blue-hoki">
         <div class="portlet-title">
@@ -97,16 +108,16 @@ $top_ibns_array = $top_ibns->fetchAll(pdo::FETCH_ASSOC);
                                 <div class='divtabletitle width60' >Description</div>
                                 <div class='divtabletitle width20' >Total Complaints</div>
                             </div>
-                            <?php
-                            foreach ($top_wqsp_array as $key => $value) {
-                                ?>
+<?php
+foreach ($top_wqsp_array as $key => $value) {
+    ?>
                                 <div id="<?php echo $top_wqsp_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_wqsp_array[$key]['ITEMCODE']; ?>">
                                     <div class='divtabledata width20' ><?php echo $top_wqsp_array[$key]['ITEMCODE']; ?></div>
                                     <div class='divtabledata width60' style="text-align: left;"><?php echo $top_wqsp_array[$key]['ITEM_DESC']; ?></div>
                                     <div class='divtabledata width20' ><?php echo $top_wqsp_array[$key]['TRENDCOUNT']; ?></div>
 
                                 </div>
-                            <?php } ?>
+<?php } ?>
                         </div>
                     </div>
                 </div>    
@@ -116,7 +127,7 @@ $top_ibns_array = $top_ibns->fetchAll(pdo::FETCH_ASSOC);
 </div>    
 
 <!--TOP WISP-->
-<div class="col-md-4 ">
+<div class="col-md-6 col-xl-3 ">
     <!-- BEGIN Portlet PORTLET-->
     <div class="portlet box blue-hoki">
         <div class="portlet-title">
@@ -134,16 +145,16 @@ $top_ibns_array = $top_ibns->fetchAll(pdo::FETCH_ASSOC);
                                 <div class='divtabletitle width60' >Description</div>
                                 <div class='divtabletitle width20' >Total Complaints</div>
                             </div>
-                            <?php
-                            foreach ($top_wisp_array as $key => $value) {
-                                ?>
+<?php
+foreach ($top_wisp_array as $key => $value) {
+    ?>
                                 <div id="<?php echo $top_wisp_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_wisp_array[$key]['ITEMCODE']; ?>">
                                     <div class='divtabledata width20' ><?php echo $top_wisp_array[$key]['ITEMCODE']; ?></div>
                                     <div class='divtabledata width60' style="text-align: left;"><?php echo $top_wisp_array[$key]['ITEM_DESC']; ?></div>
                                     <div class='divtabledata width20' ><?php echo $top_wisp_array[$key]['TRENDCOUNT']; ?></div>
 
                                 </div>
-                            <?php } ?>
+<?php } ?>
                         </div>
                     </div>
                 </div>    
@@ -153,7 +164,7 @@ $top_ibns_array = $top_ibns->fetchAll(pdo::FETCH_ASSOC);
 </div>    
 
 <!--TOP IBNS-->
-<div class="col-md-4 ">
+<div class="col-md-6 col-xl-3 ">
     <!-- BEGIN Portlet PORTLET-->
     <div class="portlet box blue-hoki">
         <div class="portlet-title">
@@ -171,16 +182,53 @@ $top_ibns_array = $top_ibns->fetchAll(pdo::FETCH_ASSOC);
                                 <div class='divtabletitle width60' >Description</div>
                                 <div class='divtabletitle width20' >Total Complaints</div>
                             </div>
-                            <?php
-                            foreach ($top_ibns_array as $key => $value) {
-                                ?>
+<?php
+foreach ($top_ibns_array as $key => $value) {
+    ?>
                                 <div id="<?php echo $top_ibns_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_ibns_array[$key]['ITEMCODE']; ?>">
                                     <div class='divtabledata width20' ><?php echo $top_ibns_array[$key]['ITEMCODE']; ?></div>
                                     <div class='divtabledata width60' style="text-align: left;"><?php echo $top_ibns_array[$key]['ITEM_DESC']; ?></div>
                                     <div class='divtabledata width20' ><?php echo $top_ibns_array[$key]['TRENDCOUNT']; ?></div>
 
                                 </div>
-                            <?php } ?>
+<?php } ?>
+                        </div>
+                    </div>
+                </div>    
+            </div>    
+        </div>    
+    </div>    
+</div>    
+
+<!--TOP DMG-->
+<div class="col-md-6 col-xl-3 ">
+    <!-- BEGIN Portlet PORTLET-->
+    <div class="portlet box blue-hoki">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="fa fa-exclamation-circle"></i>Top TDNR & CRID Impacts </div>
+        </div>
+        <div class="portlet-body">
+            <!--start of div table-->
+            <div class="" id="divtable_top_dmg" style="padding-bottom: 51px">
+                <div  class='col-sm-12 col-md-12 col-lg-12 print-1wide'  style="float: none;">
+                    <div class='widget-content widget-table'  style="position: relative;">
+                        <div class='divtable'>
+                            <div id="" class='divtableheader' style="padding-top">
+                                <div class='divtabletitle width20' >Item</div>
+                                <div class='divtabletitle width60' >Description</div>
+                                <div class='divtabletitle width20' >Total Complaints</div>
+                            </div>
+<?php
+foreach ($top_dmg_array as $key => $value) {
+    ?>
+                                <div id="<?php echo $top_dmg_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_dmg_array[$key]['ITEMCODE']; ?>">
+                                    <div class='divtabledata width20' ><?php echo $top_dmg_array[$key]['ITEMCODE']; ?></div>
+                                    <div class='divtabledata width60' style="text-align: left;"><?php echo $top_dmg_array[$key]['ITEM_DESC']; ?></div>
+                                    <div class='divtabledata width20' ><?php echo $top_dmg_array[$key]['TRENDCOUNT']; ?></div>
+
+                                </div>
+<?php } ?>
                         </div>
                     </div>
                 </div>    
