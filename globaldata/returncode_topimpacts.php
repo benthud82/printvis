@@ -108,16 +108,16 @@ $top_dmg_array = $top_dmg->fetchAll(pdo::FETCH_ASSOC);
                                 <div class='divtabletitle width60' >Description</div>
                                 <div class='divtabletitle width20' >Total Complaints</div>
                             </div>
-<?php
-foreach ($top_wqsp_array as $key => $value) {
-    ?>
+                            <?php
+                            foreach ($top_wqsp_array as $key => $value) {
+                                ?>
                                 <div id="<?php echo $top_wqsp_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_wqsp_array[$key]['ITEMCODE']; ?>">
                                     <div class='divtabledata width20' ><?php echo $top_wqsp_array[$key]['ITEMCODE']; ?></div>
                                     <div class='divtabledata width60' style="text-align: left;"><?php echo $top_wqsp_array[$key]['ITEM_DESC']; ?></div>
                                     <div class='divtabledata width20' ><?php echo $top_wqsp_array[$key]['TRENDCOUNT']; ?></div>
 
                                 </div>
-<?php } ?>
+                            <?php } ?>
                         </div>
                     </div>
                 </div>    
@@ -145,16 +145,16 @@ foreach ($top_wqsp_array as $key => $value) {
                                 <div class='divtabletitle width60' >Description</div>
                                 <div class='divtabletitle width20' >Total Complaints</div>
                             </div>
-<?php
-foreach ($top_wisp_array as $key => $value) {
-    ?>
+                            <?php
+                            foreach ($top_wisp_array as $key => $value) {
+                                ?>
                                 <div id="<?php echo $top_wisp_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_wisp_array[$key]['ITEMCODE']; ?>">
                                     <div class='divtabledata width20' ><?php echo $top_wisp_array[$key]['ITEMCODE']; ?></div>
                                     <div class='divtabledata width60' style="text-align: left;"><?php echo $top_wisp_array[$key]['ITEM_DESC']; ?></div>
                                     <div class='divtabledata width20' ><?php echo $top_wisp_array[$key]['TRENDCOUNT']; ?></div>
 
                                 </div>
-<?php } ?>
+                            <?php } ?>
                         </div>
                     </div>
                 </div>    
@@ -182,16 +182,16 @@ foreach ($top_wisp_array as $key => $value) {
                                 <div class='divtabletitle width60' >Description</div>
                                 <div class='divtabletitle width20' >Total Complaints</div>
                             </div>
-<?php
-foreach ($top_ibns_array as $key => $value) {
-    ?>
+                            <?php
+                            foreach ($top_ibns_array as $key => $value) {
+                                ?>
                                 <div id="<?php echo $top_ibns_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_ibns_array[$key]['ITEMCODE']; ?>">
                                     <div class='divtabledata width20' ><?php echo $top_ibns_array[$key]['ITEMCODE']; ?></div>
                                     <div class='divtabledata width60' style="text-align: left;"><?php echo $top_ibns_array[$key]['ITEM_DESC']; ?></div>
                                     <div class='divtabledata width20' ><?php echo $top_ibns_array[$key]['TRENDCOUNT']; ?></div>
 
                                 </div>
-<?php } ?>
+                            <?php } ?>
                         </div>
                     </div>
                 </div>    
@@ -219,16 +219,16 @@ foreach ($top_ibns_array as $key => $value) {
                                 <div class='divtabletitle width60' >Description</div>
                                 <div class='divtabletitle width20' >Total Complaints</div>
                             </div>
-<?php
-foreach ($top_dmg_array as $key => $value) {
-    ?>
+                            <?php
+                            foreach ($top_dmg_array as $key => $value) {
+                                ?>
                                 <div id="<?php echo $top_dmg_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_dmg_array[$key]['ITEMCODE']; ?>">
                                     <div class='divtabledata width20' ><?php echo $top_dmg_array[$key]['ITEMCODE']; ?></div>
                                     <div class='divtabledata width60' style="text-align: left;"><?php echo $top_dmg_array[$key]['ITEM_DESC']; ?></div>
                                     <div class='divtabledata width20' ><?php echo $top_dmg_array[$key]['TRENDCOUNT']; ?></div>
 
                                 </div>
-<?php } ?>
+                            <?php } ?>
                         </div>
                     </div>
                 </div>    

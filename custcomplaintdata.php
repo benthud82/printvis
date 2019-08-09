@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
- 
+
     <head>
         <title>Complaint Data</title>
         <link href="../timelinecss/animate.min.css" rel="stylesheet" type="text/css"/>
@@ -22,11 +22,10 @@
         <script src="../app.min.js" type="text/javascript"></script>
         <script src="../jquery.counterup.min.js" type="text/javascript"></script>
         <script src="../jquery.waypoints.min.js" type="text/javascript"></script>
-        
-                <?php
+
+        <?php
         include_once '../Off_System_Slotting/connection/connection_details.php';
         include_once '../Off_System_Slotting/headerincludes.php';
-
         ?>
     </head>
 
@@ -56,6 +55,8 @@
             $("body").tooltip({selector: '[data-toggle="tooltip"]'});
             $(document).ready(function () {
                 commonreports();
+                //if called from custcomplaints.php, check for cookies
+                checkCookie_custcomplaint();
             });
 
             //function to pull for common reports for header
@@ -87,7 +88,6 @@
                         theme: "rounded-dots",
                         scrollInertia: 800
                     });
-
                 });
             })(jQuery);
         </script>

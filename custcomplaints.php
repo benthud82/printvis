@@ -218,10 +218,13 @@
             $(document).on("click touchstart", ".clickable", function (e) {
                 debugger;
                 var post_desc = $(this).attr('data-postdesc');
-                var post_val = $(this).text();
+                var post_val = $(this).attr('data-postval');
+//                var post_val = $(this).text();
                 post_val = post_val.trim();
                 document.cookie = "post-desc=" + post_desc;
                 document.cookie = "post-val=" + post_val;
+                document.cookie = "max-age=10";
+//                alert(document.cookie);
                 window.open("custcomplaintdata.php");
             });
 
