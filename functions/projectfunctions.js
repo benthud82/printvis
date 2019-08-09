@@ -1,6 +1,6 @@
 
 function checkCookie_custcomplaint() {
-    debugger;
+
     var clickeddata = getCookie("post-desc");
     var clickedval = getCookie("post-val");
     if (clickeddata !== "" && clickedval !== "") {
@@ -17,7 +17,7 @@ function checkCookie_custcomplaint() {
                 // code block
                 break;
             case 'ITEMCODE':
-                // code block
+                _dt_itemcode(clickedval);
                 break;
             case 'WCSNUM':
                 // code block
@@ -32,7 +32,7 @@ function checkCookie_custcomplaint() {
 }
 
 function getCookie(cname) {
-    debugger;
+
     var name = cname + "=";
     var ca = document.cookie.split(';');
     for (var i = 0; i < ca.length; i++) {
@@ -49,11 +49,11 @@ function getCookie(cname) {
 
 //data when searched from common report
 function getmodaldata(idval, modal) {
-    debugger;
+
     $('#' + modal).modal('toggle');
     $('#datareturn').addClass('hidden');
     $('#datareturn').removeClass('hidden');
-    debugger;
+    $('#section_itemcode').addClass('hidden');
     var sqldata = $('#' + idval).val();
     var reporttype = idval;
     //ajax to pull data by lpnum
@@ -73,7 +73,7 @@ function getmodaldata_cookie(idval, modal) {
 
     $('#datareturn').addClass('hidden');
     $('#datareturn').removeClass('hidden');
-    debugger;
+    $('#section_itemcode').addClass('hidden');
     var sqldata = idval;
     var reporttype = modal;
     //ajax to pull data by lpnum
@@ -84,6 +84,7 @@ function getmodaldata_cookie(idval, modal) {
         dataType: 'html',
         success: function (ajaxresult) {
             $("#datareturn").html(ajaxresult);
+            deleteAllCookies();
         }
     });
 }
@@ -99,3 +100,43 @@ $('.modal').on('hidden.bs.modal', function (e) {
             .prop("checked", "")
             .end();
 });
+
+
+
+// Load Datable on click
+function _dt_itemcode(clickedval) {
+
+    $('#datareturn').addClass('hidden');
+    if (clickedval == null) {
+        var itemcode = $('#itemcode').val();
+    } else {
+        var itemcode = clickedval;
+    }
+    oTable = $('#table_itemcode').DataTable({
+        dom: "<'row'<'col-sm-4 pull-left'l><'col-sm-4 text-center'B><'col-sm-4 pull-right'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-4 pull-left'i><'col-sm-8 pull-right'p>>",
+        destroy: true,
+        select: true,
+        "scrollX": true,
+        'sAjaxSource': "globaldata/custcomp_itemcode_data.php?itemcode=" + itemcode,
+        buttons: [
+            'copyHtml5',
+            'excelHtml5'
+        ]
+    });
+    $('#modal_item').modal('hide');
+    $('#section_itemcode').removeClass('hidden');
+    deleteAllCookies();
+}
+
+function deleteAllCookies() {
+    var cookies = document.cookie.split(";");
+    debugger;
+    for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i];
+        var eqPos = cookie.indexOf("=");
+        var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+        document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
+}
+
+ 

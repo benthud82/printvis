@@ -24,6 +24,7 @@
         <script src="../jquery.waypoints.min.js" type="text/javascript"></script>
 
         <?php
+        include_once 'sessioninclude.php';
         include_once '../Off_System_Slotting/connection/connection_details.php';
         include_once '../Off_System_Slotting/headerincludes.php';
         ?>
@@ -44,6 +45,31 @@
                 </div>
                 <!--Displayed data will go here-->
                 <div id="datareturn" class="hidden"></div>
+                <!--datatable for complaints by item-->
+                <section class="panel hidewrapper hidden" id="section_itemcode" style="margin-bottom: 50px; margin-top: 20px;"> 
+                    <header class="panel-heading bg bg-inverse h2">Customer Complaints by Item Code</header>
+                    <div id="tablepanel_itemcode" class="panel-body" style="background: #efefef">
+                        <div id="tablecontainer_itemcode" class="col-sm-12 ">
+                            <table id="table_itemcode" class="table table-bordered" cellspacing="0" style="font-size: 11px; font-family: Calibri;  background-color:  white;">
+                                <thead>
+                                    <tr>
+                                        <th>Complaint Date</th>
+                                        <th>Return Code</th>
+                                        <th>Invoice#</th>
+                                        <th>Ship Zone</th>
+                                        <th>Box Size</th>
+                                        <th>Tracer#</th>
+                                        <th>Pick TSM</th>
+                                        <th>Pack TSM</th>
+                                        <th>Pick Location</th>
+                                        <th>Pick Date</th>
+                                        <th>EOL?</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </section>
                 <!--Modal Includes-->
                 <?php
                 include_once 'modals/modal_commonreports.php ';
@@ -78,6 +104,13 @@
                 //concatenate modal id pulled from printvis.custcompl_commonreports table
                 $('#' + modal_id).modal('toggle');
             });
+
+
+
+
+
+
+
 
 
         </script>

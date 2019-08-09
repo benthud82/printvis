@@ -130,12 +130,12 @@
             <div class="modal-body">
                 <div class="" style="margin-left: 15px" >
                     <label>Enter Item #</label>
-                    <input name='shipto' class='datainput selectstyle' id='itemcode' onKeyDown="if (event.keyCode === 13)
-                                getmodaldata('itemcode', 'modal_itemcode');" style="min-width: 300px;"/>
+                    <input  name='itemcode' class='datainput selectstyle' id='itemcode' onKeyDown="if (event.keyCode === 13)
+                                _dt_itemcode();" style="min-width: 300px;"/>
                 </div>
             </div>
             <div class="modal-footer" >
-                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onclick="getmodaldata('itemcode', 'modal_itemcode');" style="margin-bottom: 5px;">Load Data</button>
+                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onclick="_dt_itemcode();" style="margin-bottom: 5px;">Load Data</button>
             </div>
         </div>
     </div>
@@ -194,6 +194,14 @@
 
     //populate the options for picktsm
     $("#picktsm").easyAutocomplete(options_picktsm);
+
+
+    $('.modal').on('shown.bs.modal', function () {
+        setTimeout(function () {
+            $('.datainput').focus();
+        }, 100);
+
+    });
 </script>
 
 

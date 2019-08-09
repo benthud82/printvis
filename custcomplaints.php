@@ -223,8 +223,11 @@
                 post_val = post_val.trim();
                 document.cookie = "post-desc=" + post_desc;
                 document.cookie = "post-val=" + post_val;
-                document.cookie = "max-age=10";
-//                alert(document.cookie);
+//                document.cookie = "max-age=10";
+                var date = new Date();
+                date.setTime(date.getTime() + (30 * 1000));
+                var expires = "expires=" + date;
+                document.cookie = expires;
                 window.open("custcomplaintdata.php");
             });
 

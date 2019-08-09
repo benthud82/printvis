@@ -1,6 +1,7 @@
 <?php
-include_once '../sessioninclude.php';
 
+include_once '../sessioninclude.php';
+include '../../connections/conn_printvis.php';
 if (isset($_SESSION['MYUSER'])) {
     $var_userid = $_SESSION['MYUSER'];
     $whssql = $conn1->prepare("SELECT prodvisdb_users_PRIMDC from printvis.prodvisdb_users WHERE prodvisdb_users_ID = '$var_userid'");
@@ -10,221 +11,73 @@ if (isset($_SESSION['MYUSER'])) {
     $var_whse = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
     $whsesel = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 }
-
-
-$tsmpick = $conn1->prepare("SELECT 
-    *
-FROM
-    custaudit.complaint_detail
-WHERE
-    SHIPTONUM = $var_sqldata and RETURNCODE in ('IBNS','WISP','WQSP')"
-        . "AND YEARWEEK(ORD_RETURNDATE) >= YEARWEEK(CURDATE() - INTERVAL 13 WEEK) ");
-$tsmpick->execute();
-$tsmpick_array = $tsmpick->fetchAll(pdo::FETCH_ASSOC);
-
-//total number of customer complaints
-$picktsm_itemcount = count($tsmpick_array);
-
-
-
-
-
-//complaint count for yesterday for WQSP
-$top_wqsp = $conn1->prepare("SELECT 
-                                                                        ITEMCODE, ITEM_DESC, COUNT(*) AS TRENDCOUNT
+$var_item = $_GET['itemcode'];
+$stardate = date('Y-m-d', strtotime("-90 days"));
+$itemsql = $conn1->prepare("SELECT 
+                                                            ORD_RETURNDATE,
+                                                            RETURNCODE,
+                                                            CONCAT(WCSNUM, '-', WONUM) AS WCSNUM,
+                                                            SHIPZONE,
+                                                            BOXSIZE,
+                                                            TRACERNUM,
+                                                            CASE
+                                                                WHEN PICK_TSM IS NULL THEN CASEPICK_TSMNAME
+                                                                ELSE PICK_TSM
+                                                            END AS PICK_TSM,
+                                                            CASE
+                                                                WHEN PACK_TSMNAME IS NULL THEN CASEPICK_TSMNAME
+                                                                ELSE PACK_TSMNAME
+                                                            END AS PACK_TSMNAME,
+                                                            PICK_LOCATION,
+                                                            CASE
+                                                                WHEN PICK_DATE IS NULL THEN CASEPICK_DATETIME
+                                                                ELSE PICK_DATE
+                                                            END AS PICK_DATE,
+                                                            CASE
+                                                                WHEN
+                                                                    (SELECT 
+                                                                            tsm_name
+                                                                        FROM
+                                                                            printvis.tsm
+                                                                        WHERE
+                                                                            tsm_num = CASE
+                                                                                WHEN EOLLOOSE_TSM IS NULL THEN EOLCASE_TSM
+                                                                                ELSE EOLLOOSE_TSM
+                                                                            END) IS NULL
+                                                                THEN
+                                                                    '-'
+                                                                ELSE (SELECT 
+                                                                        tsm_name
                                                                     FROM
-                                                                        custaudit.complaint_detail A
-                                                                            LEFT JOIN
-                                                                        slotting.itemdesignation B ON A.ITEMCODE = B.ITEM
+                                                                        printvis.tsm
                                                                     WHERE
-                                                                        WEEKDAY(ORD_RETURNDATE) NOT IN (5 , 6)
-                                                                            AND RETURNCODE IN ('WQSP')
-                                                                            AND YEARWEEK(ORD_RETURNDATE) >= YEARWEEK(CURDATE() - INTERVAL 13 WEEK)
-                                                                            AND SHIPTONUM = $var_sqldata 
-                                                                    GROUP BY ITEMCODE , ITEM_DESC , RETURNCODE
-                                                                    ORDER BY TRENDCOUNT DESC");
-$top_wqsp->execute();
-$top_wqsp_array = $top_wqsp->fetchAll(pdo::FETCH_ASSOC);
-
-//complaint count for yesterday for WISP
-$top_wisp = $conn1->prepare("SELECT 
-                                                                        ITEMCODE, ITEM_DESC, COUNT(*) AS TRENDCOUNT
-                                                                    FROM
-                                                                        custaudit.complaint_detail A
-                                                                            LEFT JOIN
-                                                                        slotting.itemdesignation B ON A.ITEMCODE = B.ITEM
-                                                                    WHERE
-                                                                        WEEKDAY(ORD_RETURNDATE) NOT IN (5 , 6)
-                                                                            AND RETURNCODE IN ('WISP')
-                                                                            AND YEARWEEK(ORD_RETURNDATE) >= YEARWEEK(CURDATE() - INTERVAL 13 WEEK)
-                                                                           AND SHIPTONUM = $var_sqldata 
-                                                                    GROUP BY ITEMCODE , ITEM_DESC , RETURNCODE
-                                                                    ORDER BY TRENDCOUNT DESC");
-$top_wisp->execute();
-$top_wisp_array = $top_wisp->fetchAll(pdo::FETCH_ASSOC);
-
-//complaint count for yesterday for IBNS
-$top_ibns = $conn1->prepare("SELECT 
-                                                                        ITEMCODE, ITEM_DESC, COUNT(*) AS TRENDCOUNT
-                                                                    FROM
-                                                                        custaudit.complaint_detail A
-                                                                            LEFT JOIN
-                                                                        slotting.itemdesignation B ON A.ITEMCODE = B.ITEM
-                                                                    WHERE
-                                                                        WEEKDAY(ORD_RETURNDATE) NOT IN (5 , 6)
-                                                                            AND RETURNCODE IN ('IBNS')
-                                                                            AND YEARWEEK(ORD_RETURNDATE) >= YEARWEEK(CURDATE() - INTERVAL 13 WEEK)
-                                                                           AND  SHIPTONUM = $var_sqldata 
-                                                                    GROUP BY ITEMCODE , ITEM_DESC , RETURNCODE
-                                                                    ORDER BY TRENDCOUNT DESC");
-$top_ibns->execute();
-$top_ibns_array = $top_ibns->fetchAll(pdo::FETCH_ASSOC);
-?>
-
-<div class="portlet light bordered">
-    <div class="portlet-title">
-        <div class="caption">
-            <i class="icon-bubble font-green-sharp"></i>
-            <span class="caption-subject font-green-sharp bold uppercase">Data for Ship To #: <span style="background-color: black; color: #dddada"><?php echo $var_sqldata; ?></span></span>
-        </div>
-    </div>
-    <div class="portlet-body">
-        <!--TOP WQSP-->
-        <div class="col-md-4 ">
-            <!-- BEGIN Portlet PORTLET-->
-            <div class="portlet box blue-hoki">
-                <div class="portlet-title">
-                    <div class="caption">
-                        <i class="fa fa-exclamation-circle"></i>Top WQSP Impacts </div>
-                </div>
-                <?php if (count($top_wqsp_array) === 0) { ?>
-                    <div class="portlet-body">
-                        <!--No records-->
-                        <div class="h4">No WQSP complaints in last quarter!</div>
-                    </div>  <?php
-                } else {
-                    ?>
-                    <div class="portlet-body">
-                        <!--start of div table-->
-                        <div class="" id="divtable_top_wqsp" style="padding-bottom: 51px">
-                            <div  class='col-sm-12 col-md-12 col-lg-12 print-1wide'  style="float: none;">
-                                <div class='widget-content widget-table'  style="position: relative;">
-                                    <div class='divtable'>
-                                        <div id="" class='divtableheader' style="padding-top">
-                                            <div class='divtabletitle width20' >Item</div>
-                                            <div class='divtabletitle width60' >Description</div>
-                                            <div class='divtabletitle width20' >Total Complaints</div>
-                                        </div>
-                                        <?php
-                                        foreach ($top_wqsp_array as $key => $value) {
-                                            ?>
-                                            <div id="<?php echo $top_wqsp_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_wqsp_array[$key]['ITEMCODE']; ?>">
-                                                <div class='divtabledata width20' ><?php echo $top_wqsp_array[$key]['ITEMCODE']; ?></div>
-                                                <div class='divtabledata width60' style="text-align: left;"><?php echo $top_wqsp_array[$key]['ITEM_DESC']; ?></div>
-                                                <div class='divtabledata width20' ><?php echo $top_wqsp_array[$key]['TRENDCOUNT']; ?></div>
-
-                                            </div>
-                                        <?php } ?>
-                                    </div>
-                                </div>
-                            </div>    
-                        </div>    
-                    </div>    
-                <?php } ?>
-            </div>    
-        </div>    
-
-        <!--TOP WISP-->
-        <div class="col-md-4 ">
-            <!-- BEGIN Portlet PORTLET-->
-            <div class="portlet box blue-hoki">
-                <div class="portlet-title">
-                    <div class="caption">
-                        <i class="fa fa-exclamation-circle"></i>Top WISP Impacts </div>
-                </div>
-                <?php if (count($top_wisp_array) === 0) { ?>
-                    <div class="portlet-body">
-                        <!--No records-->
-                        <div class="h4">No WISP complaints in last quarter!</div>
-                    </div>  <?php
-                } else {
-                    ?>
-                    <div class="portlet-body">
-                        <!--start of div table-->
-                        <div class="" id="divtable_top_wqsp" style="padding-bottom: 51px">
-                            <div  class='col-sm-12 col-md-12 col-lg-12 print-1wide'  style="float: none;">
-                                <div class='widget-content widget-table'  style="position: relative;">
-                                    <div class='divtable'>
-                                        <div id="" class='divtableheader' style="padding-top">
-                                            <div class='divtabletitle width20' >Item</div>
-                                            <div class='divtabletitle width60' >Description</div>
-                                            <div class='divtabletitle width20' >Total Complaints</div>
-                                        </div>
-                                        <?php
-                                        foreach ($top_wisp_array as $key => $value) {
-                                            ?>
-                                            <div id="<?php echo $top_wisp_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_wisp_array[$key]['ITEMCODE']; ?>">
-                                                <div class='divtabledata width20' ><?php echo $top_wisp_array[$key]['ITEMCODE']; ?></div>
-                                                <div class='divtabledata width60' style="text-align: left;"><?php echo $top_wisp_array[$key]['ITEM_DESC']; ?></div>
-                                                <div class='divtabledata width20' ><?php echo $top_wisp_array[$key]['TRENDCOUNT']; ?></div>
-
-                                            </div>
-                                        <?php } ?>
-                                    </div>
-                                </div>
-                            </div>    
-                        </div>    
-                    </div>    
-                <?php } ?>
-            </div>    
-        </div>    
-
-        <!--TOP IBNS-->
-        <div class="col-md-4 ">
-            <!-- BEGIN Portlet PORTLET-->
-            <div class="portlet box blue-hoki">
-                <div class="portlet-title">
-                    <div class="caption">
-                        <i class="fa fa-exclamation-circle"></i>Top IBNS Impacts </div>
-                </div>
-                <?php if (count($top_ibns_array) === 0) { ?>
-                    <div class="portlet-body">
-                        <!--No records-->
-                        <div class="h4">No IBNS complaints in last quarter!</div>
-                    </div>  <?php
-                } else {
-                    ?>
-                    <div class="portlet-body">
-                        <!--start of div table-->
-                        <div class="" id="divtable_top_wqsp" style="padding-bottom: 51px">
-                            <div  class='col-sm-12 col-md-12 col-lg-12 print-1wide'  style="float: none;">
-                                <div class='widget-content widget-table'  style="position: relative;">
-                                    <div class='divtable'>
-                                        <div id="" class='divtableheader' style="padding-top">
-                                            <div class='divtabletitle width20' >Item</div>
-                                            <div class='divtabletitle width60' >Description</div>
-                                            <div class='divtabletitle width20' >Total Complaints</div>
-                                        </div>
-                                        <?php
-                                        foreach ($top_ibns_array as $key => $value) {
-                                            ?>
-                                            <div id="<?php echo $top_ibns_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_ibns_array[$key]['ITEMCODE']; ?>">
-                                                <div class='divtabledata width20' ><?php echo $top_ibns_array[$key]['ITEMCODE']; ?></div>
-                                                <div class='divtabledata width60' style="text-align: left;"><?php echo $top_ibns_array[$key]['ITEM_DESC']; ?></div>
-                                                <div class='divtabledata width20' ><?php echo $top_ibns_array[$key]['TRENDCOUNT']; ?></div>
-
-                                            </div>
-                                        <?php } ?>
-                                    </div>
-                                </div>
-                            </div>    
-                        </div>    
-                    </div>    
-                <?php } ?>
-            </div>    
-        </div>    
-    </div>    
-</div>    
+                                                                        tsm_num = CASE
+                                                                            WHEN EOLLOOSE_TSM IS NULL THEN EOLCASE_TSM
+                                                                            ELSE EOLLOOSE_TSM
+                                                                        END)
+                                                            END AS EOL_TSM
+                                                        FROM
+                                                            custaudit.complaint_detail
+                                                        WHERE
+                                                            ORD_RETURNDATE >= '$stardate'
+                                                                AND PICK_WHSE = $var_whse
+                                                                AND ITEMCODE = $var_item
+                                                        ORDER BY ORD_RETURNDATE DESC");
+$itemsql->execute();
+$item_array = $itemsql->fetchAll(pdo::FETCH_ASSOC);
 
 
 
+
+$output = array(
+    "aaData" => array()
+);
+$row = array();
+
+foreach ($item_array as $key => $value) {
+    $row[] = array_values($item_array[$key]);
+}
+
+
+$output['aaData'] = $row;
+echo json_encode($output);
