@@ -118,6 +118,29 @@
     </div>
 </div>
 
+<!--Modal to search by ITEM CODE-->
+<div id="modal_item" class="modal fade " role="dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close_visible" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Search by Item Code</h4>
+            </div>
+            <div class="modal-body">
+                <div class="" style="margin-left: 15px" >
+                    <label>Enter Item #</label>
+                    <input name='shipto' class='datainput selectstyle' id='itemcode' onKeyDown="if (event.keyCode === 13)
+                                getmodaldata('itemcode', 'modal_itemcode');" style="min-width: 300px;"/>
+                </div>
+            </div>
+            <div class="modal-footer" >
+                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onclick="getmodaldata('itemcode', 'modal_itemcode');" style="margin-bottom: 5px;">Load Data</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
 

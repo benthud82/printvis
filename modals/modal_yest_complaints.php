@@ -86,7 +86,7 @@ $YESTRETURNS_array = $YESTRETURNS->fetchAll(pdo::FETCH_ASSOC);
                                     <div class='divtabledata width14_28 clickable custcomplaint' data-postdesc="ITEMCODE" data-postval="<?php echo $YESTRETURNS_array[$key]['ITEMCODE']; ?>" > <?php echo $YESTRETURNS_array[$key]['ITEMCODE']; ?> </div>
                                     <div class='divtabledata width14_28 clickable custcomplaint' data-postdesc="WCSNUM" data-postval="<?php echo $YESTRETURNS_array[$key]['WCSNUM']; ?>"> <?php echo $YESTRETURNS_array[$key]['WCSNUM']; ?> </div>
                                     <div class='divtabledata width14_28' data-postdesc=""> <?php echo $YESTRETURNS_array[$key]['WONUM']; ?> </div>
-                                    <div class='divtabledata width14_28 clickable custcomplaint' data-postdesc="LPNUM" data-postval="<?php echo $YESTRETURNS_array[$key]['LPNUM']; ?>"> <?php echo $YESTRETURNS_array[$key]['LPNUM']; ?> </div>
+                                    <div class='divtabledata width14_28 clickable custcomplaint' style="cursor: pointer; text-decoration: underline; font-weight: 900;" data-postdesc="LPNUM" data-postval="<?php echo $YESTRETURNS_array[$key]['LPNUM']; ?>"> <?php echo $YESTRETURNS_array[$key]['LPNUM']; ?> </div>
                                 </div>
                             <?php } ?>
                         </div>

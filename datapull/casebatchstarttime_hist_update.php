@@ -15,12 +15,13 @@ $casebatchstart = $aseriesconn->prepare("SELECT TRIM(substr(NVCFLT,3,2)) as WHSE
                                                                                        TRIM(substr(NVCFLT,7,5)) as BATCH,
                                                                                        TRIM(substr(NVCFLT,49,10)) as TSM,
                                                                                        TRIM(substr(NVCFLT,21,9)) as LPNUM, 
+                                                                                       TRIM(substr(NVCFLT,109,7)) as LOC,
                                                                                        TRIM(substr(NVCFLT,146,19)) as PICK_DATETIME 
                                                                             FROM HSIPCORDTA.NOFCAS    
                                                                             WHERE TRIM(substr(NVCFLT,146,10)) >= '$yesterday'");
 $casebatchstart->execute();
 $casebatchstart_array = $casebatchstart->fetchAll(pdo::FETCH_ASSOC);
-$casestartcols = 'caselp_whse, caselp_batch, caselp_tsm, caselp_lp, caselp_pickdatetime';
+$casestartcols = 'caselp_whse, caselp_batch, caselp_tsm, caselp_lp, caselp_loc, caselp_pickdatetime';
 
 
 
@@ -42,9 +43,10 @@ do {
         $caselp_batch = intval($casebatchstart_array[$counter]['BATCH']);
         $caselp_tsm = intval($casebatchstart_array[$counter]['TSM']);
         $caselp_lp = intval($casebatchstart_array[$counter]['LPNUM']);
+        $caselp_loc = ($casebatchstart_array[$counter]['LOC']);
         $caselp_pickdatetime = $casebatchstart_array[$counter]['PICK_DATETIME'];
 
-        $data[] = "($caselp_whse, $caselp_batch, $caselp_tsm, $caselp_lp, '$caselp_pickdatetime')";
+        $data[] = "($caselp_whse, $caselp_batch, $caselp_tsm, $caselp_lp,'$caselp_loc', '$caselp_pickdatetime')";
         $counter += 1;
     }
 

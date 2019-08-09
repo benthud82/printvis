@@ -532,6 +532,10 @@ switch ($var_reporttype) {
                 //include the data file.  This is where the sql statement resides as well as the html markdown that is displayed in the datareturn div on the main page custcomplaintdata.php
         include 'custcomp_shipto_data.php';
         break;
+    case 'itemcode':
+                //include the data file.  This is where the sql statement resides as well as the html markdown that is displayed in the datareturn div on the main page custcomplaintdata.php
+        include 'custcomp_itemcode_data.php';
+        break;
 
     default:
         break;
