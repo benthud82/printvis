@@ -60,6 +60,7 @@ $itemsql = $conn1->prepare("SELECT
                                                             custaudit.complaint_detail
                                                         WHERE
                                                             ORD_RETURNDATE = '$var_date'
+                                                                AND PICK_WHSE = $var_whse
                                                         ORDER BY ORD_RETURNDATE DESC");
 $itemsql->execute();
 $item_array = $itemsql->fetchAll(pdo::FETCH_ASSOC);
