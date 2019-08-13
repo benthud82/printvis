@@ -1,6 +1,5 @@
 
 function checkCookie_custcomplaint() {
-
     var clickeddata = getCookie("post-desc");
     var clickedval = getCookie("post-val");
     if (clickeddata !== "" && clickedval !== "") {
@@ -10,8 +9,8 @@ function checkCookie_custcomplaint() {
             case 'ORD_RETURNDATE':
                 // code block
                 break;
-            case 'SHIPDATEJ':
-                // code block
+            case 'COMPDATE':
+                _dt_date(clickedval);
                 break;
             case 'RETURNCODE':
                 // code block
@@ -47,35 +46,60 @@ function getCookie(cname) {
     return "";
 }
 
+function loaddata(idval, modal) {
+    getmodaldata(idval, modal);
+}
+
 //data when searched from common report
 function getmodaldata(idval, modal) {
-
     $('#' + modal).modal('toggle');
     $('#datareturn').addClass('hidden');
     $('#datareturn').removeClass('hidden');
-    $('#section_itemcode').addClass('hidden');
+    $('.hidewrapper').addClass('hidden');
     var sqldata = $('#' + idval).val();
     var reporttype = idval;
-    //ajax to pull data by lpnum
+
     $.ajax({
         url: 'globaldata/custcomplaint_data.php',
         type: 'POST',
         data: {sqldata: sqldata, reporttype: reporttype},
         dataType: 'html',
         success: function (ajaxresult) {
+//             $('#datareturn').html($('#datareturn',ajaxresult).html());
             $("#datareturn").html(ajaxresult);
+            //    datatables
+            switch (reporttype) {
+                case 'packtsm':
+                    _dt_packtsm(sqldata);
+                    break;
+                case 'picktsm':
+                    _dt_picktsm(sqldata);
+                    break;
+                default:
+                    break
+            }
         }
     });
 }
 
 //data when searched by cookie from custcomplaints.php
 function getmodaldata_cookie(idval, modal) {
-
     $('#datareturn').addClass('hidden');
     $('#datareturn').removeClass('hidden');
-    $('#section_itemcode').addClass('hidden');
+    $('.hidewrapper').addClass('hidden');
     var sqldata = idval;
     var reporttype = modal;
+    //    datatables
+    switch (reporttype) {
+        case 'packtsm':
+            _dt_packtsm(sqldata);
+            break;
+        case 'picktsm':
+            _dt_picktsm(sqldata);
+            break;
+        default:
+            break
+    }
     //ajax to pull data by lpnum
     $.ajax({
         url: 'globaldata/custcomplaint_data.php',
@@ -89,7 +113,6 @@ function getmodaldata_cookie(idval, modal) {
     });
 }
 
-
 //clear modal input on hide
 $('.modal').on('hidden.bs.modal', function (e) {
     $(this)
@@ -101,12 +124,10 @@ $('.modal').on('hidden.bs.modal', function (e) {
             .end();
 });
 
-
-
-// Load Datable on click
+// Load Datable on click for item code
 function _dt_itemcode(clickedval) {
-
     $('#datareturn').addClass('hidden');
+    $('.hidewrapper').addClass('hidden');
     if (clickedval == null) {
         var itemcode = $('#itemcode').val();
     } else {
@@ -115,8 +136,17 @@ function _dt_itemcode(clickedval) {
     oTable = $('#table_itemcode').DataTable({
         dom: "<'row'<'col-sm-4 pull-left'l><'col-sm-4 text-center'B><'col-sm-4 pull-right'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-4 pull-left'i><'col-sm-8 pull-right'p>>",
         destroy: true,
-        select: true,
         "scrollX": true,
+        "aoColumnDefs": [
+            {
+                "aTargets": [6], // Column to target
+                "mRender": function (data, type, full) {
+                    // 'full' is the row's data object, and 'data' is this column's data
+                    // e.g. 'full[0]' is the comic id, and 'data' is the comic title
+                    return '<a href="https://www.ups.com/track?loc=en_US&tracknum=' + data + '&requester=WT/trackdetails" target="_blank">' + data + '</a>';
+                }
+            }
+        ],
         'sAjaxSource': "globaldata/custcomp_itemcode_data.php?itemcode=" + itemcode,
         buttons: [
             'copyHtml5',
@@ -128,9 +158,107 @@ function _dt_itemcode(clickedval) {
     deleteAllCookies();
 }
 
+// Load Datable on click for pack TSM
+function _dt_packtsm(clickedval) {
+    $('.hidewrapper').addClass('hidden');
+    if (clickedval == null) {
+        var packtsm = $('#packtsm').val();
+    } else {
+        var packtsm = clickedval;
+    }
+    oTable = $('#table_packtsm').DataTable({
+        dom: "<'row'<'col-sm-4 pull-left'l><'col-sm-4 text-center'B><'col-sm-4 pull-right'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-4 pull-left'i><'col-sm-8 pull-right'p>>",
+        destroy: true,
+        "scrollX": true,
+        "aoColumnDefs": [
+            {
+                "aTargets": [6], // Column to target
+                "mRender": function (data, type, full) {
+                    // 'full' is the row's data object, and 'data' is this column's data
+                    // e.g. 'full[0]' is the comic id, and 'data' is the comic title
+                    return '<a href="https://www.ups.com/track?loc=en_US&tracknum=' + data + '&requester=WT/trackdetails" target="_blank">' + data + '</a>';
+                }
+            }
+        ],
+        'sAjaxSource': "globaldata/custcomp_dtpacktsm_data.php?packtsm=" + packtsm,
+        buttons: [
+            'copyHtml5',
+            'excelHtml5'
+        ]
+    });
+
+    $('#section_packtsm').removeClass('hidden');
+    deleteAllCookies();
+}
+
+// Load Datable on click for pack TSM
+function _dt_picktsm(clickedval) {
+    if (clickedval == null) {
+        var picktsm = $('#picktsm').val();
+    } else {
+        var picktsm = clickedval;
+    }
+    oTable = $('#table_picktsm').DataTable({
+        dom: "<'row'<'col-sm-4 pull-left'l><'col-sm-4 text-center'B><'col-sm-4 pull-right'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-4 pull-left'i><'col-sm-8 pull-right'p>>",
+        destroy: true,
+        "scrollX": true,
+        "aoColumnDefs": [
+            {
+                "aTargets": [6], // Column to target
+                "mRender": function (data, type, full) {
+                    // 'full' is the row's data object, and 'data' is this column's data
+                    // e.g. 'full[0]' is the comic id, and 'data' is the comic title
+                    return '<a href="https://www.ups.com/track?loc=en_US&tracknum=' + data + '&requester=WT/trackdetails" target="_blank">' + data + '</a>';
+                }
+            }
+        ],
+        'sAjaxSource': "globaldata/custcomp_dtpicktsm_data.php?picktsm=" + picktsm,
+        buttons: [
+            'copyHtml5',
+            'excelHtml5'
+        ]
+    });
+
+    $('#section_picktsm').removeClass('hidden');
+    deleteAllCookies();
+}
+
+// Load Datable on click for date
+function _dt_date(clickedval) {
+        $('#datareturn').addClass('hidden');
+    $('.hidewrapper').addClass('hidden');
+    if (clickedval == null) {
+        var startdate = $('#startfiscal').val();
+    } else {
+        var startdate = clickedval;
+    }
+    oTable = $('#table_date').DataTable({
+        dom: "<'row'<'col-sm-4 pull-left'l><'col-sm-4 text-center'B><'col-sm-4 pull-right'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-4 pull-left'i><'col-sm-8 pull-right'p>>",
+        destroy: true,
+        "scrollX": true,
+        "aoColumnDefs": [
+            {
+                "aTargets": [6], // Column to target
+                "mRender": function (data, type, full) {
+                    // 'full' is the row's data object, and 'data' is this column's data
+                    // e.g. 'full[0]' is the comic id, and 'data' is the comic title
+                    return '<a href="https://www.ups.com/track?loc=en_US&tracknum=' + data + '&requester=WT/trackdetails" target="_blank">' + data + '</a>';
+                }
+            }
+        ],
+        'sAjaxSource': "globaldata/custcomp_dtdate_data.php?startdate=" + startdate,
+        buttons: [
+            'copyHtml5',
+            'excelHtml5'
+        ]
+    });
+    $('#modal_date').modal('hide');
+    $('#section_date').removeClass('hidden');
+    deleteAllCookies();
+}
+
 function deleteAllCookies() {
     var cookies = document.cookie.split(";");
-    debugger;
     for (var i = 0; i < cookies.length; i++) {
         var cookie = cookies[i];
         var eqPos = cookie.indexOf("=");

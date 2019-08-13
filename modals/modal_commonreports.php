@@ -1,6 +1,7 @@
 <script src="../../EasyAutocomplete-1.3.4/dist/jquery.easy-autocomplete.js" type="text/javascript"></script>
 <link href="../../EasyAutocomplete-1.3.4/dist/easy-autocomplete.css" rel="stylesheet" type="text/css"/>
 <link href="../../EasyAutocomplete-1.3.4/dist/easy-autocomplete.themes.css" rel="stylesheet" type="text/css"/>
+<link href="../../jquery-ui-1.10.3.custom.css" rel="stylesheet" type="text/css"/>
 
 
 <!--Modal to search by LP#-->
@@ -16,11 +17,11 @@
                 <div class="" style="margin-left: 15px" >
                     <label>Enter Box LP</label>
                     <input  required minlength="9" maxlength="9" name='lpnum' class='datainput selectstyle' id='lpnum' onKeyDown="if (event.keyCode === 13)
-                                getmodaldata('lpnum', 'modal_lp');"/>
+                                loaddata('lpnum', 'modal_lp');"/>
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="loaddata" type="button" class="btn btn-primary pull-left" onclick="getmodaldata('lpnum', 'modal_lp');" style="margin-bottom: 5px;">Load Data</button>
+                <button id="loaddata" type="button" class="btn btn-primary pull-left" onclick="loaddata('lpnum', 'modal_lp');" style="margin-bottom: 5px;">Load Data</button>
             </div>
         </div>
     </div>
@@ -39,11 +40,11 @@
                 <div class="" style="margin-left: 15px" >
                     <label>Enter Pick TSM Name</label>
                     <input name='picktsm' class='datainput selectstyle' id='picktsm' onKeyDown="if (event.keyCode === 13)
-                                getmodaldata('picktsm', 'modal_pick');" style="min-width: 300px;"/>
+                                loaddata('picktsm', 'modal_pick');" style="min-width: 300px;"/>
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onselect="getmodaldata('picktsm', 'modal_pick');" onclick="getmodaldata('picktsm', 'modal_pick');" style="margin-bottom: 5px;">Load Data</button>
+                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onselect="loaddata('picktsm', 'modal_pick');" onclick="loaddata('picktsm', 'modal_pick');" style="margin-bottom: 5px;">Load Data</button>
             </div>
         </div>
     </div>
@@ -62,11 +63,11 @@
                 <div class="" style="margin-left: 15px" >
                     <label>Enter Pack TSM Name</label>
                     <input name='packtsm' class='datainput selectstyle' id='packtsm' onKeyDown="if (event.keyCode === 13)
-                                getmodaldata('packtsm', 'modal_pack');" style="min-width: 300px;"/>
+                                loaddata('packtsm', 'modal_pack');" style="min-width: 300px;"/>
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onselect="getmodaldata('packtsm', 'modal_pack');" onclick="getmodaldata('packtsm', 'modal_pack');" style="margin-bottom: 5px;">Load Data</button>
+                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onselect="loaddata('packtsm', 'modal_pack');" onclick="loaddata('packtsm', 'modal_pack');" style="margin-bottom: 5px;">Load Data</button>
             </div>
         </div>
     </div>
@@ -85,11 +86,11 @@
                 <div class="" style="margin-left: 15px" >
                     <label>Enter Bill To #</label>
                     <input name='billto' class='datainput selectstyle' id='billto' onKeyDown="if (event.keyCode === 13)
-                                getmodaldata('billto', 'modal_billto');" style="min-width: 300px;"/>
+                                loaddata('billto', 'modal_billto');" style="min-width: 300px;"/>
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onclick="getmodaldata('billto', 'modal_billto');" style="margin-bottom: 5px;">Load Data</button>
+                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onclick="loaddata('billto', 'modal_billto');" style="margin-bottom: 5px;">Load Data</button>
             </div>
         </div>
     </div>
@@ -108,11 +109,11 @@
                 <div class="" style="margin-left: 15px" >
                     <label>Enter Ship To #</label>
                     <input name='shipto' class='datainput selectstyle' id='shipto' onKeyDown="if (event.keyCode === 13)
-                                getmodaldata('shipto', 'modal_shipto');" style="min-width: 300px;"/>
+                                loaddata('shipto', 'modal_shipto');" style="min-width: 300px;"/>
                 </div>
             </div>
             <div class="modal-footer" >
-                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onclick="getmodaldata('shipto', 'modal_shipto');" style="margin-bottom: 5px;">Load Data</button>
+                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onclick="loaddata('shipto', 'modal_shipto');" style="margin-bottom: 5px;">Load Data</button>
             </div>
         </div>
     </div>
@@ -141,6 +142,29 @@
     </div>
 </div>
 
+<!--Modal to search by DATE-->
+<div id="modal_date" class="modal fade " role="dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close_visible" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Search by Date</h4>
+            </div>
+            <div class="modal-body">
+                <div class="" style="margin-left: 15px" >
+                    <label>Enter Date</label>
+                    <input autocomplete="off"  name="startfiscal" id="startfiscal" class="selectstyle" style="cursor: pointer; max-width: 120px;"onKeyDown="if (event.keyCode === 13)
+                                _dt_date();"  />
+                </div>
+            </div>
+            <div class="modal-footer" >
+                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onclick="_dt_date();" style="margin-bottom: 5px;">Load Data</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
 
@@ -160,8 +184,8 @@
                 enabled: true
             },
             onClickEvent: function () {
-                //call getmodaldata function
-                getmodaldata('picktsm', 'modal_pick');
+                //call loaddata function
+                loaddata('picktsm', 'modal_pick');
             }
         },
         theme: "plate-dark"
@@ -182,8 +206,8 @@
                 enabled: true
             },
             onClickEvent: function () {
-                //call getmodaldata function
-                getmodaldata('packtsm', 'modal_pack');
+                //call loaddata function
+                loaddata('packtsm', 'modal_pack');
             }
         },
         theme: "plate-dark"
@@ -205,3 +229,6 @@
 </script>
 
 
+<script>
+    $('#startfiscal').datepicker();
+</script>

@@ -134,16 +134,6 @@
                             marker: {
                                 enabled: false
                             }
-                        },
-                        series: {
-                            cursor: 'pointer',
-                            point: {
-                                events: {
-                                    click: function () {
-                                        window.open('custcomplaintdata.php?startdate=' + this.category + '&enddate=' + this.category + '&movetype=' + this.series.name + '&formSubmit=Submit');
-                                    }
-                                }
-                            }
                         }
                     },
                     title: {
@@ -181,8 +171,7 @@
                     }, tooltip: {
                         formatter: function () {
                             return '<b>' + this.series.name + '</b><br/>' +
-                                    this.x + ': ' + Highcharts.numberFormat(this.y, 0) + '<br/>' +
-                                    'Click me for detail!';
+                                    this.x + ': ' + Highcharts.numberFormat(this.y, 0);
                         }
                     },
                     series: []
@@ -230,7 +219,6 @@
                 document.cookie = expires;
                 window.open("custcomplaintdata.php");
             });
-
             function weeklypiechart() {
                 $.ajax({
                     url: 'globaldata/graph_complaints_week_pie.php',

@@ -11,10 +11,10 @@ if (isset($_SESSION['MYUSER'])) {
     $var_whse = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
     $whsesel = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 }
-$var_item = $_GET['itemcode'];
+$var_packtsm = strtoupper($_GET['packtsm']);
 $stardate = date('Y-m-d', strtotime("-90 days"));
 $itemsql = $conn1->prepare("SELECT 
-                                                            ITEMCODE,                                                           
+                                                            ITEMCODE,
                                                             ORD_RETURNDATE,
                                                             RETURNCODE,
                                                             CONCAT(WCSNUM, '-', WONUM) AS WCSNUM,
@@ -29,11 +29,11 @@ $itemsql = $conn1->prepare("SELECT
                                                                 WHEN PACK_TSMNAME IS NULL THEN CASEPICK_TSMNAME
                                                                 ELSE PACK_TSMNAME
                                                             END AS PACK_TSMNAME,
-                                                            PICK_LOCATION,
+                                                            PACK_STATION,
                                                             CASE
-                                                                WHEN PICK_DATE IS NULL THEN CASEPICK_DATETIME
-                                                                ELSE PICK_DATE
-                                                            END AS PICK_DATE,
+                                                                WHEN PACK_DATE IS NULL THEN CASEPICK_DATETIME
+                                                                ELSE PACK_DATE
+                                                            END AS PACK_DATE,
                                                             CASE
                                                                 WHEN
                                                                     (SELECT 
@@ -61,8 +61,7 @@ $itemsql = $conn1->prepare("SELECT
                                                             custaudit.complaint_detail
                                                         WHERE
                                                             ORD_RETURNDATE >= '$stardate'
-                                                                AND PICK_WHSE = $var_whse
-                                                                AND ITEMCODE = $var_item
+                                                                AND UPPER(PACK_TSMNAME) = '$var_packtsm'
                                                         ORDER BY ORD_RETURNDATE DESC");
 $itemsql->execute();
 $item_array = $itemsql->fetchAll(pdo::FETCH_ASSOC);

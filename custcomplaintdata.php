@@ -43,33 +43,121 @@
                         <div id="commonreports"></div>
                     </div>
                 </div>
+
                 <!--Displayed data will go here-->
-                <div id="datareturn" class="hidden"></div>
-                <!--datatable for complaints by item-->
-                <section class="panel hidewrapper hidden" id="section_itemcode" style="margin-bottom: 50px; margin-top: 20px;"> 
-                    <header class="panel-heading bg bg-inverse h2">Customer Complaints by Item Code</header>
-                    <div id="tablepanel_itemcode" class="panel-body" style="background: #efefef">
-                        <div id="tablecontainer_itemcode" class="col-sm-12 ">
-                            <table id="table_itemcode" class="table table-bordered" cellspacing="0" style="font-size: 11px; font-family: Calibri;  background-color:  white;">
-                                <thead>
-                                    <tr>
-                                        <th>Complaint Date</th>
-                                        <th>Return Code</th>
-                                        <th>Invoice#</th>
-                                        <th>Ship Zone</th>
-                                        <th>Box Size</th>
-                                        <th>Tracer#</th>
-                                        <th>Pick TSM</th>
-                                        <th>Pack TSM</th>
-                                        <th>Pick Location</th>
-                                        <th>Pick Date</th>
-                                        <th>EOL?</th>
-                                    </tr>
-                                </thead>
-                            </table>
-                        </div>
+                <div id="mastercontainer">
+                    <div id="datareturn" class="hidden">
                     </div>
-                </section>
+
+                    <!--datatable for complaints by item-->
+                    <section class="panel hidewrapper hidden" id="section_itemcode" style="margin-bottom: 50px; margin-top: 20px;"> 
+                        <header class="panel-heading bg bg-inverse h2">Customer Complaints by Item Code</header>
+                        <div id="tablepanel_itemcode" class="panel-body" style="background: #efefef">
+                            <div id="tablecontainer_itemcode" class="col-sm-12 ">
+                                <table id="table_itemcode" class="table table-bordered" cellspacing="0" style="font-size: 11px; font-family: Calibri;  background-color:  white;">
+                                    <thead>
+                                        <tr>
+                                            <th>Item Code</th>
+                                            <th>Complaint Date</th>
+                                            <th>Return Code</th>
+                                            <th>Invoice#</th>
+                                            <th>Ship Zone</th>
+                                            <th>Box Size</th>
+                                            <th>Tracer#</th>
+                                            <th>Pick TSM</th>
+                                            <th>Pack TSM</th>
+                                            <th>Pick Location</th>
+                                            <th>Pick Date</th>
+                                            <th>EOL?</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!--datatable for complaints by pack TSM-->
+                    <section class="panel hidewrapper hidden" id="section_packtsm" style="margin-bottom: 50px; margin-top: 20px;"> 
+                        <header class="panel-heading bg bg-inverse h2">Complaints Data for Pack TSM</header>
+                        <div id="tablepanel_packtsm" class="panel-body" style="background: #efefef">
+                            <div id="tablecontainer_packtsm" class="col-sm-12 ">
+                                <table id="table_packtsm" class="table table-bordered" cellspacing="0" style="font-size: 11px; font-family: Calibri;  background-color:  white;">
+                                    <thead>
+                                        <tr>
+                                            <th>Item Code</th>
+                                            <th>Complaint Date</th>
+                                            <th>Return Code</th>
+                                            <th>Invoice#</th>
+                                            <th>Ship Zone</th>
+                                            <th>Box Size</th>
+                                            <th>Tracer#</th>
+                                            <th>Pick TSM</th>
+                                            <th>Pack TSM</th>
+                                            <th>Pack Station</th>
+                                            <th>Pack Date</th>
+                                            <th>EOL?</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!--datatable for complaints by pick TSM-->
+                    <section class="panel hidewrapper hidden" id="section_picktsm" style="margin-bottom: 50px; margin-top: 20px;"> 
+                        <header class="panel-heading bg bg-inverse h2">Complaints Data for Pick TSM</header>
+                        <div id="tablepanel_picktsm" class="panel-body" style="background: #efefef">
+                            <div id="tablecontainer_picktsm" class="col-sm-12 ">
+                                <table id="table_picktsm" class="table table-bordered" cellspacing="0" style="font-size: 11px; font-family: Calibri;  background-color:  white;">
+                                    <thead>
+                                        <tr>
+                                            <th>Item Code</th>
+                                            <th>Complaint Date</th>
+                                            <th>Return Code</th>
+                                            <th>Invoice#</th>
+                                            <th>Ship Zone</th>
+                                            <th>Box Size</th>
+                                            <th>Tracer#</th>
+                                            <th>Pick TSM</th>
+                                            <th>Pack TSM</th>
+                                            <th>Pick Location</th>
+                                            <th>Pick Date</th>
+                                            <th>EOL?</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!--datatable for complaints by Date-->
+                    <section class="panel hidewrapper hidden" id="section_date" style="margin-bottom: 50px; margin-top: 20px;"> 
+                        <header class="panel-heading bg bg-inverse h2">Complaints Data by Date</header>
+                        <div id="tablepanel_date" class="panel-body" style="background: #efefef">
+                            <div id="tablecontainer_date" class="col-sm-12 ">
+                                <table id="table_date" class="table table-bordered" cellspacing="0" style="font-size: 11px; font-family: Calibri;  background-color:  white;">
+                                    <thead>
+                                        <tr>
+                                            <th>Item Code</th>
+                                            <th>Complaint Date</th>
+                                            <th>Return Code</th>
+                                            <th>Invoice#</th>
+                                            <th>Ship Zone</th>
+                                            <th>Box Size</th>
+                                            <th>Tracer#</th>
+                                            <th>Pick TSM</th>
+                                            <th>Pack TSM</th>
+                                            <th>Pick Location</th>
+                                            <th>Pick Date</th>
+                                            <th>EOL?</th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
                 <!--Modal Includes-->
                 <?php
                 include_once 'modals/modal_commonreports.php ';
@@ -104,12 +192,6 @@
                 //concatenate modal id pulled from printvis.custcompl_commonreports table
                 $('#' + modal_id).modal('toggle');
             });
-
-
-
-
-
-
 
 
 

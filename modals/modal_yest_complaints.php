@@ -42,7 +42,6 @@ $YESTRETURNS_array = $YESTRETURNS->fetchAll(pdo::FETCH_ASSOC);
         <!-- Modal content-->
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close_visible" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">Yesterday's DC Complaints</h4>
             </div>
             <div class="modal-body">
@@ -64,6 +63,10 @@ $YESTRETURNS_array = $YESTRETURNS->fetchAll(pdo::FETCH_ASSOC);
                             </div>
                         </div>
                     </div>
+                </div>
+                <!--External link to detail data by date-->
+                <div class=" h4 clickable" data-postdesc="COMPDATE" data-postval="<?php echo $YESTRETURNS_array[0]['ORD_RETURNDATE']; ?>" style="cursor: pointer">
+                    <span  > View detailed data: <i class="fa fa-external-link"></i></span>
                 </div>
                 <!--start of div table-->
                 <div class="" id="divtablecontainer">
