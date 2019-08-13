@@ -134,16 +134,6 @@
                             marker: {
                                 enabled: false
                             }
-                        },
-                        series: {
-                            cursor: 'pointer',
-                            point: {
-                                events: {
-                                    click: function () {
-                                        window.open('custcomplaintdata.php?startdate=' + this.category + '&enddate=' + this.category + '&movetype=' + this.series.name + '&formSubmit=Submit');
-                                    }
-                                }
-                            }
                         }
                     },
                     title: {
@@ -181,8 +171,7 @@
                     }, tooltip: {
                         formatter: function () {
                             return '<b>' + this.series.name + '</b><br/>' +
-                                    this.x + ': ' + Highcharts.numberFormat(this.y, 0) + '<br/>' +
-                                    'Click me for detail!';
+                                    this.x + ': ' + Highcharts.numberFormat(this.y, 0);
                         }
                     },
                     series: []
@@ -223,11 +212,13 @@
                 post_val = post_val.trim();
                 document.cookie = "post-desc=" + post_desc;
                 document.cookie = "post-val=" + post_val;
-                document.cookie = "max-age=10";
-//                alert(document.cookie);
+//                document.cookie = "max-age=10";
+                var date = new Date();
+                date.setTime(date.getTime() + (30 * 1000));
+                var expires = "expires=" + date;
+                document.cookie = expires;
                 window.open("custcomplaintdata.php");
             });
-
             function weeklypiechart() {
                 $.ajax({
                     url: 'globaldata/graph_complaints_week_pie.php',

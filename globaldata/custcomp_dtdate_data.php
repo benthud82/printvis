@@ -11,10 +11,9 @@ if (isset($_SESSION['MYUSER'])) {
     $var_whse = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
     $whsesel = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 }
-$var_item = $_GET['itemcode'];
-$stardate = date('Y-m-d', strtotime("-90 days"));
+$var_date = date('Y-m-d', strtotime($_GET['startdate']));
 $itemsql = $conn1->prepare("SELECT 
-                                                            ITEMCODE,                                                           
+                                                            ITEMCODE,
                                                             ORD_RETURNDATE,
                                                             RETURNCODE,
                                                             CONCAT(WCSNUM, '-', WONUM) AS WCSNUM,
@@ -60,9 +59,7 @@ $itemsql = $conn1->prepare("SELECT
                                                         FROM
                                                             custaudit.complaint_detail
                                                         WHERE
-                                                            ORD_RETURNDATE >= '$stardate'
-                                                                AND PICK_WHSE = $var_whse
-                                                                AND ITEMCODE = $var_item
+                                                            ORD_RETURNDATE = '$var_date'
                                                         ORDER BY ORD_RETURNDATE DESC");
 $itemsql->execute();
 $item_array = $itemsql->fetchAll(pdo::FETCH_ASSOC);

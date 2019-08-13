@@ -100,138 +100,140 @@ $top_ibns_array = $top_ibns->fetchAll(pdo::FETCH_ASSOC);
         </div>
     </div>
     <div class="portlet-body">
-        <!--TOP WQSP-->
-        <div class="col-md-4 ">
-            <!-- BEGIN Portlet PORTLET-->
-            <div class="portlet box blue-hoki">
-                <div class="portlet-title">
-                    <div class="caption">
-                        <i class="fa fa-exclamation-circle"></i>Top WQSP Impacts </div>
-                </div>
-                <?php if (count($top_wqsp_array) === 0) { ?>
-                    <div class="portlet-body">
-                        <!--No records-->
-                        <div class="h4">No WQSP complaints in last quarter!</div>
-                    </div>  <?php
-                } else {
-                    ?>
-                    <div class="portlet-body">
-                        <!--start of div table-->
-                        <div class="" id="divtable_top_wqsp" style="padding-bottom: 51px">
-                            <div  class='col-sm-12 col-md-12 col-lg-12 print-1wide'  style="float: none;">
-                                <div class='widget-content widget-table'  style="position: relative;">
-                                    <div class='divtable'>
-                                        <div id="" class='divtableheader' style="padding-top">
-                                            <div class='divtabletitle width20' >Item</div>
-                                            <div class='divtabletitle width60' >Description</div>
-                                            <div class='divtabletitle width20' >Total Complaints</div>
-                                        </div>
-                                        <?php
-                                        foreach ($top_wqsp_array as $key => $value) {
-                                            ?>
-                                            <div id="<?php echo $top_wqsp_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_wqsp_array[$key]['ITEMCODE']; ?>">
-                                                <div class='divtabledata width20' ><?php echo $top_wqsp_array[$key]['ITEMCODE']; ?></div>
-                                                <div class='divtabledata width60' style="text-align: left;"><?php echo $top_wqsp_array[$key]['ITEM_DESC']; ?></div>
-                                                <div class='divtabledata width20' ><?php echo $top_wqsp_array[$key]['TRENDCOUNT']; ?></div>
-
+        <div class="row">
+            <!--TOP WQSP-->
+            <div class="col-md-4 ">
+                <!-- BEGIN Portlet PORTLET-->
+                <div class="portlet box blue-hoki">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="fa fa-exclamation-circle"></i>Top WQSP Impacts </div>
+                    </div>
+                    <?php if (count($top_wqsp_array) === 0) { ?>
+                        <div class="portlet-body">
+                            <!--No records-->
+                            <div class="h4">No WQSP complaints in last quarter!</div>
+                        </div>  <?php
+                    } else {
+                        ?>
+                        <div class="portlet-body">
+                            <!--start of div table-->
+                            <div class="" id="divtable_top_wqsp" style="padding-bottom: 51px">
+                                <div  class='col-sm-12 col-md-12 col-lg-12 print-1wide'  style="float: none;">
+                                    <div class='widget-content widget-table'  style="position: relative;">
+                                        <div class='divtable'>
+                                            <div id="" class='divtableheader' style="padding-top">
+                                                <div class='divtabletitle width20' >Item</div>
+                                                <div class='divtabletitle width60' >Description</div>
+                                                <div class='divtabletitle width20' >Total Complaints</div>
                                             </div>
-                                        <?php } ?>
+                                            <?php
+                                            foreach ($top_wqsp_array as $key => $value) {
+                                                ?>
+                                                <div id="<?php echo $top_wqsp_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_wqsp_array[$key]['ITEMCODE']; ?>">
+                                                    <div class='divtabledata width20' ><?php echo $top_wqsp_array[$key]['ITEMCODE']; ?></div>
+                                                    <div class='divtabledata width60' style="text-align: left;"><?php echo $top_wqsp_array[$key]['ITEM_DESC']; ?></div>
+                                                    <div class='divtabledata width20' ><?php echo $top_wqsp_array[$key]['TRENDCOUNT']; ?></div>
+
+                                                </div>
+                                            <?php } ?>
+                                        </div>
                                     </div>
-                                </div>
+                                </div>    
                             </div>    
                         </div>    
-                    </div>    
-                <?php } ?>
+                    <?php } ?>
+                </div>    
             </div>    
-        </div>    
 
-        <!--TOP WISP-->
-        <div class="col-md-4 ">
-            <!-- BEGIN Portlet PORTLET-->
-            <div class="portlet box blue-hoki">
-                <div class="portlet-title">
-                    <div class="caption">
-                        <i class="fa fa-exclamation-circle"></i>Top WISP Impacts </div>
-                </div>
-                <?php if (count($top_wisp_array) === 0) { ?>
-                    <div class="portlet-body">
-                        <!--No records-->
-                        <div class="h4">No WISP complaints in last quarter!</div>
-                    </div>  <?php
-                } else {
-                    ?>
-                    <div class="portlet-body">
-                        <!--start of div table-->
-                        <div class="" id="divtable_top_wqsp" style="padding-bottom: 51px">
-                            <div  class='col-sm-12 col-md-12 col-lg-12 print-1wide'  style="float: none;">
-                                <div class='widget-content widget-table'  style="position: relative;">
-                                    <div class='divtable'>
-                                        <div id="" class='divtableheader' style="padding-top">
-                                            <div class='divtabletitle width20' >Item</div>
-                                            <div class='divtabletitle width60' >Description</div>
-                                            <div class='divtabletitle width20' >Total Complaints</div>
-                                        </div>
-                                        <?php
-                                        foreach ($top_wisp_array as $key => $value) {
-                                            ?>
-                                            <div id="<?php echo $top_wisp_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_wisp_array[$key]['ITEMCODE']; ?>">
-                                                <div class='divtabledata width20' ><?php echo $top_wisp_array[$key]['ITEMCODE']; ?></div>
-                                                <div class='divtabledata width60' style="text-align: left;"><?php echo $top_wisp_array[$key]['ITEM_DESC']; ?></div>
-                                                <div class='divtabledata width20' ><?php echo $top_wisp_array[$key]['TRENDCOUNT']; ?></div>
-
+            <!--TOP WISP-->
+            <div class="col-md-4 ">
+                <!-- BEGIN Portlet PORTLET-->
+                <div class="portlet box blue-hoki">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="fa fa-exclamation-circle"></i>Top WISP Impacts </div>
+                    </div>
+                    <?php if (count($top_wisp_array) === 0) { ?>
+                        <div class="portlet-body">
+                            <!--No records-->
+                            <div class="h4">No WISP complaints in last quarter!</div>
+                        </div>  <?php
+                    } else {
+                        ?>
+                        <div class="portlet-body">
+                            <!--start of div table-->
+                            <div class="" id="divtable_top_wqsp" style="padding-bottom: 51px">
+                                <div  class='col-sm-12 col-md-12 col-lg-12 print-1wide'  style="float: none;">
+                                    <div class='widget-content widget-table'  style="position: relative;">
+                                        <div class='divtable'>
+                                            <div id="" class='divtableheader' style="padding-top">
+                                                <div class='divtabletitle width20' >Item</div>
+                                                <div class='divtabletitle width60' >Description</div>
+                                                <div class='divtabletitle width20' >Total Complaints</div>
                                             </div>
-                                        <?php } ?>
+                                            <?php
+                                            foreach ($top_wisp_array as $key => $value) {
+                                                ?>
+                                                <div id="<?php echo $top_wisp_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_wisp_array[$key]['ITEMCODE']; ?>">
+                                                    <div class='divtabledata width20' ><?php echo $top_wisp_array[$key]['ITEMCODE']; ?></div>
+                                                    <div class='divtabledata width60' style="text-align: left;"><?php echo $top_wisp_array[$key]['ITEM_DESC']; ?></div>
+                                                    <div class='divtabledata width20' ><?php echo $top_wisp_array[$key]['TRENDCOUNT']; ?></div>
+
+                                                </div>
+                                            <?php } ?>
+                                        </div>
                                     </div>
-                                </div>
+                                </div>    
                             </div>    
                         </div>    
-                    </div>    
-                <?php } ?>
+                    <?php } ?>
+                </div>    
             </div>    
-        </div>    
 
-        <!--TOP IBNS-->
-        <div class="col-md-4 ">
-            <!-- BEGIN Portlet PORTLET-->
-            <div class="portlet box blue-hoki">
-                <div class="portlet-title">
-                    <div class="caption">
-                        <i class="fa fa-exclamation-circle"></i>Top IBNS Impacts </div>
-                </div>
-                <?php if (count($top_ibns_array) === 0) { ?>
-                    <div class="portlet-body">
-                        <!--No records-->
-                        <div class="h4">No IBNS complaints in last quarter!</div>
-                    </div>  <?php
-                } else {
-                    ?>
-                    <div class="portlet-body">
-                        <!--start of div table-->
-                        <div class="" id="divtable_top_wqsp" style="padding-bottom: 51px">
-                            <div  class='col-sm-12 col-md-12 col-lg-12 print-1wide'  style="float: none;">
-                                <div class='widget-content widget-table'  style="position: relative;">
-                                    <div class='divtable'>
-                                        <div id="" class='divtableheader' style="padding-top">
-                                            <div class='divtabletitle width20' >Item</div>
-                                            <div class='divtabletitle width60' >Description</div>
-                                            <div class='divtabletitle width20' >Total Complaints</div>
-                                        </div>
-                                        <?php
-                                        foreach ($top_ibns_array as $key => $value) {
-                                            ?>
-                                            <div id="<?php echo $top_ibns_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_ibns_array[$key]['ITEMCODE']; ?>">
-                                                <div class='divtabledata width20' ><?php echo $top_ibns_array[$key]['ITEMCODE']; ?></div>
-                                                <div class='divtabledata width60' style="text-align: left;"><?php echo $top_ibns_array[$key]['ITEM_DESC']; ?></div>
-                                                <div class='divtabledata width20' ><?php echo $top_ibns_array[$key]['TRENDCOUNT']; ?></div>
-
+            <!--TOP IBNS-->
+            <div class="col-md-4 ">
+                <!-- BEGIN Portlet PORTLET-->
+                <div class="portlet box blue-hoki">
+                    <div class="portlet-title">
+                        <div class="caption">
+                            <i class="fa fa-exclamation-circle"></i>Top IBNS Impacts </div>
+                    </div>
+                    <?php if (count($top_ibns_array) === 0) { ?>
+                        <div class="portlet-body">
+                            <!--No records-->
+                            <div class="h4">No IBNS complaints in last quarter!</div>
+                        </div>  <?php
+                    } else {
+                        ?>
+                        <div class="portlet-body">
+                            <!--start of div table-->
+                            <div class="" id="divtable_top_wqsp" style="padding-bottom: 51px">
+                                <div  class='col-sm-12 col-md-12 col-lg-12 print-1wide'  style="float: none;">
+                                    <div class='widget-content widget-table'  style="position: relative;">
+                                        <div class='divtable'>
+                                            <div id="" class='divtableheader' style="padding-top">
+                                                <div class='divtabletitle width20' >Item</div>
+                                                <div class='divtabletitle width60' >Description</div>
+                                                <div class='divtabletitle width20' >Total Complaints</div>
                                             </div>
-                                        <?php } ?>
+                                            <?php
+                                            foreach ($top_ibns_array as $key => $value) {
+                                                ?>
+                                                <div id="<?php echo $top_ibns_array[$key]['ITEMCODE']; ?>"class='divtablerow itemdetailexpand greyhover batchclick' data-date="<?php echo $top_ibns_array[$key]['ITEMCODE']; ?>">
+                                                    <div class='divtabledata width20' ><?php echo $top_ibns_array[$key]['ITEMCODE']; ?></div>
+                                                    <div class='divtabledata width60' style="text-align: left;"><?php echo $top_ibns_array[$key]['ITEM_DESC']; ?></div>
+                                                    <div class='divtabledata width20' ><?php echo $top_ibns_array[$key]['TRENDCOUNT']; ?></div>
+
+                                                </div>
+                                            <?php } ?>
+                                        </div>
                                     </div>
-                                </div>
+                                </div>    
                             </div>    
                         </div>    
-                    </div>    
-                <?php } ?>
+                    <?php } ?>
+                </div>    
             </div>    
         </div>    
     </div>    
