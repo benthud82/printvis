@@ -21,14 +21,14 @@ $itemsql = $conn1->prepare("SELECT
                                                             SHIPZONE,
                                                             BOXSIZE,
                                                             TRACERNUM,
-                                                            CASE
+                                                            UPPER(CASE
                                                                 WHEN PICK_TSM IS NULL THEN CASEPICK_TSMNAME
                                                                 ELSE PICK_TSM
-                                                            END AS PICK_TSM,
-                                                            CASE
+                                                            END) AS PICK_TSM,
+                                                            UPPER(CASE
                                                                 WHEN PACK_TSMNAME IS NULL THEN CASEPICK_TSMNAME
                                                                 ELSE PACK_TSMNAME
-                                                            END AS PACK_TSMNAME,
+                                                            END) AS PACK_TSMNAME,
                                                             PICK_LOCATION,
                                                             CASE
                                                                 WHEN PICK_DATE IS NULL THEN CASEPICK_DATETIME

@@ -22,6 +22,11 @@
         <script src="../app.min.js" type="text/javascript"></script>
         <script src="../jquery.counterup.min.js" type="text/javascript"></script>
         <script src="../jquery.waypoints.min.js" type="text/javascript"></script>
+        <style>
+            td {
+                white-space: nowrap;
+            }
+        </style>
 
         <?php
         include_once 'sessioninclude.php';
