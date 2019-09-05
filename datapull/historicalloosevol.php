@@ -1,6 +1,5 @@
 <?php
 
-
 include '../../globalincludes/usa_asys.php';
 include '../../connections/conn_printvis.php';
 ini_set('max_execution_time', 99999);
@@ -11,7 +10,7 @@ $today = date('Y-m-d');
 $startday = date('Y-m-d', (strtotime('-5 days', strtotime($today))));
 $startjday = _gregdatetoyyddd($startday);
 
-$whsearray = array(2,7,3, 6, 9);
+$whsearray = array(2, 7, 3, 6, 9);
 //$whsearray = array(9);  //still need to do 3,6,9 then all history has been loaded
 
 foreach ($whsearray as $whse) {
@@ -23,7 +22,7 @@ foreach ($whsearray as $whse) {
     $sqldelete4 = "TRUNCATE  printvis.hist_loosevol_merge ";
     $querydelete4 = $conn1->prepare($sqldelete4);
     $querydelete4->execute();
-    
+
 //Delete from casebatchstarttime table where batches are older than yesterday's cutoff time
     $sqldelete4 = "TRUNCATE  printvis.hist_loosevol ";
     $querydelete4 = $conn1->prepare($sqldelete4);
@@ -273,8 +272,8 @@ foreach ($whsearray as $whse) {
         $query->execute();
         $maxrange += 4000;
     } while ($counter <= $rowcount);
-    
-    
+
+
 
     $sqlinsert = "INSERT INTO printvis.hist_loosevol_summary(
 SELECT 
@@ -295,7 +294,26 @@ GROUP BY hist_whse , hist_build , hist_equip , predicted_availdate , predicted_a
 on duplicate key update loosevol_lines=VALUES(loosevol_lines),loosevol_cube=VALUES(loosevol_cube)";
     $queryinsert = $conn1->prepare($sqlinsert);
     $queryinsert->execute();
-    
-    
-    
 }
+
+//update first time pick table
+$sqlinsert2 = "INSERT IGNORE INTO printvis.tsm_firstpick
+                            SELECT 
+                                UserDescription, MIN(DateTimeFirstPick)
+                            FROM
+                                printvis.voicepicks_hist
+                            WHERE
+                                UserDescription <> ' ' 
+                            GROUP BY UserDescription ";
+$queryinsert2 = $conn1->prepare($sqlinsert2);
+$queryinsert2->execute();
+
+//update first time pack table
+$sqlinsert3 = "INSERT IGNORE INTO printvis.tsm_firstpack 
+SELECT      
+cartstart_tsm, MIN(dateaddedtotable) 
+FROM     printvis.allcart_history 
+GROUP BY cartstart_tsm
+ ";
+$queryinsert3 = $conn1->prepare($sqlinsert3);
+$queryinsert3->execute();
