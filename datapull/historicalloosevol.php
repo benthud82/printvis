@@ -299,12 +299,12 @@ on duplicate key update loosevol_lines=VALUES(loosevol_lines),loosevol_cube=VALU
 //update first time pick table
 $sqlinsert2 = "INSERT IGNORE INTO printvis.tsm_firstpick
                             SELECT 
-                                UserDescription, MIN(DateTimeFirstPick)
+                                ReserveUSerID, MIN(DATE(DateTimeFirstPick))
                             FROM
                                 printvis.voicepicks_hist
                             WHERE
                                 UserDescription <> ' ' 
-                            GROUP BY UserDescription ";
+                            GROUP BY ReserveUSerID";
 $queryinsert2 = $conn1->prepare($sqlinsert2);
 $queryinsert2->execute();
 
