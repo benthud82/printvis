@@ -25,6 +25,9 @@
         <section id="content"> 
             <section class="main padder"  style="padding-bottom: 75px; padding-top: 75px;"> 
                 <?php include_once 'authority/auth_shipzone.php'; ?>
+                <!--List any shipzones that are missing-->
+                <div id="err_shipzones"></div>
+                <!--List of ship zones-->
                 <div id="shipzonelist"></div>
             </section>
         </section>
@@ -34,6 +37,7 @@
             $("#shipzones").addClass('active');
 
             $(document).ready(function () {
+                err_shipzone();
                 //call function to refresh shipzone UL list
                 shipzone_ul_list();
             });
@@ -91,27 +95,41 @@
                 });
             }
 
+            function gettable(shipzone) {
+                $('#modal_addnewshipzone').modal('toggle');
+                if (typeof shipzone !== 'undefined') {
+                    $('#addshipzone_shipzone').val(shipzone);
+                }
+            }
+
+            function err_shipzone() {
+                $.ajax({
+                    url: 'globaldata/errors_shipzone.php',
+                    type: 'POST',
+                    dataType: 'html',
+                    success: function (ajaxresult) {
+                        $("#err_shipzones").html(ajaxresult);
+                    }
+                });
+            }
+
             $(document).on("click touchstart", ".del_shipzone", function (e) {
                 var currank = $(this).attr('data-currentrank');
                 $('#modal_deleteshipzone').modal('toggle');
-                 $('#delete_shipzone').val(currank);
+                $('#delete_shipzone').val(currank);
             });
-            
-            $(document).on("click touchstart", "#addshipzone", function (e) {
-                $('#modal_addnewshipzone').modal('toggle');
-            });
-            
+
             $(document).on("click touchstart", ".mod_shipzone", function (e) {
                 $('#modal_modifyshipzone').modal('toggle');
                 debugger;
                 var shipzone = $(this).attr('data-shipzone');
                 var printcut = $(this).attr('data-printcut');
                 var truckpull = $(this).attr('data-truckpull');
-                
-                  $('#modify_shipzone').val(shipzone);
-                  $('#modify_print').val(printcut);
-                  $('#modify_truck').val(truckpull);
-                
+
+                $('#modify_shipzone').val(shipzone);
+                $('#modify_print').val(printcut);
+                $('#modify_truck').val(truckpull);
+
             });
 
 

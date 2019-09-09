@@ -31,3 +31,7 @@ $sql = "INSERT IGNORE INTO printvis.printcutoff ($columns) VALUES ($values) ";
 $query = $conn1->prepare($sql);
 $query->execute();
 
+
+//update badges
+include '../datapull/badges_updateshipzone.php';
+

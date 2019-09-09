@@ -46,6 +46,7 @@
             data: formData,
             success: function (result) {
                 $('#modal_deleteshipzone').modal('hide');
+                err_shipzone();
                 shipzone_ul_list();
             }
         });

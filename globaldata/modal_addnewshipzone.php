@@ -42,12 +42,6 @@
 
 <script>
 
-
-
-
-
-
-    //post add wager to table
     $(document).on("click", "#btn_addshipzone", function (event) {
         event.preventDefault();
         debugger;
@@ -63,6 +57,7 @@
             data: formData,
             success: function (result) {
                 $('#modal_addnewshipzone').modal('hide');
+                err_shipzone();
                 shipzone_ul_list();
             }
         });
