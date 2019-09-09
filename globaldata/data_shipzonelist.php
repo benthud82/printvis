@@ -23,7 +23,7 @@ $shipzonesql = $conn1->prepare("SELECT
                                                                     cutoff_zone AS ZONE,
                                                                     cutoff_time AS TIME_PRINT,
                                                                     cutoff_truck AS TIME_TRUCK,
-                                                                    cutoff_rank AS RANK
+                                                                    cutoff_rank AS CUT_RANK
                                                                 FROM
                                                                     printvis.printcutoff
                                                                 WHERE
@@ -34,12 +34,12 @@ $shipzone_array = $shipzonesql->fetchAll(pdo::FETCH_ASSOC);
 ?>
 <ul id="sortable" class="col-md-6">
     <?php foreach ($shipzone_array as $key => $value) { ?>
-        <li class="ul_shipzone" data-currentrank="<?php echo $shipzone_array[$key]['RANK'] ?>"">
+        <li class="ul_shipzone" data-currentrank="<?php echo $shipzone_array[$key]['CUT_RANK'] ?>">
             <span style="margin-left: 10px;">Ship Zone: <?php echo $shipzone_array[$key]['ZONE'] ?></span>
             <span style="margin-left: 10px;">Print Cutoff: <?php echo date('H:i', strtotime($shipzone_array[$key]['TIME_PRINT'])); ?></span>
             <span style="margin-left: 10px;">Truck Pull Time: <?php echo date('H:i', strtotime($shipzone_array[$key]['TIME_TRUCK'])); ?></span>
-            <span style="margin-left: 10px;">Rank: <?php echo intval($shipzone_array[$key]['RANK']) ?></span>
-            <i class="fa fa-close pull-right del_shipzone" style="cursor: pointer;" data-toggle='tooltip' title='Click to Delete Ship Zone' data-placement='top' data-container='body' data-currentrank="<?php echo $shipzone_array[$key]['RANK'] ?>" ></i>
+            <span style="margin-left: 10px;">Rank: <?php echo intval($shipzone_array[$key]['CUT_RANK']) ?></span>
+            <i class="fa fa-close pull-right del_shipzone" style="cursor: pointer;" data-toggle='tooltip' title='Click to Delete Ship Zone' data-placement='top' data-container='body' data-currentrank="<?php echo $shipzone_array[$key]['CUT_RANK'] ?>" ></i>
             <i class="fa fa-pencil pull-right mod_shipzone " style="cursor: pointer;" data-toggle='tooltip' title='Click to Edit this Ship Zone' data-placement='top' data-container='body'  data-shipzone="<?php echo $shipzone_array[$key]['ZONE'] ?>" data-printcut="<?php echo $shipzone_array[$key]['TIME_PRINT'] ?>"data-truckpull="<?php echo $shipzone_array[$key]['TIME_TRUCK'] ?>"></i>
         </li>
     <?php } ?>

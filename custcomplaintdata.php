@@ -202,14 +202,14 @@
 
         </script>
         <script>
-            (function ($) {
-                $(document).ready(function () {
-                    $("#side-menu-content").mCustomScrollbar({
-                        theme: "rounded-dots",
-                        scrollInertia: 800
-                    });
-                });
-            })(jQuery);
+//            (function ($) {
+//                $(document).ready(function () {
+//                    $("#side-menu-content").mCustomScrollbar({
+//                        theme: "rounded-dots",
+//                        scrollInertia: 800
+//                    });
+//                });
+//            })(jQuery);
         </script>
     </body>
 </html>

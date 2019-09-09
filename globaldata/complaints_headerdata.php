@@ -76,7 +76,8 @@ $precent = ($hdr_percent_array[0]['PERCENTACC'] * 100);
 
 
 //trend analysis
-$hdr_trend = $conn1->prepare("SELECT 
+$hdr_trend = $conn1->prepare("SELECT      CONCAT(YEAR(ORD_RETURNDATE),
+                                                                        WEEK(ORD_RETURNDATE)),
                                                               COUNT(*) as TRENDCOUNT
                                                                 FROM
                                                                     custaudit.custreturns
@@ -89,7 +90,8 @@ $hdr_trend = $conn1->prepare("SELECT
                                                                         AND YEARWEEK(ORD_RETURNDATE) >= YEARWEEK(CURDATE() - INTERVAL 13 WEEK)
                                                                 GROUP BY CONCAT(YEAR(ORD_RETURNDATE),
                                                                         WEEK(ORD_RETURNDATE))
-                                                                ORDER BY ORD_RETURNDATE");
+                                                                ORDER BY CONCAT(YEAR(ORD_RETURNDATE),
+                                                                        WEEK(ORD_RETURNDATE))");
 $hdr_trend->execute();
 $hdr_trend_array = $hdr_trend->fetchAll(pdo::FETCH_COLUMN);
 $trendarraycount = count($hdr_trend_array);

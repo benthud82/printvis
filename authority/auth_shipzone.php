@@ -16,7 +16,7 @@ $auth_mod = intval($autharray[0]['auth_shipzones']);
             <p> You are authorized to modify ship zone cutoff priorities. </p>
             <div class="row">
                 <div class="col-md-3 col-sm-6 col-xs-12 col-lg-2 col-xl-2">
-                    <button id="addshipzone" type="button" class="btn btn-primary" onclick="gettable();">Add New Ship Zone</button>
+                    <button id="addshipzone_main" type="button" class="btn btn-primary" onclick="gettable();">Add New Ship Zone</button>
                 </div>
             </div>
         <?php } else {
