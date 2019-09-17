@@ -596,7 +596,7 @@ $sql_looselines_taskpred = $conn1->prepare("INSERT INTO printvis.taskpred
                                                                                                 printvis.openputaway_logtime_hist
                                                                                                 JOIN printvis.log_equip on openputaway_logtime_log = logequip_log and logequip_whse = openputaway_logtime_whse
                                                                                             WHERE
-                                                                                                openputaway_logtime_whse in (6,3)
+                                                                                                openputaway_logtime_whse in (6,3,7,9)
                                                                                                     AND DATE(openputaway_logtime_datetime) = CURDATE()
                                                                                                     and logequip_equip = 'CRT'
                                                                                                     ON DUPLICATE KEY UPDATE taskpred_mintime = values(taskpred_mintime),taskpred_maxtime = values(taskpred_maxtime)");
