@@ -30,6 +30,7 @@ $unscannedsql = $conn1->prepare("SELECT
                                                                             etput_prevbatch,                                                                           
                                                                             etput_timedif,
                                                                              etput_breaklunch,
+                                                                             etput_path,
                                                                             case when etput_difbatch = 1 then 'YES' else 'NO' end as etput_difbatch
                                                                         FROM
                                                                             printvis.elapsedtime_put

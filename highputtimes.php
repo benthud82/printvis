@@ -98,6 +98,7 @@
                                                 <th>Previous Log</th>
                                                 <th>Minute Difference</th>
                                                 <th>Break/Lunch</th>
+                                                <th>User/System</th>
                                                 <th data-toggle='tooltip' title='Was elapsed time between end of one log and start of a different log?' data-placement='top' data-container='body'>New Log?</th>
                                             </tr>
                                         </thead>
