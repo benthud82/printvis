@@ -116,7 +116,7 @@ foreach ($whsearray as $whsesel) {
             $temp_openputaway_item = $mindaysarray[$counter]['EAITEM'];
             $temp_openputaway_trans = $mindaysarray[$counter]['EATRN#'];
             $temp_openputaway_status = $mindaysarray[$counter]['EASTAT'];
-            $temp_openputaway_quantity = $mindaysarray[$counter]['EATRNQ'];
+            $temp_openputaway_quantity = $mindaysarray[$counter]['EATRNQ'];            
             $temp_openputaway_location = substr($mindaysarray[$counter]['EATLOC'], 0, 6);
             $temp_openputaway_log = $mindaysarray[$counter]['EALOG#'];
             $temp_openputaway_transdate = $mindaysarray[$counter]['EATRND'];
@@ -125,6 +125,9 @@ foreach ($whsearray as $whsesel) {
             $temp_openputaway_type = $mindaysarray[$counter]['LOPRIM'];
             $temp_openputaway_casehandle = $mindaysarray[$counter]['CASEHANDLE'];
             $temp_openputaway_eachhandle = $mindaysarray[$counter]['EACHHANDLE'];
+            if ($temp_openputaway_eachhandle >= 50) {
+                $temp_openputaway_eachhandle = 50;
+            }
             $temp_openputaway_lot = $mindaysarray[$counter]['EASP12'];
             $temp_openputaway_expiry = $mindaysarray[$counter]['EAEXPD'];
             //STOPKEEP
