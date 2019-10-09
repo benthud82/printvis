@@ -97,7 +97,7 @@ foreach ($whsearray as $whsesel) {
     $querydelete2 = $conn1->prepare($sqldelete2);
     $querydelete2->execute();
 
-    $printhourmin = intval(date('Hi', strtotime('-200 minutes')));  //this is local to the DC because of timezone set.
+    $printhourmin = intval(date('Hi', strtotime('-20 minutes')));  //this is local to the DC because of timezone set.
     $printhourmin_colon = (date('H:i', strtotime('-20 minutes')));  //this is local to the DC because of timezone set.
     $todayjdate = _gregdatetoyyddd($today);
     $printlimiter = "and PBPTJD = $todayjdate and PBPTHM >= $printhourmin";
