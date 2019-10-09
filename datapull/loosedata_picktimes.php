@@ -3,32 +3,39 @@
 //calculates time needed to pick each batch
 
 include '../../globalincludes/usa_asys.php';
+include '../../globalincludes/newcanada_asys.php';
 include '../../connections/conn_printvis.php';
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
 
-function _ftpupload($ftpfilename,$ftpwhse)
-{
-	//* Transfer file to FTP server *//
-	$serverarray = array(2=>"10.1.112.199",3=>"10.1.22.212",6=>"10.1.17.208",7=>"10.1.18.194",9=>"10.1.16.206",11=>"10.10.200.209");
-	$server = $serverarray[$ftpwhse];
-	//$server = "10.1.16.206";
-	$ftp_user_name = "anonymous";
-	$ftp_user_pass = "anonymous@hsi.com";
-	$dest = "$ftpfilename";
-	$source = "./exports/$ftpfilename";
-	$connection = ftp_connect($server);
-	$login = ftp_login($connection, $ftp_user_name, $ftp_user_pass);
-	if (!$connection || !$login) { die('Connection attempt failed!'); }
-	//echo "<br /><br />Uploading $ftpfilename for Whse $ftpwhse<br /><br />";
-	$upload = ftp_put($connection, $dest, $source, FTP_ASCII);
-	if (!$upload) { echo 'FTP upload failed!'; } else { echo'FTP Succeeded!';}
-	print_r(error_get_last());
-	ftp_close($connection); 
+function _ftpupload($ftpfilename, $ftpwhse) {
+    //* Transfer file to FTP server *//
+    $serverarray = array(2 => "10.1.112.199", 3 => "10.1.22.212", 6 => "10.1.17.208", 7 => "10.1.18.194", 9 => "10.1.16.206", 11 => "10.10.200.209");
+    $server = $serverarray[$ftpwhse];
+    //$server = "10.1.16.206";
+    $ftp_user_name = "anonymous";
+    $ftp_user_pass = "anonymous@hsi.com";
+    $dest = "$ftpfilename";
+    $source = "./exports/$ftpfilename";
+    $connection = ftp_connect($server);
+    $login = ftp_login($connection, $ftp_user_name, $ftp_user_pass);
+    if (!$connection || !$login) {
+        die('Connection attempt failed!');
+    }
+    //echo "<br /><br />Uploading $ftpfilename for Whse $ftpwhse<br /><br />";
+    $upload = ftp_put($connection, $dest, $source, FTP_ASCII);
+    if (!$upload) {
+        echo 'FTP upload failed!';
+    } else {
+        echo'FTP Succeeded!';
+    }
+    print_r(error_get_last());
+    ftp_close($connection);
 }
 
-$whsearray = array(2, 3, 6, 7, 9);
+$whsearray = array(11, 2, 3, 6, 7, 9);
+
 //$whsearray = array(6);
 $today = date('Y-m-d');
 $dayofweek = date('w', strtotime($today));
@@ -66,6 +73,19 @@ $col_linespicked_hist = 'Pick_ID, Whse, Batch_Num, Location, ItemCode, DateTimeF
 
 
 foreach ($whsearray as $whsesel) {
+
+    switch ($whsesel) {
+        case 11:
+            $connection = $aseriesconn_can;
+            $schema = 'ARCPCORDTA';
+            break;
+
+        default:
+            $connection = $aseriesconn;
+            $schema = 'HSIPCORDTA';
+            break;
+    }
+
     include '../timezoneset.php';
     include '../../globalincludes/voice_' . $whsesel . '.php';
     $todaydatetime = date('Y-m-d H:i:s');
@@ -77,13 +97,13 @@ foreach ($whsearray as $whsesel) {
     $querydelete2 = $conn1->prepare($sqldelete2);
     $querydelete2->execute();
 
-    $printhourmin = intval(date('Hi', strtotime('-20 minutes')));  //this is local to the DC because of timezone set.
+    $printhourmin = intval(date('Hi', strtotime('-200 minutes')));  //this is local to the DC because of timezone set.
     $printhourmin_colon = (date('H:i', strtotime('-20 minutes')));  //this is local to the DC because of timezone set.
     $todayjdate = _gregdatetoyyddd($today);
     $printlimiter = "and PBPTJD = $todayjdate and PBPTHM >= $printhourmin";
 
 //pull in all loose lines and write to temporary table to join later with pickprediction_loosepickmap table
-    $sql_looselines = $aseriesconn->prepare("SELECT
+    $sql_looselines = $connection->prepare("SELECT
                                                                             PDWHSE, 
                                                                             PDWCS#,
                                                                             PDCART, 
@@ -98,19 +118,18 @@ foreach ($whsearray as $whsesel) {
                                                                                 then 0 
                                                                                 else MIN(LOONHD, (PDPCKS/PDPKGU)) end as UNITS,
                                                                            CASE WHEN MIN(LOONHD, (PDPCKS/PDPKGU)) = LOONHD and MIN(LOONHD, (PDPCKS/PDPKGU)) <> (PDPCKS/PDPKGU) THEN 1 else 0 end as PREDSHORT,
-                                                                            (SELECT sum(case when PCEWCP <> ' ' then 1 else 0 end) FROM HSIPCORDTA.NPFCPC where PCWHSE in(0,$whsesel) and PCITEM = PDITEM ) as WATCHCOUNT, 
+                                                                            (SELECT sum(case when PCEWCP <> ' ' then 1 else 0 end) FROM $schema.NPFCPC where PCWHSE in(0,$whsesel) and PCITEM = PDITEM ) as WATCHCOUNT, 
                                                                             IMLOCT as LOCTYPE,
                                                                             LMTIER,
                                                                             CASE WHEN PDFL11 = 'C' then 'COLGATE' else ' ' end as COLGATE
-                                                                        FROM HSIPCORDTA.NOTWPD  
-                                                                            JOIN HSIPCORDTA.NPFIMS on IMITEM = PDITEM   
-                                                                            JOIN HSIPCORDTA.NPFLSM on PDWHSE = LMWHSE and LMITEM = PDITEM and LMLOC# = PDLOC# 
-                                                                            JOIN HSIPCORDTA.NOTWPB on PDWCS# = PBWCS# and PDWKNO = PBWKNO and PBBOX# = PDBOX#
-                                                                            JOIN HSIPCORDTA.NPFLOC on PDWHSE = LOWHSE and LOITEM = PDITEM and LOLOC# = PDLOC# 
+                                                                        FROM $schema.NOTWPD  
+                                                                            JOIN $schema.NPFIMS on IMITEM = PDITEM   
+                                                                            JOIN $schema.NPFLSM on PDWHSE = LMWHSE and LMITEM = PDITEM and LMLOC# = PDLOC# 
+                                                                            JOIN $schema.NOTWPB on PDWCS# = PBWCS# and PDWKNO = PBWKNO and PBBOX# = PDBOX#
+                                                                            JOIN $schema.NPFLOC on PDWHSE = LOWHSE and LOITEM = PDITEM and LOLOC# = PDLOC# 
                                                                         WHERE PDWHSE = $whsesel and 
                                                                             PDBXSZ <> 'CSE' and 
                                                                             PDCART > 0 and 
-                                                                   --         PDCART = 17370 and
                                                                             PDLOC# not like '%SDS%' and 
                                                                             PDLOC# not like 'M%'
                                                                             $printlimiter");
@@ -305,7 +324,13 @@ FROM
     printvis.pm_voicetimes ON loose_picktype = voice_function and loose_whse = voice_whse
     LEFT JOIN printvis.printcutoff on substr(loose_shipzone,1,2) = substr(cutoff_zone,1,2)  and cutoff_DC = loose_whse
     WHERE loose_whse = $whsesel
-GROUP BY loose_whse , loose_cart , SUBSTR(loose_loc, 1, 3) , loose_main) 
+GROUP BY     loose_whse,
+    loose_cart,
+    SUBSTR(loose_loc, 1, 3),
+    loose_main,
+    loose_picktype,  
+    loose_printdatetime,
+    loose_recdatetime)
                                                                         ON DUPLICATE key update 
                                                                         aisletime_count_line=values(aisletime_count_line), 
                                                                         aisletime_count_unit=values(aisletime_count_unit), 
@@ -467,38 +492,36 @@ GROUP BY aisletime_whse , aisletime_cart)
 //                                                                                                WHERE batchtime_whse = $whsesel;");
 //    $sql_looselines_taskpred->execute();
     //write to aisle time historical file
-	
-	$ftpdatetime = date('Ymd_His');
-	$sql_looselines_taskpred = $conn1->prepare("SELECT LPAD(batchtime_cart, 5, '0') AS batchnum, 
+
+    $ftpdatetime = date('Ymd_His');
+    $sql_looselines_taskpred = $conn1->prepare("SELECT LPAD(batchtime_cart, 5, '0') AS batchnum, 
 		CASE
 			WHEN CAST(batchtime_time_totaltime AS UNSIGNED) > 999 THEN '00999'
 			ELSE LPAD(CAST(batchtime_time_totaltime AS UNSIGNED), 5, '0')
 			END AS MAXTIME
 		FROM printvis.looselines_batchtime WHERE (batchtime_whse = $whsesel) AND (batchtime_exported = 0)");
-	
-	$sql_looselines_taskpred->execute();
-	$numrows = $sql_looselines_taskpred->rowCount();
-	if ($numrows > 0)
-	{
-		$filename = "picktimes_whse".$whsesel."_".$ftpdatetime.".gol";
-		$fp = fopen("./exports/$filename", "w"); //open for write
-		$data = "";
-		$updatearray = array();
-		foreach($sql_looselines_taskpred as $picktimerow)
-		{
-			$data .= $picktimerow['batchnum'].$picktimerow['MAXTIME']."\r\n";
-			$updatearray[] = $picktimerow['batchnum'];
-		}
-		fwrite ($fp, $data);
-		fclose ($fp);
-		$updatewhere = implode(',', $updatearray);
-		$updateflag = $conn1->prepare("UPDATE printvis.looselines_batchtime SET batchtime_exported = 1 WHERE batchtime_cart IN($updatewhere)");
-		$updateflag->execute();
-		$sendftp = _ftpupload($filename,$whsesel);
-	}
+
+    $sql_looselines_taskpred->execute();
+    $numrows = $sql_looselines_taskpred->rowCount();
+    if ($numrows > 0 && $whsesel <> 11) {
+        $filename = "picktimes_whse" . $whsesel . "_" . $ftpdatetime . ".gol";
+        $fp = fopen("./exports/$filename", "w"); //open for write
+        $data = "";
+        $updatearray = array();
+        foreach ($sql_looselines_taskpred as $picktimerow) {
+            $data .= $picktimerow['batchnum'] . $picktimerow['MAXTIME'] . "\r\n";
+            $updatearray[] = $picktimerow['batchnum'];
+        }
+        fwrite($fp, $data);
+        fclose($fp);
+        $updatewhere = implode(',', $updatearray);
+        $updateflag = $conn1->prepare("UPDATE printvis.looselines_batchtime SET batchtime_exported = 1 WHERE batchtime_cart IN($updatewhere)");
+        $updateflag->execute();
+        $sendftp = _ftpupload($filename, $whsesel);
+    }
 
 //END PICK TIME EXPORT	
-	
+
     $sql_looselines_aisletimehist = $conn1->prepare("INSERT  INTO printvis.looselines_aisletime_hist
                                                                                                 (SELECT * FROM printvis.looselines_aisletime where aisletime_whse = $whsesel)ON DUPLICATE key update 
                                                                         aisletime_count_line=values(aisletime_count_line), 
@@ -644,8 +667,8 @@ GROUP BY aisletime_whse , aisletime_cart)
         $BOX_NUM = $linespicked_array[$key]['BOX_NUM'];
         $TOTELOC = $linespicked_array[$key]['TOTELOCATION'];
         $SHIP_ZONE = $linespicked_array[$key]['SHIP_ZONE'];
-        $UserDescription = htmlspecialchars($linespicked_array[$key]['UserDescription'],ENT_QUOTES);
-		
+        $UserDescription = htmlspecialchars($linespicked_array[$key]['UserDescription'], ENT_QUOTES);
+
         $ReserveUSerID = $linespicked_array[$key]['ReserveUSerID'];
 
         $pickdata[] = "('$Pick_ID', $whsesel, $Batch_Num, $Status, $Short_Status, '$Location', '$Sect', '$Aisle', '$Bay', '$Lev', '$Pos', '$PickType', $LotReq, $QtyOrder, $QtyPick, $PackageUnit, $Drug, $Ice, $Haz, $SO, $SN, $NSI, '$Ped', $ExpyChkReq,  $ItemCode, '$NDC_Num', '$EachWeight', '$DateTimeFirstPick', '$DATECREATED', $BO, $PutAwayFlag, '$LOCJOIN', $WCS_NUM, $WORKORDER_NUM, $BOX_NUM, $TOTELOC,'$SHIP_ZONE', '$UserDescription', $ReserveUSerID)";
@@ -755,8 +778,8 @@ $sql_cartupdate->execute();
 
 
 //Cases manifested by batch
-$casesman = $aseriesconn->prepare("SELECT PBCART,PBPTJD, count(*) as BOX_COUNT, sum(case when PBRLJD > 0 then 1 else 0 end) as REL_COUNT
-                                                                                     FROM HSIPCORDTA.NOTWPB
+$casesman = $connection->prepare("SELECT PBCART,PBPTJD, count(*) as BOX_COUNT, sum(case when PBRLJD > 0 then 1 else 0 end) as REL_COUNT
+                                                                                     FROM $schema.NOTWPB
                                                                                       group by PBCART,PBPTJD ");
 $casesman->execute();
 $casesmanarray = $casesman->fetchAll(pdo::FETCH_ASSOC);
