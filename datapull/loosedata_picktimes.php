@@ -327,10 +327,7 @@ FROM
 GROUP BY     loose_whse,
     loose_cart,
     SUBSTR(loose_loc, 1, 3),
-    loose_main,
-    loose_picktype,  
-    loose_printdatetime,
-    loose_recdatetime)
+    loose_main)
                                                                         ON DUPLICATE key update 
                                                                         aisletime_count_line=values(aisletime_count_line), 
                                                                         aisletime_count_unit=values(aisletime_count_unit), 
