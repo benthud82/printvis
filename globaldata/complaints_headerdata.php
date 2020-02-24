@@ -76,22 +76,26 @@ $precent = ($hdr_percent_array[0]['PERCENTACC'] * 100);
 
 
 //trend analysis
-$hdr_trend = $conn1->prepare("SELECT      CONCAT(YEAR(ORD_RETURNDATE),
-                                                                        WEEK(ORD_RETURNDATE)),
-                                                              COUNT(*) as TRENDCOUNT
-                                                                FROM
-                                                                    custaudit.custreturns
-                                                                WHERE
-                                                                    WEEKDAY(ORD_RETURNDATE) NOT IN (5 , 6)
-                                                                        AND WHSE = $var_whse
-                                                                             AND RETURNCODE in ('IBNS','WISP','WQSP')
-                                                                        AND CONCAT(YEAR(ORD_RETURNDATE),
-                                                                            WEEK(ORD_RETURNDATE)) <> CONCAT(YEAR(CURDATE()), WEEK(CURDATE()))
-                                                                        AND YEARWEEK(ORD_RETURNDATE) >= YEARWEEK(CURDATE() - INTERVAL 13 WEEK)
-                                                                GROUP BY CONCAT(YEAR(ORD_RETURNDATE),
-                                                                        WEEK(ORD_RETURNDATE))
-                                                                ORDER BY CONCAT(YEAR(ORD_RETURNDATE),
-                                                                        WEEK(ORD_RETURNDATE))");
+$hdr_trend = $conn1->prepare("SELECT 
+                                    CONCAT(YEAR(ORD_RETURNDATE),
+                                            CASE
+                                                WHEN WEEK(ORD_RETURNDATE) < 10 THEN CONCAT(0, WEEK(ORD_RETURNDATE))
+                                                ELSE WEEK(ORD_RETURNDATE)
+                                            END) AS YEAR_WEEK,
+                                    COUNT(*) AS TRENDCOUNT
+                                FROM
+                                    custaudit.custreturns
+                                WHERE
+                                    WEEKDAY(ORD_RETURNDATE) NOT IN (5 , 6)
+                                        AND WHSE = $var_whse
+                                        AND RETURNCODE IN ('IBNS' , 'WISP', 'WQSP')
+                                        AND CONCAT(YEAR(ORD_RETURNDATE),
+                                            WEEK(ORD_RETURNDATE)) <> CONCAT(YEAR(CURDATE()), WEEK(CURDATE()))
+                                        AND YEARWEEK(ORD_RETURNDATE) >= YEARWEEK(CURDATE() - INTERVAL 13 WEEK)
+                                GROUP BY CONCAT(YEAR(ORD_RETURNDATE),
+                                        WEEK(ORD_RETURNDATE))
+                                ORDER BY CONCAT(YEAR(ORD_RETURNDATE),
+                                        WEEK(ORD_RETURNDATE))");
 $hdr_trend->execute();
 $hdr_trend_array = $hdr_trend->fetchAll(pdo::FETCH_COLUMN);
 $trendarraycount = count($hdr_trend_array);
