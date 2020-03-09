@@ -1,3 +1,4 @@
+
 <?php
 
 include '../../globalincludes/usa_asys.php';
@@ -13,59 +14,12 @@ foreach ($truncatetables as $value) {
     $querydelete2->execute();
 }
 
-//call log equipment estimator
-include 'logequip.php';
 
-$whsearray = array(2, 3, 6, 7,9);
-foreach ($whsearray as $whsesel) {
-    include '../timezoneset.php';
-    $today = date('Y-m-d H:i:s');
-    $todaydatetime = date('Y-m-d H:i:s');
-
-//What is START location
-    $pcstart = $conn1->prepare("SELECT 
-                                                                            putcartmap_xcoor, putcartmap_zcoor
-                                                                        FROM
-                                                                            printvis.putprediction_putawaycartmap
-                                                                        WHERE
-                                                                            putcartmap_whse = $whsesel
-                                                                        AND putcartmap_location = 'PCSTART' ");
-    $pcstart->execute();
-    $pcstart_array = $pcstart->fetchAll(pdo::FETCH_ASSOC);
-    $pcstart_xcoor = $pcstart_array[0]['putcartmap_xcoor'];
-    $pcstart_zcoor = $pcstart_array[0]['putcartmap_zcoor'];
-
-    //What is stop location
-    $pcstop = $conn1->prepare("SELECT 
-                                                                        putcartmap_xcoor, putcartmap_zcoor
-                                                                        FROM
-                                                                            printvis.putprediction_putawaycartmap
-                                                                        WHERE
-                                                                            putcartmap_whse = $whsesel
-                                                                        AND putcartmap_location = 'PCSTOP' ");
-
-    $pcstop->execute();
-    $pcstop_array = $pcstop->fetchAll(pdo::FETCH_ASSOC);
-    $pcstop_xcoor = $pcstop_array[0]['putcartmap_xcoor'];
-    $pcstop_zcoor = $pcstop_array[0]['putcartmap_zcoor'];
-
-
-
-    $foottravel = $conn1->prepare("select put_foottraveltime from printvis.pm_putawaytimes where put_whse = $whsesel;");
-
-    $foottravel->execute();
-    $foottravelarray = $foottravel->fetchAll(pdo::FETCH_ASSOC);
-    $foottraveltime = $foottravelarray[0]['put_foottraveltime'];
-
-
-
-    $result1 = $aseriesconn->prepare("SELECT eawhse, a.EAITEM, a.EATRN#, a.EATRNQ, a.EATLOC, a.EALOG#, a.EATRND, a.EACMPT, a.EASEQ3, a.EASTAT, d.LOPRIM, a.EATYPE, c.PCCPKU, c.PCIPKU, d.LOPKGU, a.EATYPE, CASE WHEN c.PCCPKU > 0 then int(a.EATRNQ /  c.PCCPKU) else 0 end as CASEHANDLE,  CASE WHEN c.PCCPKU > 0 then mod(a.EATRNQ ,  c.PCCPKU) else (CASE WHEN a.EATRNQ > 100 THEN 100 ELSE A.EATRNQ END) end as EACHHANDLE,  EASP12, EAEXPD FROM HSIPCORDTA.NPFCPC c, HSIPCORDTA.NPFLOC d, HSIPCORDTA.NPFERA a LEFT JOIN HSIPCORDTA.NPFLER E ON A.EATLOC = E.LELOC# AND A.EATRN# = E.LETRND inner join (SELECT EATRN#, max(EASEQ3) as max_seq FROM HSIPCORDTA.NPFERA GROUP BY EATRN#) b on b.EATRN# = a.EATRN# and a.EASEQ3 = max_seq and EASTAT <> 'C'  WHERE PCITEM = EAITEM and PCWHSE = 0 and LOWHSE = EAWHSE and LOLOC# = EATLOC AND EAWHSE = $whsesel");
-    $result1->execute();
-    $mindaysarray = $result1->fetchAll(pdo::FETCH_ASSOC);
-
+//columns
 //create table on local
-    $columns = 'temp_openputaway_whse,temp_openputaway_item, temp_openputaway_trans, temp_openputaway_status, temp_openputaway_quantity, temp_openputaway_location, temp_openputaway_log, temp_openputaway_transdate, temp_openputaway_comptime, temp_openputaway_seq, temp_openputaway_type, temp_openputaway_casehandle, temp_openputaway_eachhandle,temp_openputaway_lot, temp_openputaway_expiry';
-    $columns_aisletime = 'openputaway_aisletime_whse,
+$columns = 'temp_openputaway_whse,temp_openputaway_item, temp_openputaway_trans, temp_openputaway_status, temp_openputaway_quantity, temp_openputaway_location, temp_openputaway_log, temp_openputaway_transdate, temp_openputaway_comptime, temp_openputaway_seq, temp_openputaway_type, temp_openputaway_casehandle, temp_openputaway_eachhandle,temp_openputaway_lot, temp_openputaway_expiry';
+
+$columns_aisletime = 'openputaway_aisletime_whse,
                             openputaway_aisletime_log,
                             openputaway_aisletime_aisle,
                             openputaway_aisletime_main,
@@ -96,59 +50,149 @@ foreach ($whsearray as $whsesel) {
                             openputaway_aisletime_totaltime,
                             openputaway_aisletime_datetime';
 
-//***KEEP**
-    $values = array();
+
+//call log equipment estimator.  For each log today, will determine equipment most likely to be used.
+include 'logequip.php';
+
+$whsearray = array(2, 3, 6, 7, 9);
+foreach ($whsearray as $whsesel) {
+    include '../timezoneset.php';
+    $today = date('Y-m-d H:i:s');
+    $todaydatetime = date('Y-m-d H:i:s');
+
+//What is START location
+    $pcstart = $conn1->prepare("SELECT 
+                                    putcartmap_xcoor, putcartmap_zcoor
+                                FROM
+                                    printvis.putprediction_putawaycartmap
+                                WHERE
+                                    putcartmap_whse = $whsesel
+                                AND putcartmap_location = 'PCSTART' ");
+    $pcstart->execute();
+    $pcstart_array = $pcstart->fetchAll(pdo::FETCH_ASSOC);
+    $pcstart_xcoor = $pcstart_array[0]['putcartmap_xcoor'];
+    $pcstart_zcoor = $pcstart_array[0]['putcartmap_zcoor'];
+
+    //What is stop location
+    $pcstop = $conn1->prepare("SELECT 
+                                putcartmap_xcoor, putcartmap_zcoor
+                                FROM
+                                    printvis.putprediction_putawaycartmap
+                                WHERE
+                                    putcartmap_whse = $whsesel
+                                AND putcartmap_location = 'PCSTOP' ");
+
+    $pcstop->execute();
+    $pcstop_array = $pcstop->fetchAll(pdo::FETCH_ASSOC);
+    $pcstop_xcoor = $pcstop_array[0]['putcartmap_xcoor'];
+    $pcstop_zcoor = $pcstop_array[0]['putcartmap_zcoor'];
 
 
-    $maxrange = 3999;
-    $counter = 0;
-    $rowcount = count($mindaysarray);
 
-    do {
-        if ($maxrange > $rowcount) {  //prevent undefined offset
-            $maxrange = $rowcount - 1;
-        }
+    $foottravel = $conn1->prepare("select put_foottraveltime from printvis.pm_putawaytimes where put_whse = $whsesel;");
 
-        $data = array();
-        $values = array();
-        while ($counter <= $maxrange) { //split into 5,000 lines segments to insert into merge table
-            $temp_openputaway_whse = $mindaysarray[$counter]['EAWHSE'];
-            $temp_openputaway_item = $mindaysarray[$counter]['EAITEM'];
-            $temp_openputaway_trans = $mindaysarray[$counter]['EATRN#'];
-            $temp_openputaway_status = $mindaysarray[$counter]['EASTAT'];
-            $temp_openputaway_quantity = $mindaysarray[$counter]['EATRNQ'];            
-            $temp_openputaway_location = substr($mindaysarray[$counter]['EATLOC'], 0, 6);
-            $temp_openputaway_log = $mindaysarray[$counter]['EALOG#'];
-            $temp_openputaway_transdate = $mindaysarray[$counter]['EATRND'];
-            $temp_openputaway_comptime = $mindaysarray[$counter]['EACMPT'];
-            $temp_openputaway_seq = $mindaysarray[$counter]['EASEQ3'];
-            $temp_openputaway_type = $mindaysarray[$counter]['LOPRIM'];
-            $temp_openputaway_casehandle = $mindaysarray[$counter]['CASEHANDLE'];
-            $temp_openputaway_eachhandle = $mindaysarray[$counter]['EACHHANDLE'];
-            if ($temp_openputaway_eachhandle >= 50) {
-                $temp_openputaway_eachhandle = 50;
-            }
-            $temp_openputaway_lot = $mindaysarray[$counter]['EASP12'];
-            $temp_openputaway_expiry = $mindaysarray[$counter]['EAEXPD'];
-            //STOPKEEP
+    $foottravel->execute();
+    $foottravelarray = $foottravel->fetchAll(pdo::FETCH_ASSOC);
+    $foottraveltime = $foottravelarray[0]['put_foottraveltime'];
 
 
-            $data[] = "($temp_openputaway_whse, $temp_openputaway_item,$temp_openputaway_trans, '$temp_openputaway_status', $temp_openputaway_quantity,'$temp_openputaway_location',$temp_openputaway_log, $temp_openputaway_transdate,$temp_openputaway_comptime, $temp_openputaway_seq, '$temp_openputaway_type',$temp_openputaway_casehandle, $temp_openputaway_eachhandle, '$temp_openputaway_lot', $temp_openputaway_expiry)";
-            $counter += 1;
-        }
+//pull in all open putaway
+    $result1 = $aseriesconn->prepare("SELECT
+    eawhse  as TEMP_OPENPUTAWAY_WHSE,
+    a.EAITEM as TEMP_OPENPUTAWAY_ITEM,
+    a.EATRN# as TEMP_OPENPUTAWAY_TRANS,
+    a.EASTAT as TEMP_OPENPUTAWAY_STATUS,
+    a.EATRNQ as TEMP_OPENPUTAWAY_QUANTITY,
+    SUBSTRING(a.EATLOC,1,6) as TEMP_OPENPUTAWAY_LOCATION,
+    a.EALOG# as TEMP_OPENPUTAWAY_LOG,
+    a.EATRND as TEMP_OPENPUTAWAY_TRANSDATE,
+    a.EACMPT as TEMP_OPENPUTAWAY_COMPTIME,
+    a.EASEQ3 as TEMP_OPENPUTAWAY_SEQ,
+    a.EATYPE as TEMP_OPENPUTAWAY_TYPE,
+    CASE
+        WHEN c.PCCPKU > 0
+            then int(a.EATRNQ / c.PCCPKU)
+            else 0
+    end  as TEMP_OPENPUTAWAY_CASEHANDLE,
+    CASE
+        WHEN
+                (
+                    CASE
+                        WHEN c.PCCPKU > 0
+                            then mod(a.EATRNQ , c.PCCPKU)
+                            else
+                                (
+                                    CASE
+                                        WHEN a.EATRNQ > 100
+                                            THEN 100
+                                            ELSE A.EATRNQ
+                                    END
+                                )
+                    end
+                )
+            > 50
+            then 50
+            else
+                (
+                    CASE
+                        WHEN c.PCCPKU > 0
+                            then mod(a.EATRNQ , c.PCCPKU)
+                            else
+                                (
+                                    CASE
+                                        WHEN a.EATRNQ > 100
+                                            THEN 100
+                                            ELSE A.EATRNQ
+                                    END
+                                )
+                    end
+                )
+    end as TEMP_OPENPUTAWAY_EACHHANDLE,
+    EASP12 as TEMP_OPENPUTAWAY_LOT,
+    EAEXPD as TEMP_OPENPUTAWAY_EXPIRY
+FROM
+    HSIPCORDTA.NPFCPC c,
+    HSIPCORDTA.NPFLOC d,
+    HSIPCORDTA.NPFERA a
+    LEFT JOIN
+        HSIPCORDTA.NPFLER E
+        ON
+            A.EATLOC     = E.LELOC#
+            AND A.EATRN# = E.LETRND
+    inner join
+        (
+            SELECT
+                EATRN#,
+                max(EASEQ3) as max_seq
+            FROM
+                HSIPCORDTA.NPFERA
+            GROUP BY
+                EATRN#
+        )
+        b
+        on
+            b.EATRN#     = a.EATRN#
+            and a.EASEQ3 = max_seq
+            and EASTAT  <> 'C'
+WHERE
+    PCITEM     = EAITEM
+    and PCWHSE = 0
+    and LOWHSE = EAWHSE
+    and LOLOC# = EATLOC
+    AND EAWHSE = $whsesel");
+    $result1->execute();
+    $mindaysarray = $result1->fetchAll(pdo::FETCH_ASSOC);
 
 
-        $values = implode(',', $data);
+    $temptable = 'temp_openputaway';
+    $schema = 'printvis';
+    $arraychunk = 10000; //each result array will be split into 1000 line chunks to prevent memory over allocation
+//insert into table
+    pdoMultiInsert($temptable, $schema, $mindaysarray, $conn1, $arraychunk);
 
-        if (empty($values)) {
-            break;
-        }
-        $sql = "INSERT IGNORE INTO printvis.temp_openputaway ($columns) VALUES $values";
-        $query = $conn1->prepare($sql);
-        $query->execute();
-        $maxrange += 4000;
-    } while ($counter <= $rowcount);
 
+
+    //Join temp open putaway table with map to get x, y z coordinates of each putaway transaction
     $sql_putawaylines_joined = $conn1->prepare("INSERT IGNORE into printvis.openputaway(SELECT temp_openputaway_whse,
                                                                                             temp_openputaway_item,
                                                                                             temp_openputaway_trans,
@@ -179,6 +223,8 @@ foreach ($whsearray as $whsesel) {
 
     $sql_putawaylines_joined->execute();
 
+    
+    //Group at the aisle level to determine how long it should take to be in each aisle
     $sql_aisletimes = $conn1->prepare("INSERT IGNORE INTO  printvis.openputaway_aisletime (SELECT 
     openputaway_whse,
     openputaway_log,
