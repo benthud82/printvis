@@ -8,7 +8,7 @@ ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
 
 $today = date('Y-m-d');
-$startday = date('Y-m-d', (strtotime('-15 days', strtotime($today))));
+$startday = date('Y-m-d', (strtotime('-5 days', strtotime($today))));
 $startjday = _gregdatetoyyddd($startday);
 $endjday = _gregdatetoyyddd($today);
 

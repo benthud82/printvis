@@ -511,3 +511,102 @@ function _logequip($logequip_totlines, $logequip_putflow, $logequip_putcart, $lo
     }
     return $log_equip;
 }
+
+function pdoMultiInsert($tableName, $schema, $data, $pdoObject, $arraychunk) {
+
+    //Get a list of column names to use in the SQL statement.
+    $columnNames = array_keys($data[0]);
+
+    $data_chunked = array_chunk($data, $arraychunk); //chunk the large array into smaller pieces to prevent memory over allocation
+    //Loop through our $data array.
+    foreach ($data_chunked as $key => $value) {
+        //Will contain SQL snippets.
+        $rowsSQL = array();
+
+        //Will contain the values that we need to bind.
+        $toBind = array();
+
+        foreach ($value as $arrayIndex => $row) {
+            $params = array();
+            foreach ($row as $columnName => $columnValue) {
+                $param = ":" . $columnName . $arrayIndex;
+                $params[] = $param;
+                if (empty($columnValue)) {
+                    $toBind[$param] = "0";
+                } else {
+                    $toBind[$param] = $columnValue;
+                }
+            }
+            $rowsSQL[] = "(" . implode(", ", $params) . ")";
+        }
+
+        //Construct our SQL statement
+        $sql = "INSERT IGNORE INTO `$schema` . `$tableName` (" . implode(", ", $columnNames) . ") VALUES " . implode(", ", $rowsSQL);
+
+        //Prepare our PDO statement.
+        $pdoStatement = $pdoObject->prepare($sql);
+
+        //Bind our values.
+        foreach ($toBind as $param => $val) {
+            $pdoStatement->bindValue($param, $val);
+        }
+
+        //Execute our statement (i.e. insert the data).
+        $pdoStatement->execute();
+    }
+    return;
+}
+
+function pdoMultiInsert_duplicate($tableName, $schema, $data, $pdoObject, $arraychunk) {
+
+    //Get a list of column names to use in the SQL statement.
+    $columnNames = array_keys($data[0]);
+
+    $data_chunked = array_chunk($data, $arraychunk); //chunk the large array into smaller pieces to prevent memory over allocation
+    //Loop through our $data array.
+    foreach ($data_chunked as $key => $value) {
+        //Will contain SQL snippets.
+        $rowsSQL = array();
+        $updateCols = array();
+        //Will contain the values that we need to bind.
+        $toBind = array();
+
+        foreach ($value as $arrayIndex => $row) {
+            $params = array();
+            foreach ($row as $columnName => $columnValue) {
+                $param = ":" . $columnName . $arrayIndex;
+                $params[] = $param;
+                if (empty($columnValue)) {
+                    $toBind[$param] = "0";
+                    $updateCols[] = $columnName . " = VALUES($columnName)";
+                } else {
+                    $toBind[$param] = $columnValue;
+                    $updateCols[] = $columnName . " = VALUES($columnName)";
+                }
+            }
+            $rowsSQL[] = "(" . implode(", ", $params) . ")";
+            $onDup = implode(', ', $updateCols);
+        }
+
+
+//        //setup the ON DUPLICATE column names
+//        $updateCols = array();
+//        foreach ($colNames as $curCol) {
+//            $updateCols[] = $curCol . " = VALUES($curCol)";
+//        }
+        //Construct our SQL statement
+        $sql = "INSERT INTO `$schema` . `$tableName` (" . implode(", ", $columnNames) . ") VALUES " . implode(", ", $rowsSQL) . " ON DUPLICATE KEY UPDATE $onDup";
+
+        //Prepare our PDO statement.
+        $pdoStatement = $pdoObject->prepare($sql);
+
+        //Bind our values.
+        foreach ($toBind as $param => $val) {
+            $pdoStatement->bindValue($param, $val);
+        }
+
+        //Execute our statement (i.e. insert the data).
+        $pdoStatement->execute();
+    }
+    return;
+}
