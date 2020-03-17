@@ -54,6 +54,7 @@ include 'globaldata/badges.php'; //$maperrorcount for vector mapping errors
                 <li><a href="custcomplaintdata.php">Complaint Data</a></li> 
             </ul> 
         </li>
+        <li id="aso"><a href="shorts_expeditor.php"><i class="fa fa-exclamation-circle fa-lg"></i><span style="white-space: nowrap;">  Bin Report  <br> Expeditor</span></a></li> 
 
     </ul> 
 </nav>
