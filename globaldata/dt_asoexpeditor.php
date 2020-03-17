@@ -1,6 +1,5 @@
 
 <?php
-
 include '../../CustomerAudit/connection/connection_details.php';
 include '../sessioninclude.php';
 include '../functions/functions_totetimes.php';
@@ -12,9 +11,28 @@ if (isset($_SESSION['MYUSER'])) {
 
     $var_whse = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 }
+$sel_lsecse = ($_POST['sel_lsecse']);
+
+switch ($sel_lsecse) {
+    case '*':
+        $sql_lsecse = ' ';
+
+        break;
+    case 'C':
+        $sql_lsecse = ' and dropzone_tozone in (7,8)';
+
+        break;
+    case 'L':
+        $sql_lsecse = ' and dropzone_tozone not in (7,8)';
+
+        break;
+
+    default:
+        break;
+}
 
 
-$dt_sql = $conn1->prepare("SELECT 
+$dt_sql = $conn1->prepare("SELECT DISTINCT
                                 dropzone_item,
                                 dropzone_fromzone,
                                 dropzone_tozone,
@@ -40,31 +58,69 @@ $dt_sql = $conn1->prepare("SELECT
                                 (@COUNT_HOLD + @COUNT_SHORTS) AS COUNT_TOTAL
                             FROM
                                 printvis.dropzone_replen
-                            WHERE dropzone_whse = $var_whse
+                                    LEFT JOIN
+                                printvis.delete_shortsexp ON delete_whse = dropzone_whse
+                                    AND delete_loc = dropzone_toloc
+                            WHERE
+                                dropzone_whse = $var_whse
+                                and delete_loc is null
+                                $sql_lsecse
                             HAVING COUNT_TOTAL > 0
                             ORDER BY COUNT_TOTAL DESC");
 $dt_sql->execute();
 $dt_array = $dt_sql->fetchAll(pdo::FETCH_ASSOC);
+?>
+
+
+<div class="row">
+    <div class="pull-left  col-lg-3" >
+        <div id="container_deletebtn">
+            <button id="btn_delete_batch" class="btn btn-danger">Delete Selected Batches</button>
+        </div>
+    </div>
+</div>
+<!--start of div table-->
+<div class="" id="divtable_priorities" style="padding-bottom: 51px">
+    <div  class='col-sm-12 col-md-12 col-lg-12 print-1wide'  style="float: none;">
+
+
+        <div class='widget-content widget-table'  style="position: relative;">
+            <div class='divtable'>
+                <div id="sticky-anchor"></div>
+                <div style="padding-top: 51px;"></div>
+                <div id="sticky" class='divtableheader' style="padding-top">
+                    <div class='divtabletitle width5' style="cursor: default">Delete?</div>
+                    <div class='divtabletitle width8_33' style="cursor: default">Item</div>
+                    <div class='divtabletitle width8_33' style="cursor: default">From Loc / Drop Zone</div>
+                    <div class='divtabletitle width8_33' style="cursor: default">To Location</div>
+                    <div class='divtabletitle width8_33' style="cursor: default">Box Hold Count</div>
+                    <div class='divtabletitle width8_33' style="cursor: default">Shorts Count</div>
+                    <div class='divtabletitle width8_33' style="cursor: default">Total Count</div>
+
+
+                </div>
+                <?php foreach ($dt_array as $key => $value) { ?>
+                    <div id="<?php echo $dt_array[$key]['dropzone_toloc']; ?>"class='divtablerow itemdetailexpand' style="cursor: pointer">
+                        <div class='divtabledata width5' style="vertical-align: text-top; cursor: pointer"> <input type="checkbox" class="chkbox_deletebatch noclick" name="checkbox" id="<?php echo $dt_array[$key]['dropzone_toloc']; ?>"  /></div>
+                        <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['dropzone_item']; ?></div>
+                        <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['dropzone_fromloc']; ?></div>
+                        <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['dropzone_toloc']; ?></div>
+                        <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['COUNT_HOLD']; ?></div>
+                        <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['COUNT_SHORTS']; ?></div>
+                        <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['COUNT_TOTAL']; ?></div>
+
+                    </div>
+                <?php } ?>
+
+            </div>
+        </div>
 
 
 
 
-foreach ($dt_array as $key => $value) {
-    $dropzone_item = $dt_array[$key]['dropzone_item'];
-    $dropzone_fromloc = $dt_array[$key]['dropzone_fromloc'];
-    $dropzone_toloc = $dt_array[$key]['dropzone_toloc'];
-    $COUNT_HOLD = $dt_array[$key]['COUNT_HOLD'];
-    $COUNT_SHORTS = $dt_array[$key]['COUNT_SHORTS'];
-    $COUNT_TOTAL = $dt_array[$key]['COUNT_TOTAL'];
+
+    </div>
+</div>    
 
 
-    $rowpush = array($dropzone_item, $dropzone_fromloc, $dropzone_toloc, $COUNT_HOLD, $COUNT_SHORTS, $COUNT_TOTAL);
-    $row[] = array_values($rowpush);
-}
 
-$output = array(
-    "aaData" => array()
-);
-
-$output['aaData'] = $row;
-echo json_encode($output);
