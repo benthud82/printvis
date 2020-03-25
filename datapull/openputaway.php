@@ -17,7 +17,7 @@ foreach ($truncatetables as $value) {
 
 //columns
 //create table on local
-$columns = 'temp_openputaway_whse,temp_openputaway_item, temp_openputaway_trans, temp_openputaway_status, temp_openputaway_quantity, temp_openputaway_location, temp_openputaway_log, temp_openputaway_transdate, temp_openputaway_comptime, temp_openputaway_seq, temp_openputaway_type, temp_openputaway_casehandle, temp_openputaway_eachhandle,temp_openputaway_lot, temp_openputaway_expiry';
+$columns = 'temp_openputaway_whse,temp_openputaway_item, temp_openputaway_trans, temp_openputaway_status, temp_openputaway_quantity, temp_openputaway_location, temp_openputaway_log, temp_openputaway_transdate, temp_openputaway_comptime, temp_openputaway_seq, temp_openputaway_type, temp_openputaway_labeltype, temp_openputaway_casehandle, temp_openputaway_eachhandle,temp_openputaway_lot, temp_openputaway_expiry';
 
 $columns_aisletime = 'openputaway_aisletime_whse,
                             openputaway_aisletime_log,
@@ -108,7 +108,7 @@ foreach ($whsearray as $whsesel) {
     a.EATRND as TEMP_OPENPUTAWAY_TRANSDATE,
     a.EACMPT as TEMP_OPENPUTAWAY_COMPTIME,
     a.EASEQ3 as TEMP_OPENPUTAWAY_SEQ,
-    a.EATYPE as TEMP_OPENPUTAWAY_TYPE,
+    d.LOPRIM as TEMP_OPENPUTAWAY_TYPE,
     CASE
         WHEN c.PCCPKU > 0
             then int(a.EATRNQ / c.PCCPKU)
