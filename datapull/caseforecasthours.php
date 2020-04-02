@@ -20,7 +20,7 @@ include '../functions/functions_totetimes.php';
 //}
 
 
-$whsearray = array(7, 3.1, 3.2, 6, 9);
+$whsearray = array(7, 3.1, 3.2, 6, 9,2);
 
 
 
