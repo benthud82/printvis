@@ -512,6 +512,45 @@ function _logequip($logequip_totlines, $logequip_putflow, $logequip_putcart, $lo
     return $log_equip;
 }
 
+
+
+function _logequipopen($logequipopen_totlines, $logequipopen_putflow, $logequipopen_putcart, $logequipopen_putdogp, $logequipopen_putturr, $logequipopen_putordp, $logequipopen_recvol) {
+    //default to CRT
+    $log_equipopen = 'CRT';
+
+    //cubic cm cutoff for tote putaway batch
+    $toteavg = 1200;
+    if ($logequipopen_recvol < $toteavg) {
+        $log_equip = 'TOT';
+        return $log_equip;
+    }
+    $perc_flow = $logequipopen_putflow / $logequipopen_totlines;
+    $perc_cart = $logequipopen_putcart / $logequipopen_totlines;
+    $perc_dogp = $logequipopen_putdogp / $logequipopen_totlines;
+    $perc_turr = $logequipopen_putturr / $logequipopen_totlines;
+    $perc_ordp = $logequipopen_putordp / $logequipopen_totlines;
+
+    $maxperc = max($perc_flow, $perc_cart, $perc_dogp, $perc_turr, $perc_ordp);
+
+    switch ($maxperc) {
+        case $perc_flow:
+            $log_equipopen = 'FLW';
+            break;
+        case $perc_cart:
+            $log_equipopen = 'CRT';
+            break;
+        case $perc_turr:
+            $log_equipopen = 'TUR';
+            break;
+        case $perc_ordp:
+            $log_equipopen = 'ORD';
+            break;
+        case $perc_dogp:
+            $log_equipopen = 'DOG';
+            break;
+    }
+    return $log_equipopen;
+}
 function pdoMultiInsert($tableName, $schema, $data, $pdoObject, $arraychunk) {
 
     //Get a list of column names to use in the SQL statement.
