@@ -33,7 +33,7 @@ $putawayopen = $aseriesconn->prepare("SELECT eawhse as LOGEQUIPOPEN_WHSE,
                                                             LOWHSE = EAWHSE and 
                                                             LOLOC# = EATLOC 
                                                             AND EALOG# = 0
-                                                            and EATRND >= 1200507
+                                                            and EATRND >= $today_eraformat
                                                     GROUP BY EAWHSE, CASE WHEN EAWHSE = 3 AND EAUS08 IN ('NVSK005W', 'NVSK016W') THEN 2 ELSE 1 END, CASE WHEN eaWHSE = 3 and EATLOC >= 'W400000' then 2 else 1 end, A.EALOG#, CASE WHEN LMTIER in('L01', 'L02') then 'PUTFLW'
                                                                  WHEN LMTIER in ('L04', 'L05') or substring(LOSIZE,1,1) = 'B' then 'PUTCRT'
                                                                  WHEN LMTIER = 'L06' then 'PUTDOG' 
@@ -54,8 +54,6 @@ foreach ($array_logequipopen as $key => $value) {
     $logequipopen_log = $array_logequipopen[$key]['LOGEQUIPOPEN_LOG'];
     $logequipopen_equip = $array_logequipopen[$key]['LOGEQUIPOPEN_EQUIP'];
     $logequipopen_totlines = $array_logequipopen[$key]['LOGEQUIPOPEN_TOTLINES'];
-    
-    
 }
 
 
@@ -64,10 +62,6 @@ $schema = 'printvis';
 $arraychunk = 10000; //each result array will be split into 1000 line chunks to prevent memory over allocation
 //insert into table
 pdoMultiInsert($mysqltable, $schema, $array_logequipopen, $conn1, $arraychunk);
-
-
-
-{
 
 $PUTOPENTIMES = $conn1->prepare("SELECT LOGEQUIPOPEN_WHSE AS LOGEQUIPOPENTIMES_WHSE,
                                        LOGEQUIPOPEN_FROMBLDG AS LOGEQUIPOPENTIMES_FROMBLDG,
@@ -90,9 +84,9 @@ $PUTOPENTIMES = $conn1->prepare("SELECT LOGEQUIPOPEN_WHSE AS LOGEQUIPOPENTIMES_W
                                        
                                                                          
                                        GROUP BY LOGEQUIPOPENTIMES_WHSE, LOGEQUIPOPENTIMES_FROMBLDG, LOGEQUIPOPENTIMES_TOBLDG, LOGEQUIPOPENTIMES_LOG, LOGEQUIPOPENTIMES_EQUIP");
-                                       
-  $PUTOPENTIMES->execute();  
-  $array_logequipopentimes = $PUTOPENTIMES->fetchAll(pdo::FETCH_ASSOC);
+
+$PUTOPENTIMES->execute();
+$array_logequipopentimes = $PUTOPENTIMES->fetchAll(pdo::FETCH_ASSOC);
 
 $data1 = array();
 $logcolumns1 = 'logequipopentimes_whse,logequipopentimes_frombldg,logequipopentimes_tobldg,logequipopentimes_log, logequipopentimes_equip, logequipopentimes_totlines,LOGEQUIPOPENTIMES_TOTTIME';
@@ -105,9 +99,6 @@ foreach ($array_logequipopentimes as $key => $value) {
     $logequipopentimes_equip = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_EQUIP'];
     $logequipopentimes_totlines = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_TOTLINES'];
     $logequipopentimes_tottime = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_TOTTIME'];
-    
-    
-}
 }
 
 $mysqltable1 = 'log_equipopentimes';
@@ -124,9 +115,8 @@ pdoMultiInsert($mysqltable1, $schema1, $array_logequipopentimes, $conn1, $arrayc
 
 
 //pull in today's predicted moves
-
 {
-$predmovesopen = $aseriesconn->prepare("SELECT A.LOWHSE as FORECASTMOVE_WHSE,
+    $predmovesopen = $aseriesconn->prepare("SELECT A.LOWHSE as FORECASTMOVE_WHSE,
                                         CASE WHEN LOWHSE = 3 and LOLOC# >= 'W400000' then 2 else 1 end as FORECASTMOVE_BUILDING, 
                                         CASE WHEN LMTIER IN ('L01', 'L15') then 'MVEL01'
                                              WHEN LMTIER IN ('L02', 'L03', 'L19') then 'MVEFLW'
@@ -148,21 +138,20 @@ $predmovesopen = $aseriesconn->prepare("SELECT A.LOWHSE as FORECASTMOVE_WHSE,
                                     WHEN LMTIER IN ('L04', 'L05', 'L10') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
                                     WHEN LMTIER = 'L06' then 'MVEDOG' 
                                     WHEN LMTIER IN ('C01', 'C02', 'C03') then 'MVETUR' 
-                                    WHEN LMTIER IN ('C04', 'C05', 'C06') then 'MVEPKR' else 'MVEOPEN' END ");                                                    
+                                    WHEN LMTIER IN ('C04', 'C05', 'C06') then 'MVEPKR' else 'MVEOPEN' END ");
 
-$predmovesopen->execute();
-$array_movesopen = $predmovesopen->fetchAll(pdo::FETCH_ASSOC);
+    $predmovesopen->execute();
+    $array_movesopen = $predmovesopen->fetchAll(pdo::FETCH_ASSOC);
 
-$data2 = array();
-$mvecolumns = 'forecastmove_whse,forecastmove_building, forecastmove_equip, forecastmove_totlines';
-foreach ($array_movesopen as $key => $value) {
+    $data2 = array();
+    $mvecolumns = 'forecastmove_whse,forecastmove_building, forecastmove_equip, forecastmove_totlines';
+    foreach ($array_movesopen as $key => $value) {
 
-    $forecastmove_whse = $array_movesopen[$key]['FORECASTMOVE_WHSE'];
-    $forecastmove_building = $array_movesopen[$key]['FORECASTMOVE_BUILDING'];   
-    $forecastmove_equip = $array_movesopen[$key]['FORECASTMOVE_EQUIP'];
-    $forecastmove_totlines = $array_movesopen[$key]['FORECASTMOVE_TOTLINES'];
-    
-}   
+        $forecastmove_whse = $array_movesopen[$key]['FORECASTMOVE_WHSE'];
+        $forecastmove_building = $array_movesopen[$key]['FORECASTMOVE_BUILDING'];
+        $forecastmove_equip = $array_movesopen[$key]['FORECASTMOVE_EQUIP'];
+        $forecastmove_totlines = $array_movesopen[$key]['FORECASTMOVE_TOTLINES'];
+    }
 }
 
 
@@ -170,14 +159,9 @@ $mysqltable2 = 'forecastmoves';
 $schema2 = 'printvis';
 $arraychunk2 = 10000; //each result array will be split into 1000 line chunks to prevent memory over allocation
 //insert into table
-pdoMultiInsert($mysqltable2, $schema2, $array_movesopen, $conn1, $arraychunk2);
+pdoMultiInsert($mysqltable2, $schema2, $array_movesopen, $conn1, $arraychunk2); {
 
-
-
-
-{
-
-$PREDMOVEOPENTIMES = $conn1->prepare("SELECT FORECASTMOVE_WHSE AS forecastmovetimes_whse,
+    $PREDMOVEOPENTIMES = $conn1->prepare("SELECT FORECASTMOVE_WHSE AS forecastmovetimes_whse,
                                        FORECASTMOVE_BUILDING AS forecastmovetimes_building, 
                                        FORECASTMOVE_EQUIP AS forecastmovetimes_equip,
                                        FORECASTMOVE_TOTLINES AS forecastmovetimes_totlines,
@@ -196,22 +180,20 @@ $PREDMOVEOPENTIMES = $conn1->prepare("SELECT FORECASTMOVE_WHSE AS forecastmoveti
                                        
                                                                          
                                        GROUP BY FORECASTMOVETIMES_WHSE, FORECASTMOVETIMES_BUILDING, FORECASTMOVETIMES_EQUIP");
-                                       
-  $PREDMOVEOPENTIMES->execute();  
-  $array_MOVEOPENTIMES = $PREDMOVEOPENTIMES->fetchAll(pdo::FETCH_ASSOC);
 
-$data3 = array();
-$logcolumns3 = 'forecastmovetimes_whse,forecastmovetimes_building, forecastmovetimes_equip, forecastmovetimes_totlines,forecastmovetimes_tottime';
-foreach ($array_MOVEOPENTIMES as $key => $value) {
+    $PREDMOVEOPENTIMES->execute();
+    $array_MOVEOPENTIMES = $PREDMOVEOPENTIMES->fetchAll(pdo::FETCH_ASSOC);
 
-    $forecastmovetimes_whse_whse = $array_MOVEOPENTIMES[$key]['forecastmovetimes_whse'];
-    $forecastmovetimes_building = $array_MOVEOPENTIMES[$key]['forecastmovetimes_building'];
-    $forecastmovetimes_equip = $array_MOVEOPENTIMES[$key]['forecastmovetimes_equip'];
-    $forecastmovetimes_totlines = $array_MOVEOPENTIMES[$key]['forecastmovetimes_totlines'];
-    $forecastmovetimes_tottime = $array_MOVEOPENTIMES[$key]['forecastmovetimes_tottime'];
-    
-    
-}
+    $data3 = array();
+    $logcolumns3 = 'forecastmovetimes_whse,forecastmovetimes_building, forecastmovetimes_equip, forecastmovetimes_totlines,forecastmovetimes_tottime';
+    foreach ($array_MOVEOPENTIMES as $key => $value) {
+
+        $forecastmovetimes_whse_whse = $array_MOVEOPENTIMES[$key]['forecastmovetimes_whse'];
+        $forecastmovetimes_building = $array_MOVEOPENTIMES[$key]['forecastmovetimes_building'];
+        $forecastmovetimes_equip = $array_MOVEOPENTIMES[$key]['forecastmovetimes_equip'];
+        $forecastmovetimes_totlines = $array_MOVEOPENTIMES[$key]['forecastmovetimes_totlines'];
+        $forecastmovetimes_tottime = $array_MOVEOPENTIMES[$key]['forecastmovetimes_tottime'];
+    }
 }
 
 $mysqltable3 = 'forecastmoves_opentimes';
@@ -258,8 +240,8 @@ $openmoves4 = $aseriesconn->prepare("SELECT MVWHSE AS OPENMOVES_WHSE,
                                                   WHEN MVFLC# <> MVPLC# AND LMTIER IN ('L01', 'L15') THEN 'DRPHJK'
                                                   WHEN MVFLC# <> MVPLC# AND LMTIER IN ('C04', 'C06') THEN 'DRPPKR'
                                                   WHEN MVFLC# <> MVPLC# AND LMTIER IN ('C01', 'C02', 'C03') THEN 'DRPTUR'
-                                                  ELSE 'OPEN' END");                                   
-                                    
+                                                  ELSE 'OPEN' END");
+
 $openmoves4->execute();
 $array_movesopen4 = $openmoves4->fetchAll(pdo::FETCH_ASSOC);
 
@@ -270,10 +252,10 @@ foreach ($array_movesopen4 as $key => $value) {
     $openmoves_whse = $array_movesopen4[$key]['OPENMOVES_WHSE'];
     $openmoves_type = $array_movesopen4[$key]['OPENMOVES_TYPE'];
     $openmoves_frombldg = $array_movesopen4[$key]['OPENMOVES_FROMBLDG'];
-    $openmoves_tobldg = $array_movesopen4[$key]['OPENMOVES_TOBLDG'];   
+    $openmoves_tobldg = $array_movesopen4[$key]['OPENMOVES_TOBLDG'];
     $openmoves_equip = $array_movesopen4[$key]['OPENMOVES_EQUIP'];
     $openmoves_totlines = $array_movesopen4[$key]['OPENMOVES_TOTLINES'];
-}   
+}
 
 
 $mysqltable4 = 'openmoves';
@@ -287,7 +269,7 @@ pdoMultiInsert($mysqltable4, $schema4, $array_movesopen4, $conn1, $arraychunk4);
 //calculate times for open moves
 
 $OPENMOVETIMES = $conn1->prepare("SELECT OPENMOVES_WHSE AS openmovetimes_whse,
-                                       OPENMOVES_FROMBLDG as openmovetimes_frombldg
+                                       OPENMOVES_FROMBLDG as openmovetimes_frombldg,
                                        OPENMOVES_TOBLDG AS openmovetimes_tobldg, 
                                        OPENMOVES_EQUIP AS openmovetimes_equip,
                                        OPENMOVES_TOTLINES AS openmovetimes_totlines,
@@ -305,10 +287,10 @@ $OPENMOVETIMES = $conn1->prepare("SELECT OPENMOVES_WHSE AS openmovetimes_whse,
                                        OPENMOVES_EQUIP = FORECAST_FUNCTION
                                        
                                                                          
-                                       GROUP BY openmovetimes_whse, openmovetimes_frombldg, openmovetimes_tobldg, openmovetimes_equip");
-                                       
-  $OPENMOVETIMES->execute();  
-  $array_OPENMOVETIMES = $OPENMOVETIMES->fetchAll(pdo::FETCH_ASSOC);
+                                       GROUP BY openmovetimes_whse, openmovetimes_frombldg, openmovetimes_tobldg, openmovetimes_equip, openmovetimes_totlines");
+
+$OPENMOVETIMES->execute();
+$array_OPENMOVETIMES = $OPENMOVETIMES->fetchAll(pdo::FETCH_ASSOC);
 
 $data10 = array();
 $logcolumns10 = 'openmovetimes_whse,openmovetimes_frombldg, openmovetimes_tobldg, openmovetimes_equip,openmovetimes_totlines, openmovetimes_tottime ';
@@ -318,10 +300,8 @@ foreach ($array_OPENMOVETIMES as $key => $value) {
     $openmovetimes_frombldg = $array_OPENMOVETIMES[$key]['openmovetimes_frombldg'];
     $openmovetimes_tobldg = $array_OPENMOVETIMES[$key]['openmovetimes_tobldg'];
     $openmovetimes_equip = $array_OPENMOVETIMES[$key]['openmovetimes_equip'];
-    $openmovetimes = $array_OPENMOVETIMES[$key]['openmovetimes_totlines'];    
+    $openmovetimes = $array_OPENMOVETIMES[$key]['openmovetimes_totlines'];
     $openmovetimes_tottime = $array_OPENMOVETIMES[$key]['openmovetimes_tottime'];
-    
-    
 }
 
 
