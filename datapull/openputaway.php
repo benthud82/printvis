@@ -650,3 +650,4 @@ $sql_looselines_taskpred = $conn1->prepare("INSERT INTO printvis.taskpred
                                                                                                     and logequip_equip = 'CRT'
                                                                                                     ON DUPLICATE KEY UPDATE taskpred_mintime = values(taskpred_mintime),taskpred_maxtime = values(taskpred_maxtime)");
 $sql_looselines_taskpred->execute();
+

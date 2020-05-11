@@ -6,9 +6,14 @@ ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
 $today_eraformat = intval(date('1ymd'));
+$truncatetables = array('log_equipopen', 'log_equipopentimes', 'openmoves');
+foreach ($truncatetables as $value) {
+    $querydelete2 = $conn1->prepare("TRUNCATE printvis.$value");
+    $querydelete2->execute();
+}
 
 
-//pull in today's logs
+//pull in all open putaway (logged and non logged)
 $putawayopen = $aseriesconn->prepare("SELECT eawhse as LOGEQUIPOPEN_WHSE,
                                                             CASE WHEN EAWHSE = 3 AND EAUS08 IN ('NVSK005W', 'NVSK016W') THEN 2 ELSE 1 END AS LOGEQUIPOPEN_FROMBLDG,
                                                             CASE WHEN eaWHSE = 3 and EATLOC >= 'W400000' then 2 else 1 end as LOGEQUIPOPEN_TOBLDG,
@@ -32,8 +37,7 @@ $putawayopen = $aseriesconn->prepare("SELECT eawhse as LOGEQUIPOPEN_WHSE,
                                                             PCWHSE = 0 and 
                                                             LOWHSE = EAWHSE and 
                                                             LOLOC# = EATLOC 
-                                                            AND EALOG# = 0
-                                                            and EATRND >= $today_eraformat
+                                                            and EASTAT <> 'C'
                                                     GROUP BY EAWHSE, CASE WHEN EAWHSE = 3 AND EAUS08 IN ('NVSK005W', 'NVSK016W') THEN 2 ELSE 1 END, CASE WHEN eaWHSE = 3 and EATLOC >= 'W400000' then 2 else 1 end, A.EALOG#, CASE WHEN LMTIER in('L01', 'L02') then 'PUTFLW'
                                                                  WHEN LMTIER in ('L04', 'L05') or substring(LOSIZE,1,1) = 'B' then 'PUTCRT'
                                                                  WHEN LMTIER = 'L06' then 'PUTDOG' 
