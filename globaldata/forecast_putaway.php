@@ -189,7 +189,7 @@ $puttur = $array_puttur[0]['TUR_TOTAL'];
 <!--Line Count-->
 <div class="row">
     <div class="col-lg-2" id="stat_LINETOTAL">
-        <div class="dashboard-stat dashboard-stat-v2 yellow-casablanca">  
+        <div class="dashboard-stat dashboard-stat-v2 red-intense">  
             <div class="visual">
                 <i class="fa fa-cubes"></i>
             </div>
@@ -202,7 +202,7 @@ $puttur = $array_puttur[0]['TUR_TOTAL'];
         </div>
     </div>
     <div class="col-lg-2" id="stat_LINECRT">
-        <div class="dashboard-stat dashboard-stat-v2 yellow-casablanca">  
+        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
             <div class="visual">
                 <i class="fa fa-cubes"></i>
             </div>
@@ -215,7 +215,7 @@ $puttur = $array_puttur[0]['TUR_TOTAL'];
         </div>
     </div>
     <div class="col-lg-2" id="stat_LINEFLW">
-        <div class="dashboard-stat dashboard-stat-v2 yellow-casablanca">  
+        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
             <div class="visual">
                 <i class="fa fa-cubes"></i>
             </div>
@@ -228,7 +228,7 @@ $puttur = $array_puttur[0]['TUR_TOTAL'];
         </div>
     </div>
     <div class="col-lg-2" id="stat_LINEDOG">
-        <div class="dashboard-stat dashboard-stat-v2 yellow-casablanca">  
+        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
             <div class="visual">
                 <i class="fa fa-cubes"></i>
             </div>
@@ -241,7 +241,7 @@ $puttur = $array_puttur[0]['TUR_TOTAL'];
         </div>
     </div>
     <div class="col-lg-2" id="stat_LINEPKR">
-        <div class="dashboard-stat dashboard-stat-v2 yellow-casablanca">  
+        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
             <div class="visual">
                 <i class="fa fa-cubes"></i>
             </div>
@@ -254,7 +254,7 @@ $puttur = $array_puttur[0]['TUR_TOTAL'];
         </div>
     </div>
     <div class="col-lg-2" id="stat_LINETUR">
-        <div class="dashboard-stat dashboard-stat-v2 yellow-casablanca">  
+        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
             <div class="visual">
                 <i class="fa fa-cubes"></i>
             </div>
@@ -271,7 +271,7 @@ $puttur = $array_puttur[0]['TUR_TOTAL'];
 
 <div class="row">
     <div class="col-lg-2" id="stat_TOTALPUT">
-        <div class="dashboard-stat dashboard-stat-v2 yellow-casablanca">  
+        <div class="dashboard-stat dashboard-stat-v2 red-intense">  
             <div class="visual">
                 <i class="fa fa-cubes"></i>
             </div>
@@ -284,7 +284,7 @@ $puttur = $array_puttur[0]['TUR_TOTAL'];
         </div>
     </div>
     <div class="col-lg-2" id="stat_TOTALCRT">
-        <div class="dashboard-stat dashboard-stat-v2 yellow-casablanca">  
+        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
             <div class="visual">
                 <i class="fa fa-cubes"></i>
             </div>
@@ -297,7 +297,7 @@ $puttur = $array_puttur[0]['TUR_TOTAL'];
         </div>
     </div>
     <div class="col-lg-2" id="stat_TOTALFLW">
-        <div class="dashboard-stat dashboard-stat-v2 yellow-casablanca">  
+        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
             <div class="visual">
                 <i class="fa fa-cubes"></i>
             </div>
@@ -310,7 +310,7 @@ $puttur = $array_puttur[0]['TUR_TOTAL'];
         </div>
     </div>
     <div class="col-lg-2" id="stat_TOTALDOG">
-        <div class="dashboard-stat dashboard-stat-v2 yellow-casablanca">  
+        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
             <div class="visual">
                 <i class="fa fa-cubes"></i>
             </div>
@@ -323,7 +323,7 @@ $puttur = $array_puttur[0]['TUR_TOTAL'];
         </div>
     </div>
     <div class="col-lg-2" id="stat_TOTALPKR">
-        <div class="dashboard-stat dashboard-stat-v2 yellow-casablanca">  
+        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
             <div class="visual">
                 <i class="fa fa-cubes"></i>
             </div>
@@ -336,7 +336,7 @@ $puttur = $array_puttur[0]['TUR_TOTAL'];
         </div>
     </div>
     <div class="col-lg-2" id="stat_TOTALTUR">
-        <div class="dashboard-stat dashboard-stat-v2 yellow-casablanca">  
+        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
             <div class="visual">
                 <i class="fa fa-cubes"></i>
             </div>

@@ -17,7 +17,6 @@ foreach ($truncatetables as $value) {
 $putawayopen = $aseriesconn->prepare("SELECT eawhse as LOGEQUIPOPEN_WHSE,
                                                             CASE WHEN EAWHSE = 3 AND EAUS08 IN ('NVSK005W', 'NVSK016W') THEN 2 ELSE 1 END AS LOGEQUIPOPEN_FROMBLDG,
                                                             CASE WHEN eaWHSE = 3 and EATLOC >= 'W400000' then 2 else 1 end as LOGEQUIPOPEN_TOBLDG,
-                                                            a.EALOG# as LOGEQUIPOPEN_LOG,
                                                             CASE WHEN LMTIER in('L01', 'L02') then 'PUTFLW' 
                                                                  WHEN LMTIER in ('L04', 'L05') or substring(LOSIZE,1,1) = 'B' then 'PUTCRT'
                                                                  WHEN LMTIER = 'L06' then 'PUTDOG'
@@ -38,7 +37,8 @@ $putawayopen = $aseriesconn->prepare("SELECT eawhse as LOGEQUIPOPEN_WHSE,
                                                             LOWHSE = EAWHSE and 
                                                             LOLOC# = EATLOC 
                                                             and EASTAT <> 'C'
-                                                    GROUP BY EAWHSE, CASE WHEN EAWHSE = 3 AND EAUS08 IN ('NVSK005W', 'NVSK016W') THEN 2 ELSE 1 END, CASE WHEN eaWHSE = 3 and EATLOC >= 'W400000' then 2 else 1 end, A.EALOG#, CASE WHEN LMTIER in('L01', 'L02') then 'PUTFLW'
+                                                            and EATRND >= 1200301
+                                                    GROUP BY EAWHSE, CASE WHEN EAWHSE = 3 AND EAUS08 IN ('NVSK005W', 'NVSK016W') THEN 2 ELSE 1 END, CASE WHEN eaWHSE = 3 and EATLOC >= 'W400000' then 2 else 1 end, CASE WHEN LMTIER in('L01', 'L02') then 'PUTFLW'
                                                                  WHEN LMTIER in ('L04', 'L05') or substring(LOSIZE,1,1) = 'B' then 'PUTCRT'
                                                                  WHEN LMTIER = 'L06' then 'PUTDOG' 
                                                                  WHEN EATYPE = 'P' then 'PUTTUR' 
@@ -49,13 +49,12 @@ $putawayopen->execute();
 $array_logequipopen = $putawayopen->fetchAll(pdo::FETCH_ASSOC);
 
 $data = array();
-$logcolumns = 'logequipopen_whse, logequipopen_frombldg, logequipopen_tobldg, logequipopen_log, logequipopen_equip, logequipopen_totlines';
+$logcolumns = 'logequipopen_whse, logequipopen_frombldg, logequipopen_tobldg, logequipopen_equip, logequipopen_totlines';
 foreach ($array_logequipopen as $key => $value) {
 
     $logequipopen_whse = $array_logequipopen[$key]['LOGEQUIPOPEN_WHSE'];
     $logequipopen_frombldg = $array_logequipopen[$key]['LOGEQUIPOPEN_FROMBLDG'];
     $logequipopen_tobldg = $array_logequipopen[$key]['LOGEQUIPOPEN_TOBLDG'];
-    $logequipopen_log = $array_logequipopen[$key]['LOGEQUIPOPEN_LOG'];
     $logequipopen_equip = $array_logequipopen[$key]['LOGEQUIPOPEN_EQUIP'];
     $logequipopen_totlines = $array_logequipopen[$key]['LOGEQUIPOPEN_TOTLINES'];
 }
@@ -70,7 +69,6 @@ pdoMultiInsert($mysqltable, $schema, $array_logequipopen, $conn1, $arraychunk);
 $PUTOPENTIMES = $conn1->prepare("SELECT LOGEQUIPOPEN_WHSE AS LOGEQUIPOPENTIMES_WHSE,
                                        LOGEQUIPOPEN_FROMBLDG AS LOGEQUIPOPENTIMES_FROMBLDG,
                                        LOGEQUIPOPEN_TOBLDG AS LOGEQUIPOPENTIMES_TOBLDG,
-                                       LOGEQUIPOPEN_LOG AS LOGEQUIPOPENTIMES_LOG,
                                        LOGEQUIPOPEN_EQUIP AS LOGEQUIPOPENTIMES_EQUIP,
                                        LOGEQUIPOPEN_TOTLINES AS LOGEQUIPOPENTIMES_TOTLINES,
                                        SUM(LOGEQUIPOPEN_TOTLINES * FORECAST_TIMEPERLINE) AS LOGEQUIPOPENTIMES_TOTTIME
@@ -87,7 +85,7 @@ $PUTOPENTIMES = $conn1->prepare("SELECT LOGEQUIPOPEN_WHSE AS LOGEQUIPOPENTIMES_W
                                        LOGEQUIPOPEN_EQUIP = FORECAST_FUNCTION
                                        
                                                                          
-                                       GROUP BY LOGEQUIPOPENTIMES_WHSE, LOGEQUIPOPENTIMES_FROMBLDG, LOGEQUIPOPENTIMES_TOBLDG, LOGEQUIPOPENTIMES_LOG, LOGEQUIPOPENTIMES_EQUIP");
+                                       GROUP BY LOGEQUIPOPENTIMES_WHSE, LOGEQUIPOPENTIMES_FROMBLDG, LOGEQUIPOPENTIMES_TOBLDG, LOGEQUIPOPENTIMES_EQUIP");
 
 $PUTOPENTIMES->execute();
 $array_logequipopentimes = $PUTOPENTIMES->fetchAll(pdo::FETCH_ASSOC);
@@ -99,7 +97,6 @@ foreach ($array_logequipopentimes as $key => $value) {
     $logequipopentimes_whse = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_WHSE'];
     $logequipopentimes_frombldg = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_FROMBLDG'];
     $logequipopentimes_tobldg = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_TOBLDG'];
-    $logequipopentimes_log = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_LOG'];
     $logequipopentimes_equip = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_EQUIP'];
     $logequipopentimes_totlines = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_TOTLINES'];
     $logequipopentimes_tottime = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_TOTTIME'];
@@ -208,7 +205,11 @@ pdoMultiInsert($mysqltable3, $schema3, $array_MOVEOPENTIMES, $conn1, $arraychunk
 
 //pull in today's open moves
 $openmoves4 = $aseriesconn->prepare("SELECT MVWHSE AS OPENMOVES_WHSE,
-                                             MVTYPE AS OPENMOVES_TYPE,
+                                            CASE WHEN MVTYPE = 'RS' THEN 'AUTO'
+                                                 WHEN MVTYPE IN ('SK' , 'SJ') THEN 'ASO'
+                                                 WHEN MVTYPE IN ('SO' , 'SP') THEN 'SPEC'
+                                                 WHEN MVTYPE = 'CM' THEN 'CONSOL'
+                                                 ELSE 'UNDEFINED' END AS OPENMOVES_TYPE,
                                              CASE WHEN MVWHSE = 3 and MVFLC# >= 'W400000' then 2 else 1 end as OPENMOVES_FROMBLDG,
                                              CASE WHEN MVWHSE = 3 and MVTLC# >= 'W400000' then 2 else 1 end as OPENMOVES_TOBLDG,
                                              CASE WHEN MVFZNE IN ('1', '2') AND MVTZNE IN ('1', '2') AND MVFLC# = MVPLC# THEN 'CRTCRT'
@@ -230,7 +231,11 @@ $openmoves4 = $aseriesconn->prepare("SELECT MVWHSE AS OPENMOVES_WHSE,
                                     JOIN HSIPCORDTA.NPFLSM ON LMWHSE = MVWHSE AND MVTLC# = LMLOC#
                                     WHERE MVSTAT <> 'C' 
                                                                                  
-                                    group by mvwhse, mvtype, 
+                                    group by mvwhse, CASE WHEN MVTYPE = 'RS' THEN 'AUTO'
+                                                 WHEN MVTYPE IN ('SK' , 'SJ') THEN 'ASO'
+                                                 WHEN MVTYPE IN ('SO' , 'SP') THEN 'SPEC'
+                                                 WHEN MVTYPE = 'CM' THEN 'CONSOL'
+                                                 ELSE 'UNDEFINED' END,                            
 						CASE WHEN MVWHSE = 3 and MVFLC# >= 'W400000' then 2 else 1 end,
 						CASE WHEN MVWHSE = 3 and MVTLC# >= 'W400000' then 2 else 1 end,
 						CASE WHEN MVFZNE IN ('1', '2') AND MVTZNE IN ('1', '2') AND MVFLC# = MVPLC# THEN 'CRTCRT'
@@ -273,6 +278,7 @@ pdoMultiInsert($mysqltable4, $schema4, $array_movesopen4, $conn1, $arraychunk4);
 //calculate times for open moves
 
 $OPENMOVETIMES = $conn1->prepare("SELECT OPENMOVES_WHSE AS openmovetimes_whse,
+                                       OPENMOVES_TYPE as openmovetimes_type, 
                                        OPENMOVES_FROMBLDG as openmovetimes_frombldg,
                                        OPENMOVES_TOBLDG AS openmovetimes_tobldg, 
                                        OPENMOVES_EQUIP AS openmovetimes_equip,
@@ -291,16 +297,17 @@ $OPENMOVETIMES = $conn1->prepare("SELECT OPENMOVES_WHSE AS openmovetimes_whse,
                                        OPENMOVES_EQUIP = FORECAST_FUNCTION
                                        
                                                                          
-                                       GROUP BY openmovetimes_whse, openmovetimes_frombldg, openmovetimes_tobldg, openmovetimes_equip, openmovetimes_totlines");
+                                       GROUP BY openmovetimes_whse, openmovetimes_type, openmovetimes_frombldg, openmovetimes_tobldg, openmovetimes_equip, openmovetimes_totlines");
 
 $OPENMOVETIMES->execute();
 $array_OPENMOVETIMES = $OPENMOVETIMES->fetchAll(pdo::FETCH_ASSOC);
 
 $data10 = array();
-$logcolumns10 = 'openmovetimes_whse,openmovetimes_frombldg, openmovetimes_tobldg, openmovetimes_equip,openmovetimes_totlines, openmovetimes_tottime ';
+$logcolumns10 = 'openmovetimes_whse, openmovetimes_type, openmovetimes_frombldg, openmovetimes_tobldg, openmovetimes_equip,openmovetimes_totlines, openmovetimes_tottime ';
 foreach ($array_OPENMOVETIMES as $key => $value) {
 
     $openmovetimes_whse = $array_OPENMOVETIMES[$key]['openmovetimes_whse'];
+    $openmovetimes_type = $array_OPENMOVETIMES[$key]['openmovetimes_type'];
     $openmovetimes_frombldg = $array_OPENMOVETIMES[$key]['openmovetimes_frombldg'];
     $openmovetimes_tobldg = $array_OPENMOVETIMES[$key]['openmovetimes_tobldg'];
     $openmovetimes_equip = $array_OPENMOVETIMES[$key]['openmovetimes_equip'];
