@@ -337,14 +337,14 @@ $putawayopen = $aseriesconn_can->prepare("SELECT eawhse as LOGEQUIPOPEN_WHSE,
                                                                  WHEN EATYPE <> 'P' and (LMTIER like 'C%' or substring(LOSIZE,1,1) in ('P','D','H')) then 'PUTPKR' else 'PUTOPEN' END as LOGEQUIPOPEN_EQUIP,                                                           
                                                              count(*) as LOGEQUIPOPEN_TOTLINES
                                                             
-                                                    FROM HSIPCORDTA.NPFCPC c, 
-                                                    HSIPCORDTA.NPFLOC d, 
-                                                    HSIPCORDTA.NPFERA a LEFT JOIN 
-                                                    HSIPCORDTA.NPFLER E ON A.EATLOC = E.LELOC# AND A.EATRN# = E.LETRND 
+                                                    FROM ARCPCORDTA.NPFCPC c, 
+                                                    ARCPCORDTA.NPFLOC d, 
+                                                    ARCPCORDTA.NPFERA a LEFT JOIN 
+                                                    ARCPCORDTA.NPFLER E ON A.EATLOC = E.LELOC# AND A.EATRN# = E.LETRND 
                                                     inner join (SELECT EATRN#, max(EASEQ3) as max_seq 
-                                                    FROM HSIPCORDTA.NPFERA GROUP BY EATRN#) b on b.EATRN# = a.EATRN# 
+                                                    FROM ARCPCORDTA.NPFERA GROUP BY EATRN#) b on b.EATRN# = a.EATRN# 
                                                     and a.EASEQ3 = max_seq   
-                                                    JOIN HSIPCORDTA.NPFLSM on LMWHSE = EAWHSE and EATLOC = LMLOC# 
+                                                    JOIN ARCPCORDTA.NPFLSM on LMWHSE = EAWHSE and EATLOC = LMLOC# 
                                                     WHERE PCITEM = EAITEM and 
                                                             PCWHSE = 0 and 
                                                             LOWHSE = EAWHSE and 
@@ -439,9 +439,9 @@ pdoMultiInsert($mysqltable1, $schema1, $array_logequipopentimes, $conn1, $arrayc
                                              WHEN LMTIER IN ('C01', 'C02', 'C03') then 'MVETUR'
                                              WHEN LMTIER IN ('C04', 'C05', 'C06') then 'MVEPKR' else 'MVEOPEN' END as FORECASTMOVE_EQUIP,
                                         count(*) as FORECASTMOVE_TOTLINES   
-                                    FROM HSIPCORDTA.NPFLOC A 
-                                    JOIN HSIPCORDTA.NPFLSM B ON LOWHSE = LMWHSE AND LOITEM = LMITEM AND LOLOC# = LMLOC#
-                                    LEFT JOIN HSIPCORDTA.NPFWRS C ON A.LOWHSE = C.WRSWHS AND A.LOITEM = C.WRSITM  
+                                    FROM ARCPCORDTA.NPFLOC A 
+                                    JOIN ARCPCORDTA.NPFLSM B ON LOWHSE = LMWHSE AND LOITEM = LMITEM AND LOLOC# = LMLOC#
+                                    LEFT JOIN ARCPCORDTA.NPFWRS C ON A.LOWHSE = C.WRSWHS AND A.LOITEM = C.WRSITM  
                                             WHERE LOPRIM = 'P'
                                                                                        
                                             AND LOITEM >= '1000000'
@@ -540,8 +540,8 @@ $openmoves4 = $aseriesconn_can->prepare("SELECT MVWHSE AS OPENMOVES_WHSE,
                                             count(*) as OPENMOVES_TOTLINES      
 
 
-                                    FROM HSIPCORDTA.NPFMVE
-                                    JOIN HSIPCORDTA.NPFLSM ON LMWHSE = MVWHSE AND MVTLC# = LMLOC#
+                                    FROM ARCPCORDTA.NPFMVE
+                                    JOIN ARCPCORDTA.NPFLSM ON LMWHSE = MVWHSE AND MVTLC# = LMLOC#
                                     WHERE MVSTAT <> 'C' 
                                                                                  
                                     group by mvwhse, CASE WHEN MVTYPE = 'RS' THEN 'AUTO'
