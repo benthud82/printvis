@@ -28,6 +28,10 @@ if (!function_exists('array_column')) {
 
 }
 
+
+$building = $_POST['building'];
+
+
 function _boxprep($boxsize, $whse) {
     switch ($whse) {
         case 6:
@@ -649,3 +653,4 @@ function pdoMultiInsert_duplicate($tableName, $schema, $data, $pdoObject, $array
     }
     return;
 }
+

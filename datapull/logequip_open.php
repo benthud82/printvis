@@ -12,7 +12,7 @@ foreach ($truncatetables as $value) {
     $querydelete2 = $conn1->prepare("TRUNCATE printvis.$value");
     $querydelete2->execute();
 }
-
+$building = $_POST['building'];
 
 //pull in all open putaway (logged and non logged)
 $putawayopen = $aseriesconn->prepare("SELECT eawhse as LOGEQUIPOPEN_WHSE,
@@ -72,7 +72,7 @@ $PUTOPENTIMES = $conn1->prepare("SELECT LOGEQUIPOPEN_WHSE AS LOGEQUIPOPENTIMES_W
                                        LOGEQUIPOPEN_TOBLDG AS LOGEQUIPOPENTIMES_TOBLDG,
                                        LOGEQUIPOPEN_EQUIP AS LOGEQUIPOPENTIMES_EQUIP,
                                        LOGEQUIPOPEN_TOTLINES AS LOGEQUIPOPENTIMES_TOTLINES,
-                                       SUM(LOGEQUIPOPEN_TOTLINES * FORECAST_TIMEPERLINE) AS LOGEQUIPOPENTIMES_TOTTIME
+                                       SUM((LOGEQUIPOPEN_TOTLINES * FORECAST_TIMEPERLINE) / 60) AS LOGEQUIPOPENTIMES_TOTTIME
                                        
                                        FROM
                                        printvis.LOG_EQUIPOPEN
@@ -85,7 +85,7 @@ $PUTOPENTIMES = $conn1->prepare("SELECT LOGEQUIPOPEN_WHSE AS LOGEQUIPOPENTIMES_W
                                        LOGEQUIPOPEN_TOBLDG = FORECAST_BUILDING AND 
                                        LOGEQUIPOPEN_EQUIP = FORECAST_FUNCTION
                                        
-                                                                         
+                                       WHERE LOGEQUIPOPEN_TOBLDG = '$building'
                                        GROUP BY LOGEQUIPOPENTIMES_WHSE, LOGEQUIPOPENTIMES_FROMBLDG, LOGEQUIPOPENTIMES_TOBLDG, LOGEQUIPOPENTIMES_EQUIP");
 
 $PUTOPENTIMES->execute();
@@ -211,9 +211,9 @@ $openmoves4 = $aseriesconn->prepare("SELECT MVWHSE AS OPENMOVES_WHSE,
                                                  WHEN MVTYPE IN ('SO' , 'SP') THEN 'SPEC'
                                                  WHEN MVTYPE = 'CM' THEN 'CONSOL'
                                                  ELSE 'UNDEFINED' END AS OPENMOVES_TYPE,
-                                             CASE WHEN MVWHSE = 3 and MVFLC# >= 'W400000' then 2 else 1 end as OPENMOVES_FROMBLDG,
-                                             CASE WHEN MVWHSE = 3 and MVTLC# >= 'W400000' then 2 else 1 end as OPENMOVES_TOBLDG,
-                                             CASE WHEN MVFZNE IN ('1', '2') AND MVTZNE IN ('1', '2') AND MVFLC# = MVPLC# THEN 'CRTCRT'
+                                            CASE WHEN MVWHSE = 3 and MVFLC# >= 'W400000' then 2 else 1 end as OPENMOVES_FROMBLDG,
+                                            CASE WHEN MVWHSE = 3 and MVTLC# >= 'W400000' then 2 else 1 end as OPENMOVES_TOBLDG,
+                                            CASE WHEN MVFZNE IN ('1', '2') AND MVTZNE IN ('1', '2') AND MVFLC# = MVPLC# THEN 'CRTCRT'
                                                   WHEN MVFZNE IN ('7', '8', '9' ) AND MVTZNE IN ('1', '2') AND LMTIER IN ('L02', 'L03', 'L19') AND MVFLC# = MVPLC# THEN 'PKRFLW'
                                                   WHEN MVFZNE IN ('7', '8', '9' ) AND MVTZNE IN ('1', '2') AND LMTIER IN ('L04') AND MVFLC# = MVPLC# THEN 'PKRBIN'
                                                   WHEN MVFZNE IN ('7', '8', '9' ) AND MVTZNE IN ('7', '8', '9') AND LMTIER IN ('C04', 'C06') AND MVFLC# = MVPLC# THEN 'PKRPKR'
@@ -281,10 +281,10 @@ pdoMultiInsert($mysqltable4, $schema4, $array_movesopen4, $conn1, $arraychunk4);
 $OPENMOVETIMES = $conn1->prepare("SELECT OPENMOVES_WHSE AS openmovetimes_whse,
                                        OPENMOVES_TYPE as openmovetimes_type, 
                                        OPENMOVES_FROMBLDG as openmovetimes_frombldg,
-                                       OPENMOVES_TOBLDG AS openmovetimes_tobldg, 
+                                       OPENMOVES_TOBLDG AS openmovetimes_tobldg,
                                        OPENMOVES_EQUIP AS openmovetimes_equip,
                                        OPENMOVES_TOTLINES AS openmovetimes_totlines,
-                                       SUM(OPENMOVES_TOTLINES * FORECAST_TIMEPERLINE) AS openmovetimes_tottime
+                                       SUM((OPENMOVES_TOTLINES * FORECAST_TIMEPERLINE) / 60) AS openmovetimes_tottime
                                        
                                        FROM
                                        printvis.OPENMOVES
@@ -384,7 +384,7 @@ $PUTOPENTIMES = $conn1->prepare("SELECT LOGEQUIPOPEN_WHSE AS LOGEQUIPOPENTIMES_W
                                        LOGEQUIPOPEN_TOBLDG AS LOGEQUIPOPENTIMES_TOBLDG,
                                        LOGEQUIPOPEN_EQUIP AS LOGEQUIPOPENTIMES_EQUIP,
                                        LOGEQUIPOPEN_TOTLINES AS LOGEQUIPOPENTIMES_TOTLINES,
-                                       SUM(LOGEQUIPOPEN_TOTLINES * FORECAST_TIMEPERLINE) AS LOGEQUIPOPENTIMES_TOTTIME
+                                       SUM((LOGEQUIPOPEN_TOTLINES * FORECAST_TIMEPERLINE) / 60) AS LOGEQUIPOPENTIMES_TOTTIME
                                        
                                        FROM
                                        printvis.LOG_EQUIPOPEN

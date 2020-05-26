@@ -12,6 +12,8 @@ $whssqlarray = $whssql->fetchAll(pdo::FETCH_ASSOC);
 $whsesel = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 include '../timezoneset.php';
 
+$building = $_POST['building'];
+
 
 
 
