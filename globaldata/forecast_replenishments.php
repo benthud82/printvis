@@ -262,515 +262,519 @@ $sql_forecastturline->execute();
 $array_forecastturline = $sql_forecastturline->fetchAll(pdo::FETCH_ASSOC);
 
 $forecastturline = $array_forecastturline[0]['FORECAST_TURLINE'];
-
 ?> 
 
 
-<?php if ($whsesel == 3){?>
+<?php if ($whsesel == 3) { ?>
 
-<div class="col-sm-12">
-                    <section class="panel hidewrapper" style="margin-bottom: 50px; margin-top: 20px;"> 
-                        <header class="panel-heading bg bg-inverse h2">Open Moves</header>
-                        <div id="openmoves" class="panel-body" style="background: #efefef">
-                     
-<!--Line Count-->
-<div class="row">
-    <div class="col-lg-2" id="stat_REPLEN_SUMMARY">
-        <div class="dashboard-stat dashboard-stat-v2 red-intense">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($replensummary, 0) ?></span>
-                </div>
-                <div class="desc">Total Moves</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_AUTOLINE">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($AUTOLINE, 0) ?></span>
-                </div>
-                <div class="desc">AUTO Moves</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_ASOLINE">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($ASOLINE, 0) ?></span>
-                </div>
-                <div class="desc">ASO Moves</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_SPECLINE">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($SPECLINE, 0) ?></span>
-                </div>
-                <div class="desc">SPEC Moves</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_CONSOLLINE">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($CONSOLLINE, 0) ?></span>
-                </div>
-                <div class="desc">CONSOL Moves</div>
-            </div>
-        </div>
-    </div>
-</div>
+    <!--Open Moves-->
+    <div class="row">
+        <div class="col-sm-12">
+            <section class="panel hidewrapper" style="margin-bottom: 50px; margin-top: 20px;"> 
+                <header class="panel-heading bg bg-inverse h2">Open Moves</header>
+                <div id="openmoves" class="panel-body" style="background: #efefef">
 
-
-<div class="row">
-    <div class="col-lg-2" id="stat_totalreplen">
-        <div class="dashboard-stat dashboard-stat-v2 red-intense">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalreplen, 1) ?></span>
-                </div>
-                <div class="desc">Total Replen Hours</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_totalauto">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalauto, 1) ?></span>
-                </div>
-                <div class="desc">Total Auto Hours</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_totalaso">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalaso, 1) ?></span>
-                </div>
-                <div class="desc">Total ASO Hours</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_totalspec">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalspec, 1) ?></span>
-                </div>
-                <div class="desc">Total Special Hours</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_totalconsol">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalconsol, 1) ?></span>
-                </div>
-                <div class="desc">Total Consol Hours</div>
-            </div>
-        </div>
-    </div>
-    </div>
-</div>
-</div>
-    
-
-
-
-<div class="row">
-<div class="col-sm-12">
-                    <section class="panel hidewrapper" style="margin-bottom: 50px; margin-top: 20px;"> 
-                        <header class="panel-heading bg bg-inverse h2">Forecasted Moves by Destination Location Type</header>
-                        <div id="forecastedmoves" class="panel-body" style="background: #efefef">
-
-<div class="row">
-    <div class="col-lg-2" id="stat_FORECAST_SUMMARY">
-        <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastsummary, 0) ?></span>
-                </div>
-                <div class="desc">Forecast Moves</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_FORECAST_BINLINE">
-        <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastbinline, 0) ?></span>
-                </div>
-                <div class="desc">Forecast Bin Lines</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_FORECAST_FPLINE">
-            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
-                <div class="visual">
-                    <i class="fa fa-cubes"></i>
-                </div>
-                <div class="details">
-                    <div class="number">
-                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastFPline, 0) ?></span>
-                    </div>
-                    <div class="desc">Forecast Full Pallet Lines</div>
-                </div>
-            </div>
-        </div>
-    <div class="col-lg-2" id="stat_FORECAST_DOGLINE">
-            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
-                <div class="visual">
-                    <i class="fa fa-cubes"></i>
-                </div>
-                <div class="details">
-                    <div class="number">
-                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastdogline, 0) ?></span>
-                    </div>
-                    <div class="desc">Forecast Dogpound Lines</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-2" id="stat_FORECAST_FLOWLINE">
-                <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
-                    <div class="visual">
-                        <i class="fa fa-cubes"></i>
-                    </div>
-                    <div class="details">
-                        <div class="number">
-                            <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastflowline, 0) ?></span>
+                    <!--Line Count-->
+                    <div class="row">
+                        <div class="col-lg-2" id="stat_REPLEN_SUMMARY">
+                            <div class="dashboard-stat dashboard-stat-v2 red-intense">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($replensummary, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Total Moves</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="desc">Forecast Flow Lines</div>
-                    </div>
-                </div>
-            </div>
-        <div class="col-lg-2" id="stat_FORECAST_PKRLINE">
-                <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
-                    <div class="visual">
-                        <i class="fa fa-cubes"></i>
-                    </div>
-                    <div class="details">
-                        <div class="number">
-                            <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastpkrline, 0) ?></span>
+                        <div class="col-lg-2" id="stat_AUTOLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($AUTOLINE, 0) ?></span>
+                                    </div>
+                                    <div class="desc">AUTO Moves</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="desc">Forecast PKR Lines</div>
-                    </div>
-                </div>
-            </div>
-        <div class="col-lg-2" id="stat_FORECAST_TURLINE">
-                <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
-                    <div class="visual">
-                        <i class="fa fa-cubes"></i>
-                    </div>
-                    <div class="details">
-                        <div class="number">
-                            <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastturline, 0) ?></span>
+                        <div class="col-lg-2" id="stat_ASOLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($ASOLINE, 0) ?></span>
+                                    </div>
+                                    <div class="desc">ASO Moves</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="desc">Forecast Turret Lines</div>
-                    </div>
-                </div>
-            </div>
-    </div>
-     
-                        
-
-   
-                            
-<?php} else{ ?>
-    
-<div class="col-sm-12">
-                    <section class="panel hidewrapper" style="margin-bottom: 50px; margin-top: 20px;"> 
-                        <header class="panel-heading bg bg-inverse h2">Open Moves</header>
-                        <div id="openmoves" class="panel-body" style="background: #efefef">
-                     
-<!--Line Count-->
-<div class="row">
-    <div class="col-lg-2" id="stat_REPLEN_SUMMARY">
-        <div class="dashboard-stat dashboard-stat-v2 red-intense">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($replensummary, 0) ?></span>
-                </div>
-                <div class="desc">Total Moves</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_AUTOLINE">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($AUTOLINE, 0) ?></span>
-                </div>
-                <div class="desc">AUTO Moves</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_ASOLINE">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($ASOLINE, 0) ?></span>
-                </div>
-                <div class="desc">ASO Moves</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_SPECLINE">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($SPECLINE, 0) ?></span>
-                </div>
-                <div class="desc">SPEC Moves</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_CONSOLLINE">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($CONSOLLINE, 0) ?></span>
-                </div>
-                <div class="desc">CONSOL Moves</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<div class="row">
-    <div class="col-lg-2" id="stat_totalreplen">
-        <div class="dashboard-stat dashboard-stat-v2 red-intense">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalreplen, 1) ?></span>
-                </div>
-                <div class="desc">Total Replen Hours</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_totalauto">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalauto, 1) ?></span>
-                </div>
-                <div class="desc">Total Auto Hours</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_totalaso">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalaso, 1) ?></span>
-                </div>
-                <div class="desc">Total ASO Hours</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_totalspec">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalspec, 1) ?></span>
-                </div>
-                <div class="desc">Total Special Hours</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_totalconsol">
-        <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalconsol, 1) ?></span>
-                </div>
-                <div class="desc">Total Consol Hours</div>
-            </div>
-        </div>
-    </div>
-    </div>
-</div>
-</div>
-    
-
-
-
-<div class="row">
-<div class="col-sm-12">
-                    <section class="panel hidewrapper" style="margin-bottom: 50px; margin-top: 20px;"> 
-                        <header class="panel-heading bg bg-inverse h2">Forecasted Moves by Destination Location Type</header>
-                        <div id="forecastedmoves" class="panel-body" style="background: #efefef">
-
-<div class="row">
-    <div class="col-lg-2" id="stat_FORECAST_SUMMARY">
-        <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastsummary, 0) ?></span>
-                </div>
-                <div class="desc">Forecast Moves</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_FORECAST_BINLINE">
-        <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
-            <div class="visual">
-                <i class="fa fa-cubes"></i>
-            </div>
-            <div class="details">
-                <div class="number">
-                    <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastbinline, 0) ?></span>
-                </div>
-                <div class="desc">Forecast Bin Lines</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-2" id="stat_FORECAST_FPLINE">
-            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
-                <div class="visual">
-                    <i class="fa fa-cubes"></i>
-                </div>
-                <div class="details">
-                    <div class="number">
-                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastFPline, 0) ?></span>
-                    </div>
-                    <div class="desc">Forecast Full Pallet Lines</div>
-                </div>
-            </div>
-        </div>
-    <div class="col-lg-2" id="stat_FORECAST_DOGLINE">
-            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
-                <div class="visual">
-                    <i class="fa fa-cubes"></i>
-                </div>
-                <div class="details">
-                    <div class="number">
-                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastdogline, 0) ?></span>
-                    </div>
-                    <div class="desc">Forecast Dogpound Lines</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-2" id="stat_FORECAST_FLOWLINE">
-                <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
-                    <div class="visual">
-                        <i class="fa fa-cubes"></i>
-                    </div>
-                    <div class="details">
-                        <div class="number">
-                            <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastflowline, 0) ?></span>
+                        <div class="col-lg-2" id="stat_SPECLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($SPECLINE, 0) ?></span>
+                                    </div>
+                                    <div class="desc">SPEC Moves</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="desc">Forecast Flow Lines</div>
-                    </div>
-                </div>
-            </div>
-        <div class="col-lg-2" id="stat_FORECAST_PKRLINE">
-                <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
-                    <div class="visual">
-                        <i class="fa fa-cubes"></i>
-                    </div>
-                    <div class="details">
-                        <div class="number">
-                            <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastpkrline, 0) ?></span>
+                        <div class="col-lg-2" id="stat_CONSOLLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($CONSOLLINE, 0) ?></span>
+                                    </div>
+                                    <div class="desc">CONSOL Moves</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="desc">Forecast PKR Lines</div>
                     </div>
-                </div>
-            </div>
-        <div class="col-lg-2" id="stat_FORECAST_TURLINE">
-                <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
-                    <div class="visual">
-                        <i class="fa fa-cubes"></i>
-                    </div>
-                    <div class="details">
-                        <div class="number">
-                            <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastturline, 0) ?></span>
+
+
+                    <div class="row">
+                        <div class="col-lg-2" id="stat_totalreplen">
+                            <div class="dashboard-stat dashboard-stat-v2 red-intense">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalreplen, 1) ?></span>
+                                    </div>
+                                    <div class="desc">Total Replen Hours</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="desc">Forecast Turret Lines</div>
+                        <div class="col-lg-2" id="stat_totalauto">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalauto, 1) ?></span>
+                                    </div>
+                                    <div class="desc">Total Auto Hours</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_totalaso">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalaso, 1) ?></span>
+                                    </div>
+                                    <div class="desc">Total ASO Hours</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_totalspec">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalspec, 1) ?></span>
+                                    </div>
+                                    <div class="desc">Total Special Hours</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_totalconsol">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalconsol, 1) ?></span>
+                                    </div>
+                                    <div class="desc">Total Consol Hours</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+        </div>
     </div>
-     
-                            
-                           
-<?php } ?>
+
+
+    <!--Forecasted moves-->
+    <div class="row">
+        <div class="col-sm-12">
+            <section class="panel hidewrapper" style="margin-bottom: 50px; margin-top: 20px;"> 
+                <header class="panel-heading bg bg-inverse h2">Forecasted Moves by Destination Location Type</header>
+                <div id="forecastedmoves" class="panel-body" style="background: #efefef">
+
+                    <div class="row">
+                        <div class="col-lg-2" id="stat_FORECAST_SUMMARY">
+                            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastsummary, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Forecast Moves</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_FORECAST_BINLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastbinline, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Forecast Bin Lines</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_FORECAST_FPLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastFPline, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Forecast Full Pallet Lines</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_FORECAST_DOGLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastdogline, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Forecast Dogpound Lines</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_FORECAST_FLOWLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastflowline, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Forecast Flow Lines</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_FORECAST_PKRLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastpkrline, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Forecast PKR Lines</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_FORECAST_TURLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastturline, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Forecast Turret Lines</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+        </div>
+    </div>
+
+<?php } else { ?>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <section class="panel hidewrapper" style="margin-bottom: 50px; margin-top: 20px;"> 
+                <header class="panel-heading bg bg-inverse h2">Open Moves</header>
+                <div id="openmoves" class="panel-body" style="background: #efefef">
+
+                    <!--Line Count-->
+                    <div class="row">
+                        <div class="col-lg-2" id="stat_REPLEN_SUMMARY">
+                            <div class="dashboard-stat dashboard-stat-v2 red-intense">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($replensummary, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Total Moves</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_AUTOLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($AUTOLINE, 0) ?></span>
+                                    </div>
+                                    <div class="desc">AUTO Moves</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_ASOLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($ASOLINE, 0) ?></span>
+                                    </div>
+                                    <div class="desc">ASO Moves</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_SPECLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($SPECLINE, 0) ?></span>
+                                    </div>
+                                    <div class="desc">SPEC Moves</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_CONSOLLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($CONSOLLINE, 0) ?></span>
+                                    </div>
+                                    <div class="desc">CONSOL Moves</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-lg-2" id="stat_totalreplen">
+                            <div class="dashboard-stat dashboard-stat-v2 red-intense">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalreplen, 1) ?></span>
+                                    </div>
+                                    <div class="desc">Total Replen Hours</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_totalauto">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalauto, 1) ?></span>
+                                    </div>
+                                    <div class="desc">Total Auto Hours</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_totalaso">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalaso, 1) ?></span>
+                                    </div>
+                                    <div class="desc">Total ASO Hours</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_totalspec">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalspec, 1) ?></span>
+                                    </div>
+                                    <div class="desc">Total Special Hours</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_totalconsol">
+                            <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalconsol, 1) ?></span>
+                                    </div>
+                                    <div class="desc">Total Consol Hours</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-sm-12">
+            <section class="panel hidewrapper" style="margin-bottom: 50px; margin-top: 20px;"> 
+                <header class="panel-heading bg bg-inverse h2">Forecasted Moves by Destination Location Type</header>
+                <div id="forecastedmoves" class="panel-body" style="background: #efefef">
+
+                    <div class="row">
+                        <div class="col-lg-2" id="stat_FORECAST_SUMMARY">
+                            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastsummary, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Forecast Moves</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_FORECAST_BINLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastbinline, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Forecast Bin Lines</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_FORECAST_FPLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastFPline, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Forecast Full Pallet Lines</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_FORECAST_DOGLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastdogline, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Forecast Dogpound Lines</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_FORECAST_FLOWLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastflowline, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Forecast Flow Lines</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_FORECAST_PKRLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastpkrline, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Forecast PKR Lines</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-2" id="stat_FORECAST_TURLINE">
+                            <div class="dashboard-stat dashboard-stat-v2 green-jungle">  
+                                <div class="visual">
+                                    <i class="fa fa-cubes"></i>
+                                </div>
+                                <div class="details">
+                                    <div class="number">
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($forecastturline, 0) ?></span>
+                                    </div>
+                                    <div class="desc">Forecast Turret Lines</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                <?php } ?>
 
