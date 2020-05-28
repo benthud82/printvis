@@ -1277,66 +1277,66 @@ $dropzonemaintocase = $array_dropzonemaintocase[0]['DROPZONE_MAINTOCASE'];
                     </div> 
                     </div>
                  <div class="row">
-                        <div class="col-lg-2" id="stat_totalreplen">
+                        <div class="col-lg-2" id="stat_totalreplentocase">
                             <div class="dashboard-stat dashboard-stat-v2 red-intense">  
                                 <div class="visual">
                                     <i class="fa fa-cubes"></i>
                                 </div>
                                 <div class="details">
                                     <div class="number">
-                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalreplen, 1) ?></span>
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalreplentocase, 1) ?></span>
                                     </div>
                                     <div class="desc">Total Replen Hours</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-2" id="stat_totalauto">
+                        <div class="col-lg-2" id="stat_totalautotocase">
                             <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
                                 <div class="visual">
                                     <i class="fa fa-cubes"></i>
                                 </div>
                                 <div class="details">
                                     <div class="number">
-                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalauto, 1) ?></span>
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalautotocase, 1) ?></span>
                                     </div>
                                     <div class="desc">Total Auto Hours</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-2" id="stat_totalaso">
+                        <div class="col-lg-2" id="stat_totalasotocase">
                             <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
                                 <div class="visual">
                                     <i class="fa fa-cubes"></i>
                                 </div>
                                 <div class="details">
                                     <div class="number">
-                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalaso, 1) ?></span>
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalasotocase, 1) ?></span>
                                     </div>
                                     <div class="desc">Total ASO Hours</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-2" id="stat_totalspec">
+                        <div class="col-lg-2" id="stat_totalspectocase">
                             <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
                                 <div class="visual">
                                     <i class="fa fa-cubes"></i>
                                 </div>
                                 <div class="details">
                                     <div class="number">
-                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalspec, 1) ?></span>
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalspectocase, 1) ?></span>
                                     </div>
                                     <div class="desc">Total Special Hours</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-2" id="stat_totalconsol">
+                        <div class="col-lg-2" id="stat_totalconsoltocase">
                             <div class="dashboard-stat dashboard-stat-v2 blue-hoki">  
                                 <div class="visual">
                                     <i class="fa fa-cubes"></i>
                                 </div>
                                 <div class="details">
                                     <div class="number">
-                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalconsol, 1) ?></span>
+                                        <span class="yestreturns" data-counter="counterup" data-value=""><?php echo number_format($totalconsoltocase, 1) ?></span>
                                     </div>
                                     <div class="desc">Total Consol Hours</div>
                                 </div>
