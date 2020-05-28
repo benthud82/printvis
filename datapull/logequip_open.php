@@ -7,12 +7,12 @@ ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
 $today_eraformat = intval(date('1ymd'));
-$truncatetables = array('log_equipopen', 'log_equipopentimes', 'openmoves', 'openmoves_times', 'openmoves_transdetail');
+$truncatetables = array('log_equipopen', 'log_equipopentimes', 'openmoves', 'openmoves_times', 'openmoves_transdetail', 'forecastmoves', 'forecastmoves_opentimes');
 foreach ($truncatetables as $value) {
     $querydelete2 = $conn1->prepare("TRUNCATE printvis.$value");
     $querydelete2->execute();
 }
-
+$building = $_POST['building'];
 
 //pull in all open putaway (logged and non logged)
 $putawayopen = $aseriesconn->prepare("SELECT eawhse as LOGEQUIPOPEN_WHSE,
@@ -72,7 +72,7 @@ $PUTOPENTIMES = $conn1->prepare("SELECT LOGEQUIPOPEN_WHSE AS LOGEQUIPOPENTIMES_W
                                        LOGEQUIPOPEN_TOBLDG AS LOGEQUIPOPENTIMES_TOBLDG,
                                        LOGEQUIPOPEN_EQUIP AS LOGEQUIPOPENTIMES_EQUIP,
                                        LOGEQUIPOPEN_TOTLINES AS LOGEQUIPOPENTIMES_TOTLINES,
-                                       SUM(LOGEQUIPOPEN_TOTLINES * FORECAST_TIMEPERLINE) AS LOGEQUIPOPENTIMES_TOTTIME
+                                       SUM((LOGEQUIPOPEN_TOTLINES * FORECAST_TIMEPERLINE) / 60) AS LOGEQUIPOPENTIMES_TOTTIME
                                        
                                        FROM
                                        printvis.LOG_EQUIPOPEN
@@ -85,7 +85,7 @@ $PUTOPENTIMES = $conn1->prepare("SELECT LOGEQUIPOPEN_WHSE AS LOGEQUIPOPENTIMES_W
                                        LOGEQUIPOPEN_TOBLDG = FORECAST_BUILDING AND 
                                        LOGEQUIPOPEN_EQUIP = FORECAST_FUNCTION
                                        
-                                                                         
+                                       WHERE LOGEQUIPOPEN_TOBLDG = '$building'
                                        GROUP BY LOGEQUIPOPENTIMES_WHSE, LOGEQUIPOPENTIMES_FROMBLDG, LOGEQUIPOPENTIMES_TOBLDG, LOGEQUIPOPENTIMES_EQUIP");
 
 $PUTOPENTIMES->execute();
@@ -122,8 +122,8 @@ pdoMultiInsert($mysqltable1, $schema1, $array_logequipopentimes, $conn1, $arrayc
                                         CASE WHEN LOWHSE = 3 and LOLOC# >= 'W400000' then 2 else 1 end as FORECASTMOVE_BUILDING, 
                                         CASE WHEN LMTIER IN ('L01', 'L15') then 'MVEL01'
                                              WHEN LMTIER IN ('L02', 'L03', 'L19') then 'MVEFLW'
-                                             WHEN LMTIER IN ('L04', 'L05', 'L10') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
-                                             WHEN LMTIER = 'L06' then 'MVEDOG'
+                                             WHEN LMTIER IN ('L04', 'L05', 'L10', 'L06') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
+                                             WHEN LMTIER = 'L99' then 'MVEDOG'
                                              WHEN LMTIER IN ('C01', 'C02', 'C03') then 'MVETUR'
                                              WHEN LMTIER IN ('C04', 'C05', 'C06') then 'MVEPKR' else 'MVEOPEN' END as FORECASTMOVE_EQUIP,
                                         count(*) as FORECASTMOVE_TOTLINES   
@@ -137,8 +137,8 @@ pdoMultiInsert($mysqltable1, $schema1, $array_logequipopentimes, $conn1, $arrayc
                                                AND ((LOONHD + LORCVQ) <= LOMINC) 
                                     GROUP BY LOWHSE, CASE WHEN LOWHSE = 3 and LOLOC# >= 'W400000' then 2 else 1 end,CASE WHEN LMTIER IN ('L01', 'L15') then 'MVEL01'  
                                     WHEN LMTIER IN ('L02', 'L03', 'L19') then 'MVEFLW'
-                                    WHEN LMTIER IN ('L04', 'L05', 'L10') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
-                                    WHEN LMTIER = 'L06' then 'MVEDOG' 
+                                    WHEN LMTIER IN ('L04', 'L05', 'L10', 'L06') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
+                                    WHEN LMTIER = 'L99' then 'MVEDOG' 
                                     WHEN LMTIER IN ('C01', 'C02', 'C03') then 'MVETUR' 
                                     WHEN LMTIER IN ('C04', 'C05', 'C06') then 'MVEPKR' else 'MVEOPEN' END ");
 
@@ -211,9 +211,9 @@ $openmoves4 = $aseriesconn->prepare("SELECT MVWHSE AS OPENMOVES_WHSE,
                                                  WHEN MVTYPE IN ('SO' , 'SP') THEN 'SPEC'
                                                  WHEN MVTYPE = 'CM' THEN 'CONSOL'
                                                  ELSE 'UNDEFINED' END AS OPENMOVES_TYPE,
-                                             CASE WHEN MVWHSE = 3 and MVFLC# >= 'W400000' then 2 else 1 end as OPENMOVES_FROMBLDG,
-                                             CASE WHEN MVWHSE = 3 and MVTLC# >= 'W400000' then 2 else 1 end as OPENMOVES_TOBLDG,
-                                             CASE WHEN MVFZNE IN ('1', '2') AND MVTZNE IN ('1', '2') AND MVFLC# = MVPLC# THEN 'CRTCRT'
+                                            CASE WHEN MVWHSE = 3 and MVFLC# >= 'W400000' then 2 else 1 end as OPENMOVES_FROMBLDG,
+                                            CASE WHEN MVWHSE = 3 and MVTLC# >= 'W400000' then 2 else 1 end as OPENMOVES_TOBLDG,
+                                            CASE WHEN MVFZNE IN ('1', '2') AND MVTZNE IN ('1', '2') AND MVFLC# = MVPLC# THEN 'CRTCRT'
                                                   WHEN MVFZNE IN ('7', '8', '9' ) AND MVTZNE IN ('1', '2') AND LMTIER IN ('L02', 'L03', 'L19') AND MVFLC# = MVPLC# THEN 'PKRFLW'
                                                   WHEN MVFZNE IN ('7', '8', '9' ) AND MVTZNE IN ('1', '2') AND LMTIER IN ('L04') AND MVFLC# = MVPLC# THEN 'PKRBIN'
                                                   WHEN MVFZNE IN ('7', '8', '9' ) AND MVTZNE IN ('7', '8', '9') AND LMTIER IN ('C04', 'C06') AND MVFLC# = MVPLC# THEN 'PKRPKR'
@@ -281,10 +281,10 @@ pdoMultiInsert($mysqltable4, $schema4, $array_movesopen4, $conn1, $arraychunk4);
 $OPENMOVETIMES = $conn1->prepare("SELECT OPENMOVES_WHSE AS openmovetimes_whse,
                                        OPENMOVES_TYPE as openmovetimes_type, 
                                        OPENMOVES_FROMBLDG as openmovetimes_frombldg,
-                                       OPENMOVES_TOBLDG AS openmovetimes_tobldg, 
+                                       OPENMOVES_TOBLDG AS openmovetimes_tobldg,
                                        OPENMOVES_EQUIP AS openmovetimes_equip,
                                        OPENMOVES_TOTLINES AS openmovetimes_totlines,
-                                       SUM(OPENMOVES_TOTLINES * FORECAST_TIMEPERLINE) AS openmovetimes_tottime
+                                       SUM((OPENMOVES_TOTLINES * FORECAST_TIMEPERLINE) / 60) AS openmovetimes_tottime
                                        
                                        FROM
                                        printvis.OPENMOVES
@@ -384,7 +384,7 @@ $PUTOPENTIMES = $conn1->prepare("SELECT LOGEQUIPOPEN_WHSE AS LOGEQUIPOPENTIMES_W
                                        LOGEQUIPOPEN_TOBLDG AS LOGEQUIPOPENTIMES_TOBLDG,
                                        LOGEQUIPOPEN_EQUIP AS LOGEQUIPOPENTIMES_EQUIP,
                                        LOGEQUIPOPEN_TOTLINES AS LOGEQUIPOPENTIMES_TOTLINES,
-                                       SUM(LOGEQUIPOPEN_TOTLINES * FORECAST_TIMEPERLINE) AS LOGEQUIPOPENTIMES_TOTTIME
+                                       SUM((LOGEQUIPOPEN_TOTLINES * FORECAST_TIMEPERLINE) / 60) AS LOGEQUIPOPENTIMES_TOTTIME
                                        
                                        FROM
                                        printvis.LOG_EQUIPOPEN
@@ -434,8 +434,8 @@ pdoMultiInsert($mysqltable1, $schema1, $array_logequipopentimes, $conn1, $arrayc
                                         CASE WHEN LOWHSE = 3 and LOLOC# >= 'W400000' then 2 else 1 end as FORECASTMOVE_BUILDING, 
                                         CASE WHEN LMTIER IN ('L01', 'L15') then 'MVEL01'
                                              WHEN LMTIER IN ('L02', 'L03', 'L19') then 'MVEFLW'
-                                             WHEN LMTIER IN ('L04', 'L05', 'L10') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
-                                             WHEN LMTIER = 'L06' then 'MVEDOG'
+                                             WHEN LMTIER IN ('L04', 'L05', 'L10', 'L06') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
+                                             WHEN LMTIER = 'L99' then 'MVEDOG'
                                              WHEN LMTIER IN ('C01', 'C02', 'C03') then 'MVETUR'
                                              WHEN LMTIER IN ('C04', 'C05', 'C06') then 'MVEPKR' else 'MVEOPEN' END as FORECASTMOVE_EQUIP,
                                         count(*) as FORECASTMOVE_TOTLINES   
@@ -449,8 +449,8 @@ pdoMultiInsert($mysqltable1, $schema1, $array_logequipopentimes, $conn1, $arrayc
                                                AND ((LOONHD + LORCVQ) <= LOMINC) 
                                     GROUP BY LOWHSE, CASE WHEN LOWHSE = 3 and LOLOC# >= 'W400000' then 2 else 1 end,CASE WHEN LMTIER IN ('L01', 'L15') then 'MVEL01'  
                                     WHEN LMTIER IN ('L02', 'L03', 'L19') then 'MVEFLW'
-                                    WHEN LMTIER IN ('L04', 'L05', 'L10') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
-                                    WHEN LMTIER = 'L06' then 'MVEDOG' 
+                                    WHEN LMTIER IN ('L04', 'L05', 'L10', 'L06') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
+                                    WHEN LMTIER = 'L99' then 'MVEDOG' 
                                     WHEN LMTIER IN ('C01', 'C02', 'C03') then 'MVETUR' 
                                     WHEN LMTIER IN ('C04', 'C05', 'C06') then 'MVEPKR' else 'MVEOPEN' END ");
 
