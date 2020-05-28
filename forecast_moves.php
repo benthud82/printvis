@@ -61,12 +61,14 @@
             $(document).ready(function () {
                 load_data();
                 replensummary();
+                replensummaryreno();
                 
             });
 
 function refreshall() {
                 load_data();
                 replensummary();
+                replensummaryreno();
                 
 }
 

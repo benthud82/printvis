@@ -7,7 +7,7 @@ ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
 $today_eraformat = intval(date('1ymd'));
-$truncatetables = array('log_equipopen', 'log_equipopentimes', 'openmoves', 'openmoves_times', 'openmoves_transdetail');
+$truncatetables = array('log_equipopen', 'log_equipopentimes', 'openmoves', 'openmoves_times', 'openmoves_transdetail', 'forecastmoves', 'forecastmoves_opentimes');
 foreach ($truncatetables as $value) {
     $querydelete2 = $conn1->prepare("TRUNCATE printvis.$value");
     $querydelete2->execute();
@@ -122,8 +122,8 @@ pdoMultiInsert($mysqltable1, $schema1, $array_logequipopentimes, $conn1, $arrayc
                                         CASE WHEN LOWHSE = 3 and LOLOC# >= 'W400000' then 2 else 1 end as FORECASTMOVE_BUILDING, 
                                         CASE WHEN LMTIER IN ('L01', 'L15') then 'MVEL01'
                                              WHEN LMTIER IN ('L02', 'L03', 'L19') then 'MVEFLW'
-                                             WHEN LMTIER IN ('L04', 'L05', 'L10') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
-                                             WHEN LMTIER = 'L06' then 'MVEDOG'
+                                             WHEN LMTIER IN ('L04', 'L05', 'L10', 'L06') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
+                                             WHEN LMTIER = 'L99' then 'MVEDOG'
                                              WHEN LMTIER IN ('C01', 'C02', 'C03') then 'MVETUR'
                                              WHEN LMTIER IN ('C04', 'C05', 'C06') then 'MVEPKR' else 'MVEOPEN' END as FORECASTMOVE_EQUIP,
                                         count(*) as FORECASTMOVE_TOTLINES   
@@ -137,8 +137,8 @@ pdoMultiInsert($mysqltable1, $schema1, $array_logequipopentimes, $conn1, $arrayc
                                                AND ((LOONHD + LORCVQ) <= LOMINC) 
                                     GROUP BY LOWHSE, CASE WHEN LOWHSE = 3 and LOLOC# >= 'W400000' then 2 else 1 end,CASE WHEN LMTIER IN ('L01', 'L15') then 'MVEL01'  
                                     WHEN LMTIER IN ('L02', 'L03', 'L19') then 'MVEFLW'
-                                    WHEN LMTIER IN ('L04', 'L05', 'L10') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
-                                    WHEN LMTIER = 'L06' then 'MVEDOG' 
+                                    WHEN LMTIER IN ('L04', 'L05', 'L10', 'L06') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
+                                    WHEN LMTIER = 'L99' then 'MVEDOG' 
                                     WHEN LMTIER IN ('C01', 'C02', 'C03') then 'MVETUR' 
                                     WHEN LMTIER IN ('C04', 'C05', 'C06') then 'MVEPKR' else 'MVEOPEN' END ");
 
@@ -434,8 +434,8 @@ pdoMultiInsert($mysqltable1, $schema1, $array_logequipopentimes, $conn1, $arrayc
                                         CASE WHEN LOWHSE = 3 and LOLOC# >= 'W400000' then 2 else 1 end as FORECASTMOVE_BUILDING, 
                                         CASE WHEN LMTIER IN ('L01', 'L15') then 'MVEL01'
                                              WHEN LMTIER IN ('L02', 'L03', 'L19') then 'MVEFLW'
-                                             WHEN LMTIER IN ('L04', 'L05', 'L10') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
-                                             WHEN LMTIER = 'L06' then 'MVEDOG'
+                                             WHEN LMTIER IN ('L04', 'L05', 'L10', 'L06') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
+                                             WHEN LMTIER = 'L99' then 'MVEDOG'
                                              WHEN LMTIER IN ('C01', 'C02', 'C03') then 'MVETUR'
                                              WHEN LMTIER IN ('C04', 'C05', 'C06') then 'MVEPKR' else 'MVEOPEN' END as FORECASTMOVE_EQUIP,
                                         count(*) as FORECASTMOVE_TOTLINES   
@@ -449,8 +449,8 @@ pdoMultiInsert($mysqltable1, $schema1, $array_logequipopentimes, $conn1, $arrayc
                                                AND ((LOONHD + LORCVQ) <= LOMINC) 
                                     GROUP BY LOWHSE, CASE WHEN LOWHSE = 3 and LOLOC# >= 'W400000' then 2 else 1 end,CASE WHEN LMTIER IN ('L01', 'L15') then 'MVEL01'  
                                     WHEN LMTIER IN ('L02', 'L03', 'L19') then 'MVEFLW'
-                                    WHEN LMTIER IN ('L04', 'L05', 'L10') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
-                                    WHEN LMTIER = 'L06' then 'MVEDOG' 
+                                    WHEN LMTIER IN ('L04', 'L05', 'L10', 'L06') or substring(LOSIZE,1,1) = 'B' then 'MVEBIN'
+                                    WHEN LMTIER = 'L99' then 'MVEDOG' 
                                     WHEN LMTIER IN ('C01', 'C02', 'C03') then 'MVETUR' 
                                     WHEN LMTIER IN ('C04', 'C05', 'C06') then 'MVEPKR' else 'MVEOPEN' END ");
 
