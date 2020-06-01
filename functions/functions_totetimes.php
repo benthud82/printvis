@@ -29,7 +29,7 @@ if (!function_exists('array_column')) {
 }
 
 
-$building = $_POST['building'];
+//$building = $_POST['building'];
 
 
 function _boxprep($boxsize, $whse) {
