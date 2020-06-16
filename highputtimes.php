@@ -22,11 +22,11 @@
 
 
         $datesqlall = $conn1->prepare("SELECT DISTINCT
-                                                                DATE(etput_curtime) as dates
+                                                                DATE(etcomb_curtime) as dates
                                                             FROM
-                                                                printvis.elapsedtime_put
+                                                                printvis.elapsedtime_comb
                                                             WHERE
-                                                                etput_whse = $var_whse");
+                                                                etcomb_whse = $var_whse");
         $datesqlall->execute();
         $datesqlallarray = $datesqlall->fetchAll(pdo::FETCH_ASSOC);
         $ids = array_column($datesqlallarray, 'dates');
@@ -34,11 +34,11 @@
 
 
         $datesql = $conn1->prepare("SELECT 
-                                max(DATE(etput_curtime)) as recentdate
+                                max(DATE(etcomb_curtime)) as recentdate
                             FROM
-                                printvis.elapsedtime_put
+                                printvis.elapsedtime_comb
                             WHERE
-                                etput_whse = $var_whse;");
+                                etcomb_whse = $var_whse;");
         $datesql->execute();
         $datesqlarary = $datesql->fetchAll(pdo::FETCH_ASSOC);
         $today = $datesqlarary[0]['recentdate'];
