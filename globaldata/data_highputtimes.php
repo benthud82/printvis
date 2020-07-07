@@ -16,28 +16,28 @@ if (isset($_SESSION['MYUSER'])) {
 }
 
 $unscannedsql = $conn1->prepare("SELECT 
-                                                                            etput_id,
-                                                                            etput_tsm,
-                                                                            etput_equip,
-                                                                            etput_curbatch,
-                                                                            etput_curloc,
-                                                                            etput_curqty,
-                                                                            etput_eachqty,
-                                                                            etput_caseqty,
-                                                                            etput_curtime,
-                                                                            etput_prevtime,
-                                                                            etput_prevloc,
-                                                                            etput_prevbatch,                                                                           
-                                                                            etput_timedif,
-                                                                             etput_breaklunch,
-                                                                             etput_path,
-                                                                            case when etput_difbatch = 1 then 'YES' else 'NO' end as etput_difbatch
+                                                                            etcomb_id,
+                                                                            etcomb_tsm,
+                                                                            etcomb_equip,
+                                                                            etcomb_curbatch,
+                                                                            etcomb_curloc,
+                                                                            etcomb_curqty,
+                                                                            etcomb_eachqty,
+                                                                            etcomb_caseqty,
+                                                                            etcomb_curtime,
+                                                                            etcomb_prevtime,
+                                                                            etcomb_prevloc,
+                                                                            etcomb_prevbatch,                                                                           
+                                                                            etcomb_timedif,
+                                                                             etcomb_breaklunch,
+                                                                             etcomb_path,
+                                                                            case when etcomb_difbatch = 1 then 'YES' else 'NO' end as etcomb_difbatch
                                                                         FROM
-                                                                            printvis.elapsedtime_put
+                                                                            printvis.elapsedtime_comb
                                                                         WHERE
-                                                                            etput_whse = $var_whse
-                                                                                AND DATE(etput_curtime) BETWEEN '$startdatesel' AND '$enddatesel'
-                                                                        ORDER BY etput_timedif desc");
+                                                                            etcomb_whse = $var_whse
+                                                                                AND DATE(etcomb_curtime) BETWEEN '$startdatesel' AND '$enddatesel'
+                                                                        ORDER BY etcomb_timedif desc");
 $unscannedsql->execute();
 $unscannedsql_array = $unscannedsql->fetchAll(pdo::FETCH_ASSOC);
 

@@ -14,107 +14,6 @@ foreach ($truncatetables as $value) {
 }
 $building = $_POST['building'];
 
-//pull in all open putaway (logged and non logged)
-$putawayopen = $aseriesconn->prepare("SELECT eawhse as LOGEQUIPOPEN_WHSE,
-                                                            CASE WHEN EAWHSE = 3 AND EAUS08 IN ('NVSK005W', 'NVSK016W') THEN 2 ELSE 1 END AS LOGEQUIPOPEN_FROMBLDG,
-                                                            CASE WHEN eaWHSE = 3 and EATLOC >= 'W400000' then 2 else 1 end as LOGEQUIPOPEN_TOBLDG,
-                                                            CASE WHEN LMTIER in('L01', 'L02', 'L19') then 'PUTFLW' 
-                                                                 WHEN LMTIER in ('L04', 'L05', 'L10', 'L16') or substring(LOSIZE,1,1) = 'B' then 'PUTCRT'
-                                                                 WHEN LMTIER = 'L06' then 'PUTDOG'
-                                                                 WHEN EATYPE = 'P' then 'PUTTUR'
-                                                                 WHEN EATYPE <> 'P' and (LMTIER like 'C%' or substring(LOSIZE,1,1) in ('P','D','H')) then 'PUTPKR' else 'PUTOPEN' END as LOGEQUIPOPEN_EQUIP,                                                           
-                                                             count(*) as LOGEQUIPOPEN_TOTLINES
-                                                            
-                                                    FROM HSIPCORDTA.NPFCPC c, 
-                                                    HSIPCORDTA.NPFLOC d, 
-                                                    HSIPCORDTA.NPFERA a LEFT JOIN 
-                                                    HSIPCORDTA.NPFLER E ON A.EATLOC = E.LELOC# AND A.EATRN# = E.LETRND 
-                                                    inner join (SELECT EATRN#, max(EASEQ3) as max_seq 
-                                                    FROM HSIPCORDTA.NPFERA GROUP BY EATRN#) b on b.EATRN# = a.EATRN# 
-                                                    and a.EASEQ3 = max_seq   
-                                                    JOIN HSIPCORDTA.NPFLSM on LMWHSE = EAWHSE and EATLOC = LMLOC# 
-                                                    WHERE PCITEM = EAITEM and 
-                                                            PCWHSE = 0 and 
-                                                            LOWHSE = EAWHSE and 
-                                                            LOLOC# = EATLOC 
-                                                            and EASTAT <> 'C'
-                                                            and EATRND >= 1200301
-                                                    GROUP BY EAWHSE, CASE WHEN EAWHSE = 3 AND EAUS08 IN ('NVSK005W', 'NVSK016W') THEN 2 ELSE 1 END, CASE WHEN eaWHSE = 3 and EATLOC >= 'W400000' then 2 else 1 end, CASE WHEN LMTIER in('L01', 'L02', 'L19') then 'PUTFLW'
-                                                                 WHEN LMTIER in ('L04', 'L05', 'L10', 'L16') or substring(LOSIZE,1,1) = 'B' then 'PUTCRT'
-                                                                 WHEN LMTIER = 'L06' then 'PUTDOG' 
-                                                                 WHEN EATYPE = 'P' then 'PUTTUR' 
-                                                                 WHEN EATYPE <> 'P' and (LMTIER like 'C%' or substring(LOSIZE,1,1) in ('P','D','H'))then 'PUTPKR' else 'PUTOPEN' END");
-
-$putawayopen->execute();
-
-$array_logequipopen = $putawayopen->fetchAll(pdo::FETCH_ASSOC);
-
-$data = array();
-$logcolumns = 'logequipopen_whse, logequipopen_frombldg, logequipopen_tobldg, logequipopen_equip, logequipopen_totlines';
-foreach ($array_logequipopen as $key => $value) {
-
-    $logequipopen_whse = $array_logequipopen[$key]['LOGEQUIPOPEN_WHSE'];
-    $logequipopen_frombldg = $array_logequipopen[$key]['LOGEQUIPOPEN_FROMBLDG'];
-    $logequipopen_tobldg = $array_logequipopen[$key]['LOGEQUIPOPEN_TOBLDG'];
-    $logequipopen_equip = $array_logequipopen[$key]['LOGEQUIPOPEN_EQUIP'];
-    $logequipopen_totlines = $array_logequipopen[$key]['LOGEQUIPOPEN_TOTLINES'];
-}
-
-
-$mysqltable = 'log_equipopen';
-$schema = 'printvis';
-$arraychunk = 10000; //each result array will be split into 1000 line chunks to prevent memory over allocation
-//insert into table
-pdoMultiInsert($mysqltable, $schema, $array_logequipopen, $conn1, $arraychunk);
-
-$PUTOPENTIMES = $conn1->prepare("SELECT LOGEQUIPOPEN_WHSE AS LOGEQUIPOPENTIMES_WHSE,
-                                       LOGEQUIPOPEN_FROMBLDG AS LOGEQUIPOPENTIMES_FROMBLDG,
-                                       LOGEQUIPOPEN_TOBLDG AS LOGEQUIPOPENTIMES_TOBLDG,
-                                       LOGEQUIPOPEN_EQUIP AS LOGEQUIPOPENTIMES_EQUIP,
-                                       LOGEQUIPOPEN_TOTLINES AS LOGEQUIPOPENTIMES_TOTLINES,
-                                       SUM((LOGEQUIPOPEN_TOTLINES * FORECAST_TIMEPERLINE) / 60) AS LOGEQUIPOPENTIMES_TOTTIME
-                                       
-                                       FROM
-                                       printvis.LOG_EQUIPOPEN
-                                       
-                                       JOIN
-                                       printvis.OPEN_FORECASTTIMES
-                                       
-                                       ON                         
-                                       LOGEQUIPOPEN_WHSE = FORECAST_WHSE AND 
-                                       LOGEQUIPOPEN_TOBLDG = FORECAST_BUILDING AND 
-                                       LOGEQUIPOPEN_EQUIP = FORECAST_FUNCTION
-                                       
-                                       WHERE LOGEQUIPOPEN_TOBLDG = '$building'
-                                       GROUP BY LOGEQUIPOPENTIMES_WHSE, LOGEQUIPOPENTIMES_FROMBLDG, LOGEQUIPOPENTIMES_TOBLDG, LOGEQUIPOPENTIMES_EQUIP");
-
-$PUTOPENTIMES->execute();
-$array_logequipopentimes = $PUTOPENTIMES->fetchAll(pdo::FETCH_ASSOC);
-
-$data1 = array();
-$logcolumns1 = 'logequipopentimes_whse,logequipopentimes_frombldg,logequipopentimes_tobldg,logequipopentimes_log, logequipopentimes_equip, logequipopentimes_totlines,LOGEQUIPOPENTIMES_TOTTIME';
-foreach ($array_logequipopentimes as $key => $value) {
-
-    $logequipopentimes_whse = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_WHSE'];
-    $logequipopentimes_frombldg = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_FROMBLDG'];
-    $logequipopentimes_tobldg = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_TOBLDG'];
-    $logequipopentimes_equip = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_EQUIP'];
-    $logequipopentimes_totlines = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_TOTLINES'];
-    $logequipopentimes_tottime = $array_logequipopentimes[$key]['LOGEQUIPOPENTIMES_TOTTIME'];
-}
-
-$mysqltable1 = 'log_equipopentimes';
-$schema1 = 'printvis';
-$arraychunk1 = 10000; //each result array will be split into 1000 line chunks to prevent memory over allocation
-//insert into table
-pdoMultiInsert($mysqltable1, $schema1, $array_logequipopentimes, $conn1, $arraychunk1);
-
-
-
-
-
-
-
 
 //pull in today's predicted moves
 {
@@ -327,7 +226,7 @@ pdoMultiInsert($mysqltable10, $schema10, $array_OPENMOVETIMES, $conn1, $arraychu
 ///   logic to include canada
 
 //pull in all open putaway (logged and non logged)
-$putawayopen_can = $aseriesconn_can->prepare("SELECT eawhse as LOGEQUIPOPEN_WHSE,
+$putawayopen = $aseriesconn_can->prepare("SELECT eawhse as LOGEQUIPOPEN_WHSE,
                                                             CASE WHEN EAWHSE = 3 AND EAUS08 IN ('NVSK005W', 'NVSK016W') THEN 2 ELSE 1 END AS LOGEQUIPOPEN_FROMBLDG,
                                                             CASE WHEN eaWHSE = 3 and EATLOC >= 'W400000' then 2 else 1 end as LOGEQUIPOPEN_TOBLDG,
                                                             CASE WHEN LMTIER in('L01', 'L02', 'L19') then 'PUTFLW' 
@@ -357,9 +256,9 @@ $putawayopen_can = $aseriesconn_can->prepare("SELECT eawhse as LOGEQUIPOPEN_WHSE
                                                                  WHEN EATYPE = 'P' then 'PUTTUR' 
                                                                  WHEN EATYPE <> 'P' and (LMTIER like 'C%' or substring(LOSIZE,1,1) in ('P','D','H'))then 'PUTPKR' else 'PUTOPEN' END");
 
-$putawayopen_can->execute();
+$putawayopen->execute();
 
-$array_logequipopen = $putawayopen_can->fetchAll(pdo::FETCH_ASSOC);
+$array_logequipopen = $putawayopen->fetchAll(pdo::FETCH_ASSOC);
 
 $data = array();
 $logcolumns = 'logequipopen_whse, logequipopen_frombldg, logequipopen_tobldg, logequipopen_equip, logequipopen_totlines';
@@ -634,6 +533,89 @@ $schema10 = 'printvis';
 $arraychunk10 = 10000; //each result array will be split into 1000 line chunks to prevent memory over allocation
 //insert into table
 pdoMultiInsert($mysqltable10, $schema10, $array_OPENMOVETIMES, $conn1, $arraychunk10);
+
+
+
+
+$reservelocs = $aseriesconn->prepare("SELECT LOWHSE AS RESERVELOCS_WHSE,
+                                             LOITEM AS RESERVELOCS_ITEM,
+                                             LOLOC# AS RESERVELOCS_LOCATION,
+                                             LOSIZE AS RESERVELOCS_SIZE,
+                                             LOVOLO AS RESERVELOCS_OPENVOLUME,
+                                             LOLOT# AS RESERVELOCS_LOT,
+                                             LOEXMO AS RESERVELOCS_EXPIRYMONTH,
+                                             LOEXYR AS RESERVELOCS_EXPIRYYEAR
+                                           
+                                          FROM HSIPCORDTA.NPFLOC
+                                        WHERE LOWHSE IN ('2', '3', '6', '7', '9') AND LOLOCK IN ('A', 'M') AND LOPRIM <> 'P' AND LOSCDE = 'R' AND LOLOC# <> 'D%' AND LOLOC# <> 'I%'  
+                                        
+                                        ORDER BY LOWHSE, LOLOC#");
+
+$reservelocs->execute();
+$array_reservelocs = $reservelocs->fetchAll(pdo::FETCH_ASSOC);
+
+$data7 = array();
+$logcolumns7 = 'reservelocs_whse, reservelocs_item, reservelocs_location, reservelocs_size, reservelocs_openvolume, reservelocs_lot, reservelocs_expirymonth, reservelocs_expiryyear';
+foreach ($array_reservelocs as $key => $value) {
+
+    $reservelocs_whse= $array_reservelocs[$key]['RESERVELOCS_WHSE'];
+    $reservelocs_item= $array_reservelocs[$key]['RESERVELOCS_ITEM'];
+    $reservelocs_locatio= $array_reservelocs[$key]['RESERVELOCS_LOCATION'];
+    $reservelocs_size= $array_reservelocs[$key]['RESERVELOCS_SIZE'];
+    $reservelocs_openvolume= $array_reservelocs[$key]['RESERVELOCS_OPENVOLUME'];
+    $reservelocs_lot= $array_reservelocs[$key]['RESERVELOCS_LOT'];
+    $reservelocs_expirymonth= $array_reservelocs[$key]['RESERVELOCS_EXPIRYMONTH'];
+    $reservelocs_expiryyear= $array_reservelocs[$key]['RESERVELOCS_EXPIRYYEAR'];
+}
+
+
+$mysqltable7 = 'open_reservelocations';
+$schema7 = 'printvis';
+$arraychunk7 = 10000; //each result array will be split into 1000 line chunks to prevent memory over allocation
+//insert into table
+pdoMultiInsert($mysqltable7, $schema7, $array_reservelocs, $conn1, $arraychunk7);    
+
+
+
+
+$openreserves = $aseriesconn->prepare("SELECT LOWHSE AS RESERVE_WHSE,
+                                              CASE WHEN substring(LOSIZE,1,1) = 'B' then 'BLUEBIN'
+                                                   WHEN substring(LOSIZE,1,1) = 'D' then 'DECK'
+                                                   WHEN substring(LOSIZE,1,1) = 'H' then 'HALFPALLET'
+                                                   WHEN LOSIZE IN ('P03', 'P07') then 'FULLPALLET'
+                                                   WHEN substring(LOSIZE,1,1) = 'P' AND LOSIZE NOT IN ('P03', 'P07') then 'BULKRESERVE' else 'OPEN' END AS RESERVE_TYPE,
+                                                   count(*) as RESERVE_NUMBEROPEN
+                                                    
+
+                                        FROM HSIPCORDTA.NPFLOC
+                                        WHERE LOLOCK IN ('A', 'M') AND LOPRIM <> 'P' AND LOITEM = '' 
+                                                                                 
+                                    group by LOWHSE, CASE WHEN substring(LOSIZE,1,1) = 'B' then 'BLUEBIN'
+                                                   WHEN substring(LOSIZE,1,1) = 'D' Then 'DECK'
+                                                   WHEN substring(LOSIZE,1,1) = 'H' then 'HALFPALLET'
+                                                   WHEN LOSIZE IN ('P03', 'P07') then 'FULLPALLET'
+                                                   WHEN substring(LOSIZE,1,1) = 'P' AND LOSIZE NOT IN ('P03', 'P07') then 'BULKRESERVE' else 'OPEN' END");
+                                                    
+
+$openreserves->execute();
+$array_openreserves = $openreserves->fetchAll(pdo::FETCH_ASSOC);
+
+$data11 = array();
+$logcolumns11 = 'reserve_whse, reserve_type, reserve_numberopen';
+foreach ($array_openreserves as $key => $value) {
+
+    $reserve_whse = $array_openreserves[$key]['reserve_whse'];
+    $reserve_type = $array_openreserves[$key]['reserve_type'];
+    $reserve_numberopen = $array_openreserves[$key]['reserve_numberopen'];
+}
+
+
+$mysqltable11 = 'open_reserves';
+$schema11 = 'printvis';
+$arraychunk11 = 10000; //each result array will be split into 1000 line chunks to prevent memory over allocation
+//insert into table
+pdoMultiInsert($mysqltable11, $schema11, $array_openreserves, $conn1, $arraychunk11);
+
 
 
 
