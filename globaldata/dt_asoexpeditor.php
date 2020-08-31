@@ -31,6 +31,7 @@ switch ($sel_lsecse) {
         break;
 }
 
+$today = date('Y-m-d');
 
 $dt_sql = $conn1->prepare("SELECT DISTINCT
                                 dropzone_item,
@@ -54,7 +55,8 @@ $dt_sql = $conn1->prepare("SELECT DISTINCT
                                     WHERE
                                         dropzone_whse = shorts_item_whse
                                             AND dropzone_toloc = shorts_item_loc
-                                            AND dropzone_item = shorts_item_item) AS COUNT_SHORTS,
+                                            AND dropzone_item = shorts_item_item
+                                            AND shorts_item_date = '$today') AS COUNT_SHORTS,
                                 (@COUNT_HOLD + @COUNT_SHORTS) AS COUNT_TOTAL
                             FROM
                                 printvis.dropzone_replen
