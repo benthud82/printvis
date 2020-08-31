@@ -1,6 +1,8 @@
+
 <?php
 
 include '../../globalincludes/usa_asys.php';
+include '../../globalincludes/newcanada_asys.php';
 include '../../connections/conn_printvis.php';
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
@@ -10,8 +12,8 @@ $today = date('Y-m-d');
 $startday = date('Y-m-d', (strtotime('-5 days', strtotime($today))));
 $startjday = _gregdatetoyyddd($startday);
 
-$whsearray = array(2, 7, 3, 6, 9);
-//$whsearray = array(9);  //still need to do 3,6,9 then all history has been loaded
+$whsearray = array(2, 7, 3, 6, 9, 11, 12, 16);
+//$whsearray = array(16);  //still need to do 3,6,9 then all history has been loaded
 
 foreach ($whsearray as $whse) {
 
@@ -29,8 +31,28 @@ foreach ($whsearray as $whse) {
     $querydelete4->execute();
 
 
+    switch ($whse) {
+        case 11:
+            $connection = $aseriesconn_can;
+            $schema = 'ARCPCORDTA';
+            break;
+        case 12:
+            $connection = $aseriesconn_can;
+            $schema = 'ARCPCORDTA';
+            break;
+        case 16:
+            $connection = $aseriesconn_can;
+            $schema = 'ARCPCORDTA';
+            break;
+
+        default:
+            $connection = $aseriesconn;
+            $schema = 'HSIPCORDTA';
+            break;
+    }
+
 //Pull data from A-system and place in temp table to pull for additional logic
-    $result1 = $aseriesconn->prepare("SELECT 
+    $result1 = $connection->prepare("SELECT 
                                                                             PBWHSE,
                                                                             1 AS PBBUILD,
                                                                             CASE
@@ -70,14 +92,14 @@ foreach ($whsearray as $whse) {
                                                                             END AS TWODAY,
                                                                             PBTX02
                                                                         FROM
-                                                                            HSIPCORDTA.NOTWPT A
+                                                                            $schema.NOTWPT A
                                                                                 JOIN
-                                                                            HSIPCORDTA.NPFCPC ON PCITEM = PDITEM
+                                                                            $schema.NPFCPC ON PCITEM = PDITEM
                                                                                 JOIN
-                                                                            HSIPCORDTA.NOTWPS ON PDWCS# = PBWCS# AND PDWKNO = PBWKNO
+                                                                            $schema.NOTWPS ON PDWCS# = PBWCS# AND PDWKNO = PBWKNO
                                                                                 AND PBBOX# = PDBOX#
                                                                                 LEFT JOIN
-                                                                            HSIPCORDTA.NPFLSM ON LMWHSE = PDWHSE AND LMLOC# = PDLOC#
+                                                                            $schema.NPFLSM ON LMWHSE = PDWHSE AND LMLOC# = PDLOC#
                                                                         WHERE
                                                                             PDWHSE = $whse AND PDBXSZ <> 'CSE'
                                                                                 AND PDLOC# NOT LIKE '%SDS%'
