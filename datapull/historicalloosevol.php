@@ -12,8 +12,8 @@ $today = date('Y-m-d');
 $startday = date('Y-m-d', (strtotime('-5 days', strtotime($today))));
 $startjday = _gregdatetoyyddd($startday);
 
-//$whsearray = array(2, 7, 3, 6, 9, 11, 12, 16);
-$whsearray = array(16);  //still need to do 3,6,9 then all history has been loaded
+$whsearray = array(2, 7, 3, 6, 9, 11, 12, 16);
+//$whsearray = array(16);  //still need to do 3,6,9 then all history has been loaded
 
 foreach ($whsearray as $whse) {
 
