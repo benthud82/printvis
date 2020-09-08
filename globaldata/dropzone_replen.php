@@ -1,5 +1,6 @@
 
 <?php
+
 include '../../CustomerAudit/connection/connection_details.php';
 include '../sessioninclude.php';
 include '../functions/functions_totetimes.php';
@@ -12,6 +13,16 @@ if (isset($_SESSION['MYUSER'])) {
 
     $var_whse = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 }
+
+# checkbox dropzone from shorts_expeditor.php
+$onlydrop = ($_POST['onlydrop']);
+if ($onlydrop == 1) {
+    $var_onlydropsql = " and mvdend <> '0001-01-01-00.00.00.000000' ";
+} else {
+    $var_onlydropsql = " ";
+}
+
+
 
 $today = date('Ymd', strtotime('-5 days'));
 //delete current box holds for whse
@@ -36,9 +47,9 @@ $result_dropzone = $aseriesconn->prepare("SELECT
                                             MVREQD as dropzone_reqdate
                                         FROM
                                             HSIPCORDTA.NPFMVE
-                                        WHERE
-                                            mvdend     <> '0001-01-01-00.00.00.000000' and
+                                        WHERE                                            
                                              MVSTAT <> 'C'
+                                             $var_onlydropsql
                                             and MVWHSE  = $var_whse
                                             and MVREQD >= $today");
 $result_dropzone->execute();

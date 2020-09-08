@@ -64,10 +64,24 @@ $dt_sql = $conn1->prepare("SELECT DISTINCT
                                 printvis.delete_shortsexp ON delete_whse = dropzone_whse
                                     AND delete_loc = dropzone_toloc
                             WHERE
-                                dropzone_whse = $var_whse
-                                and delete_loc is null
-                                $sql_lsecse
-                            HAVING COUNT_TOTAL > 0
+                                dropzone_whse = $var_whse AND delete_loc IS NULL
+                                    AND ((SELECT 
+                                        COUNT(*)
+                                    FROM
+                                        printvis.shorts_daily_item
+                                    WHERE
+                                        dropzone_whse = shorts_item_whse
+                                            AND dropzone_toloc = shorts_item_loc
+                                            AND dropzone_item = shorts_item_item
+                                            AND shorts_item_date = '$today') + (SELECT 
+                                        COUNT(*)
+                                    FROM
+                                        printvis.asoboxholds
+                                    WHERE
+                                        dropzone_whse = asohold_whse
+                                            AND dropzone_toloc = asohold_location
+                                            AND dropzone_item = asohold_item)) > 0
+                                            $sql_lsecse
                             ORDER BY COUNT_TOTAL DESC");
 $dt_sql->execute();
 $dt_array = $dt_sql->fetchAll(pdo::FETCH_ASSOC);
