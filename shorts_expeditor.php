@@ -26,21 +26,45 @@
             <section class="main padder" style="padding-top: 75px;"> 
 
 
-                <div id="ajaxloadergif" class=""> Data Loading, please wait...<img src="../ajax-loader-big.gif" alt=""/></div>
+
                 <div class="row">
                     <div class="pull-left  col-lg-3" >
                         <label>Loose or Case:</label>
-                        <select class="selectstyle" id="sel_cselse" name="sel_position" style="width: 175px;padding: 5px; margin-right: 10px;"onChange="refreshall()">
+                        <select class="selectstyle" id="sel_cselse" name="sel_position" style="width: 175px;padding: 5px; margin-right: 10px;" onChange="refreshall()">
                             <option value="*"> -All- </option>
                             <option value="L">Loose</option>
                             <option value="C">Case</option>
                         </select>
                     </div>
+                    <div class="pull-left  col-lg-3" >
+                        <label>Only in Drop Zone <i onclick="showhelpmodal();" class="fa fa-question-circle" style="cursor: pointer"></i></label>
+                        <input onclick="refreshall()" type="checkbox" class="chkbox_deletebatch noclick" name="checkbox" id="dropzone" style="width: 20px; height: 20px;"></input>
+                    </div>
                 </div>
-                <div id="container_asoexpedite" >
 
+                <div id="container_asoexpedite" ></div>
+
+                <div id="ajaxloadergif" class=""> Data Loading, please wait...<img src="../ajax-loader-big.gif" alt=""/></div>
+
+                <div id="container_helpmodal" class="modal fade " role="dialog">
+                    <div class="modal-dialog modal-lg">
+
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">Only Include Replens in Drop Zone?</h4>
+                            </div>
+
+                            <div class="modal-body" id="" style="margin: 25px;">
+                                <h4 style="font-family: calibri">
+                                    Checking this box will only show replenenishments that are currently in a drop zone waiting to be put to location.
+                                </h4>
+                            </div>
+
+                        </div>
+                    </div>
                 </div>
-
 
 
             </section>
@@ -69,8 +93,15 @@
             }
 
             function _get_dropzone_replen() {
+                // Dropzone check box
+                if ($("#dropzone").is(':checked'))
+                    var onlydrop = 1; // checked
+                else
+                     var onlydrop = 0; // checked
+
                 $.ajax({
                     url: 'globaldata/dropzone_replen.php',
+                    data: {onlydrop: onlydrop},
                     type: 'post',
                     success: function () {
                     }
@@ -124,9 +155,12 @@
                 });
             });
 
+            function showhelpmodal() {
+                $('#container_helpmodal').modal('toggle');
+            }
+
             function refreshall() {
                 debugger;
-//                $("#divtable_priorities").hide();
                 $('#container_asoexpedite').addClass('hidden');
                 var sel_lsecse = $('#sel_cselse').val();
                 _get_aso_holds();
