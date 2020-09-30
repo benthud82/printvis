@@ -1,4 +1,3 @@
-
 <?php
 include '../../CustomerAudit/connection/connection_details.php';
 include '../sessioninclude.php';
@@ -11,8 +10,21 @@ if (isset($_SESSION['MYUSER'])) {
 
     $var_whse = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 }
-$sel_lsecse = ($_POST['sel_lsecse']);
-$dl_data = ($_POST['dldata']); //if 1, dl data, else display
+if ($_GET) {
+    $sel_lsecse = ($_GET['sel_lsecse']);
+    $dl_data = ($_GET['dldata']); //if 1, dl data, else display 
+}
+if ($_POST) {
+
+    $sel_lsecse = ($_POST['sel_lsecse']);
+
+    $dl_data = ($_POST['dldata']); //if 1, dl data, else display 
+}
+
+
+
+
+
 
 switch ($sel_lsecse) {
     case '*':
@@ -89,30 +101,32 @@ $dt_array = $dt_sql->fetchAll(pdo::FETCH_ASSOC);
 
 if ($dl_data == 1) {
 
+
+
     $now = date('Y_m_d');
 
 
 //The name of the CSV file that will be downloaded by the user.
-    $fileName = 'test3.csv';
+    $fileName = 'Shorts_Expeditor_' . $now . '.csv';
 
 //Set the Content-Type and Content-Disposition headers.
     header('Content-Type: application/excel');
-//    header('Content-Disposition: attachment; filename="' . $fileName . '"');
+    header('Content-Disposition: attachment; filename="' . $fileName . '"');
 
-    header("Content-Type: application/force-download; name=\"" . $fileName . "\"");
+
     $csvdata = array();
 
 //header
-    $csvdata[] = array_keys($dt_array[0]);
+    $csvdata[] = array("Item", "FromZone", "ToZone", "FromLoc", "ToLoc", "ReqDate", "BoxHolds", "BinReports", "Total");
+
+
 //A multi-dimensional array containing our CSV data.
     foreach ($dt_array as $key => $value) {
         $csvdata[] = array_values($dt_array[$key]);
     }
 
 //Open up a PHP output stream using the function fopen.
-//    $fp = fopen('php://output', 'w');
-    $fp = fopen($fileName, 'w');
-
+    $fp = fopen('php://output', 'w');
 
 //Loop through the array containing our CSV data.
     foreach ($csvdata as $row) {
@@ -122,63 +136,59 @@ if ($dl_data == 1) {
     }
 
     fclose($fp);
-    exit();
-} else {
-    ?>
+    
+}else{
+    
 
-
-
-
-    <div class="row">
-        <div class="pull-left  col-lg-3" >
-            <div id="container_deletebtn">
-                <button id="btn_delete_batch" class="btn btn-danger">Delete Selected Batches</button>
-            </div>
+?>
+<div class="row">
+    <div class="pull-left  col-lg-3" >
+        <div id="container_deletebtn">
+            <button id="btn_delete_batch" class="btn btn-danger">Delete Selected Batches</button>
         </div>
     </div>
-    <!--start of div table-->
-    <div class="" id="divtable_priorities" style="padding-bottom: 51px">
-        <div  class='col-sm-12 col-md-12 col-lg-12 print-1wide'  style="float: none;">
+</div>
+<!--start of div table-->
+<div class="" id="divtable_priorities" style="padding-bottom: 51px">
+    <div  class='col-sm-12 col-md-12 col-lg-12 print-1wide'  style="float: none;">
 
 
-            <div class='widget-content widget-table'  style="position: relative;">
-                <div class='divtable'>
-                    <div id="sticky-anchor"></div>
-                    <div style="padding-top: 51px;"></div>
-                    <div id="sticky" class='divtableheader' style="padding-top">
-                        <div class='divtabletitle width5' style="cursor: default">Delete?</div>
-                        <div class='divtabletitle width8_33' style="cursor: default">Item</div>
-                        <div class='divtabletitle width8_33' style="cursor: default">From Loc / Drop Zone</div>
-                        <div class='divtabletitle width8_33' style="cursor: default">To Location</div>
-                        <div class='divtabletitle width8_33' style="cursor: default">Box Hold Count</div>
-                        <div class='divtabletitle width8_33' style="cursor: default">Shorts Count</div>
-                        <div class='divtabletitle width8_33' style="cursor: default">Total Count</div>
+        <div class='widget-content widget-table'  style="position: relative;">
+            <div class='divtable'>
+                <div id="sticky-anchor"></div>
+                <div style="padding-top: 51px;"></div>
+                <div id="sticky" class='divtableheader' style="padding-top">
+                    <div class='divtabletitle width5' style="cursor: default">Delete?</div>
+                    <div class='divtabletitle width8_33' style="cursor: default">Item</div>
+                    <div class='divtabletitle width8_33' style="cursor: default">From Loc / Drop Zone</div>
+                    <div class='divtabletitle width8_33' style="cursor: default">To Location</div>
+                    <div class='divtabletitle width8_33' style="cursor: default">Box Hold Count</div>
+                    <div class='divtabletitle width8_33' style="cursor: default">Shorts Count</div>
+                    <div class='divtabletitle width8_33' style="cursor: default">Total Count</div>
 
-
-                    </div>
-    <?php foreach ($dt_array as $key => $value) { ?>
-                        <div id="<?php echo $dt_array[$key]['dropzone_toloc']; ?>"class='divtablerow itemdetailexpand' style="cursor: pointer">
-                            <div class='divtabledata width5' style="vertical-align: text-top; cursor: pointer"> <input type="checkbox" class="chkbox_deletebatch noclick" name="checkbox" id="<?php echo $dt_array[$key]['dropzone_toloc']; ?>"  /></div>
-                            <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['dropzone_item']; ?></div>
-                            <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['dropzone_fromloc']; ?></div>
-                            <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['dropzone_toloc']; ?></div>
-                            <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['COUNT_HOLD']; ?></div>
-                            <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['COUNT_SHORTS']; ?></div>
-                            <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['COUNT_TOTAL']; ?></div>
-
-                        </div>
-    <?php } ?>
 
                 </div>
+                <?php foreach ($dt_array as $key => $value) { ?>
+                    <div id="<?php echo $dt_array[$key]['dropzone_toloc']; ?>"class='divtablerow itemdetailexpand' style="cursor: pointer">
+                        <div class='divtabledata width5' style="vertical-align: text-top; cursor: pointer"> <input type="checkbox" class="chkbox_deletebatch noclick" name="checkbox" id="<?php echo $dt_array[$key]['dropzone_toloc']; ?>"  /></div>
+                        <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['dropzone_item']; ?></div>
+                        <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['dropzone_fromloc']; ?></div>
+                        <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['dropzone_toloc']; ?></div>
+                        <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['COUNT_HOLD']; ?></div>
+                        <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['COUNT_SHORTS']; ?></div>
+                        <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['COUNT_TOTAL']; ?></div>
+
+                    </div>
+                <?php } ?>
+
             </div>
-
-
-
-
-
         </div>
-    </div>    
 
-    <?php
-} 
+
+
+
+
+    </div>
+</div>    
+<?php }
 
