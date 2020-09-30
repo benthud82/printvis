@@ -1,6 +1,6 @@
 <?php
 
-   include '../../connections/conn_printvis.php';
+include '../../connections/conn_printvis.php';
 include '../sessioninclude.php';
 if (isset($_SESSION['MYUSER'])) {
     $var_userid = $_SESSION['MYUSER'];

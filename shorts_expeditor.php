@@ -25,8 +25,6 @@
         <section id="content"> 
             <section class="main padder" style="padding-top: 75px;"> 
 
-
-
                 <div class="row">
                     <div class="pull-left  col-lg-3" >
                         <label>Loose or Case:</label>
@@ -39,6 +37,9 @@
                     <div class="pull-left  col-lg-3" >
                         <label>Only in Drop Zone <i onclick="showhelpmodal();" class="fa fa-question-circle" style="cursor: pointer"></i></label>
                         <input onclick="refreshall()" type="checkbox" class="chkbox_deletebatch noclick" name="checkbox" id="dropzone" style="width: 20px; height: 20px;"></input>
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-xs-12 col-lg-2 col-xl-2 text-center">
+                        <button id="btn_download" type="button" class="btn btn-info" onclick="">Download Data</button>
                     </div>
                 </div>
 
@@ -80,10 +81,12 @@
             $("#aso").addClass('active');
 
             $(document).ready(function () {
-                refreshall();
+                var dldata = 0;
+                refreshall(dldata);
             });
 
             function _get_aso_holds() {
+
                 $.ajax({
                     url: 'globaldata/asoboxhold.php',
                     type: 'post',
@@ -97,7 +100,7 @@
                 if ($("#dropzone").is(':checked'))
                     var onlydrop = 1; // checked
                 else
-                     var onlydrop = 0; // checked
+                    var onlydrop = 0; // checked
 
                 $.ajax({
                     url: 'globaldata/dropzone_replen.php',
@@ -117,11 +120,11 @@
                 });
             }
 
-            function _get_display(sel_lsecse) {
+            function _get_display(sel_lsecse, dldata) {
                 $('#ajaxloadergif').removeClass('hidden');
                 $.ajax({
                     url: 'globaldata/dt_asoexpeditor.php',
-                    data: {sel_lsecse: sel_lsecse},
+                    data: {sel_lsecse: sel_lsecse, dldata: dldata},
                     type: 'POST',
                     dataType: 'html',
                     success: function (ajaxresult) {
@@ -159,16 +162,21 @@
                 $('#container_helpmodal').modal('toggle');
             }
 
-            function refreshall() {
-                debugger;
+            function refreshall(dldata) {
+//                debugger;
                 $('#container_asoexpedite').addClass('hidden');
                 var sel_lsecse = $('#sel_cselse').val();
                 _get_aso_holds();
                 _get_dropzone_replen();
                 _get_deleteold_deletes();
-                _get_display(sel_lsecse);
-//                $("#divtable_priorities").show();
+                _get_display(sel_lsecse, dldata);
             }
+
+
+            $(document).on("click touchstart", "#btn_download", function (e) {
+                var dldata = 1;
+                refreshall(dldata);
+            });
 
 
         </script>

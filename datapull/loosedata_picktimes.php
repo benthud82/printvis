@@ -9,6 +9,10 @@ ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
 
+$today = date('Y-m-d');
+$startday = date('Y-m-d', (strtotime('-5 days', strtotime($today))));
+$startjday = _gregdatetoyyddd($startday);
+
 function _ftpupload($ftpfilename, $ftpwhse) {
     //* Transfer file to FTP server *//
     $serverarray = array(2 => "10.1.112.199", 3 => "10.1.22.212", 6 => "10.1.17.208", 7 => "10.1.18.194", 9 => "10.1.16.206", 11 => "10.10.200.209");
@@ -37,7 +41,7 @@ function _ftpupload($ftpfilename, $ftpwhse) {
 $whsearray = array(11, 2, 3, 6, 7, 9);
 
 //$whsearray = array(6);
-$today = date('Y-m-d');
+
 $dayofweek = date('w', strtotime($today));
 if ($dayofweek == 1) {
     $yesterday = date('Y-m-d', strtotime("-3 days"));
@@ -792,6 +796,8 @@ foreach ($casesmanarray as $key5 => $value) {
 
     $casereldata[] = "($rel_cart, $rel_date, $rel_count, $rel_relcount)";
 }
+
+
 
 
 //Add to table casebatchstarttime
