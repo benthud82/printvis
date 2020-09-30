@@ -162,10 +162,11 @@
                 $('#container_helpmodal').modal('toggle');
             }
 
-            function refreshall(dldata) {
+            function refreshall() {
 //                debugger;
                 $('#container_asoexpedite').addClass('hidden');
                 var sel_lsecse = $('#sel_cselse').val();
+                var dldata = 0;  //set default to NOT download data.
                 _get_aso_holds();
                 _get_dropzone_replen();
                 _get_deleteold_deletes();
@@ -175,7 +176,9 @@
 
             $(document).on("click touchstart", "#btn_download", function (e) {
                 var dldata = 1;
-                refreshall(dldata);
+                var sel_lsecse = $('#sel_cselse').val();
+                window.location = "globaldata/dt_asoexpeditor.php?dldata=" + dldata + "&sel_lsecse=" + sel_lsecse;
+                refreshall();
             });
 
 
