@@ -45,7 +45,7 @@ $result_dropzone = $aseriesconn->prepare("SELECT
                                             MVPLC# as dropzone_fromloc,
                                             MVTLC# as dropzone_toloc,
                                             MVREQD as dropzone_reqdate,
-                                            MVTICK as dropzone_ticket
+                                            MVLICP as dropzone_lpnum
                                         FROM
                                             HSIPCORDTA.NPFMVE
                                         WHERE                                            
