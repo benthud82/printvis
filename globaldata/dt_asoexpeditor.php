@@ -53,7 +53,7 @@ $dt_sql = $conn1->prepare("SELECT DISTINCT
                                 dropzone_fromloc,
                                 dropzone_toloc,
                                 dropzone_reqdate,
-                                dropzone_ticket,
+                                dropzone_lpnum,
                                 @COUNT_HOLD:=(SELECT 
                                         COUNT(*)
                                     FROM
@@ -118,7 +118,7 @@ if ($dl_data == 1) {
     $csvdata = array();
 
 //header
-    $csvdata[] = array("Item", "FromZone", "ToZone", "FromLoc", "ToLoc", "ReqDate", "MoveTicket", "BoxHolds", "BinReports", "Total");
+    $csvdata[] = array("Item", "FromZone", "ToZone", "FromLoc", "ToLoc", "ReqDate", "LPNumber", "BoxHolds", "BinReports", "Total");
 
 
 //A multi-dimensional array containing our CSV data.
@@ -161,7 +161,7 @@ if ($dl_data == 1) {
                 <div id="sticky" class='divtableheader' style="padding-top">
                     <div class='divtabletitle width5' style="cursor: default">Delete?</div>
                     <div class='divtabletitle width8_33' style="cursor: default">Item</div>
-                    <div class='divtabletitle width8_33' style="cursor: default">MoveTicket</div>
+                    <div class='divtabletitle width8_33' style="cursor: default">LPNumber</div>
                     <div class='divtabletitle width8_33' style="cursor: default">From Loc / Drop Zone</div>
                     <div class='divtabletitle width8_33' style="cursor: default">To Location</div>
                     <div class='divtabletitle width8_33' style="cursor: default">Box Hold Count</div>
@@ -174,7 +174,7 @@ if ($dl_data == 1) {
                     <div id="<?php echo $dt_array[$key]['dropzone_toloc']; ?>"class='divtablerow itemdetailexpand' style="cursor: pointer">
                         <div class='divtabledata width5' style="vertical-align: text-top; cursor: pointer"> <input type="checkbox" class="chkbox_deletebatch noclick" name="checkbox" id="<?php echo $dt_array[$key]['dropzone_toloc']; ?>"  /></div>
                         <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['dropzone_item']; ?></div>
-                        <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['dropzone_ticket']; ?></div>
+                        <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['dropzone_lpnum']; ?></div>
                         <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['dropzone_fromloc']; ?></div>
                         <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['dropzone_toloc']; ?></div>
                         <div class='divtabledata width8_33' ><?php echo $dt_array[$key]['COUNT_HOLD']; ?></div>
