@@ -600,18 +600,19 @@ function pdoMultiInsert($tableName, $schema, $data, $pdoObject, $arraychunk) {
     return;
 }
 
-function pdoMultiInsert_duplicate($tableName, $schema, $data, $pdoObject, $arraychunk) {
 
-    //Get a list of column names to use in the SQL statement.
+function pdoMultiInsert_duplicate($tableName, $schema, $data, $pdoObject, $arraychunk, $updatecols) {
+
+//Get a list of column names to use in the SQL statement.
     $columnNames = array_keys($data[0]);
 
     $data_chunked = array_chunk($data, $arraychunk); //chunk the large array into smaller pieces to prevent memory over allocation
-    //Loop through our $data array.
+//Loop through our $data array.
     foreach ($data_chunked as $key => $value) {
-        //Will contain SQL snippets.
+//Will contain SQL snippets.
         $rowsSQL = array();
         $updateCols = array();
-        //Will contain the values that we need to bind.
+//Will contain the values that we need to bind.
         $toBind = array();
 
         foreach ($value as $arrayIndex => $row) {
@@ -621,34 +622,35 @@ function pdoMultiInsert_duplicate($tableName, $schema, $data, $pdoObject, $array
                 $params[] = $param;
                 if (empty($columnValue)) {
                     $toBind[$param] = "0";
-                    $updateCols[] = $columnName . " = VALUES($columnName)";
+                    //$updateCols[] = $columnName . " = VALUES($columnName)";
                 } else {
                     $toBind[$param] = $columnValue;
-                    $updateCols[] = $columnName . " = VALUES($columnName)";
+                    //$updateCols[] = $columnName . " = VALUES($columnName)";
                 }
             }
             $rowsSQL[] = "(" . implode(", ", $params) . ")";
-            $onDup = implode(', ', $updateCols);
+           
         }
 
 
-//        //setup the ON DUPLICATE column names
+        //setup the ON DUPLICATE column names
 //        $updateCols = array();
-//        foreach ($colNames as $curCol) {
-//            $updateCols[] = $curCol . " = VALUES($curCol)";
-//        }
-        //Construct our SQL statement
+        foreach ($updatecols as $curCol) {
+            $updateCols[] = $curCol . " = VALUES($curCol)";
+        }
+         $onDup = implode(', ', $updateCols);
+//Construct our SQL statement
         $sql = "INSERT INTO `$schema` . `$tableName` (" . implode(", ", $columnNames) . ") VALUES " . implode(", ", $rowsSQL) . " ON DUPLICATE KEY UPDATE $onDup";
 
-        //Prepare our PDO statement.
+//Prepare our PDO statement.
         $pdoStatement = $pdoObject->prepare($sql);
 
-        //Bind our values.
+//Bind our values.
         foreach ($toBind as $param => $val) {
             $pdoStatement->bindValue($param, $val);
         }
 
-        //Execute our statement (i.e. insert the data).
+//Execute our statement (i.e. insert the data).
         $pdoStatement->execute();
     }
     return;
