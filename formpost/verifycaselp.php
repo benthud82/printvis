@@ -21,6 +21,6 @@ $verify_sql->execute();
 $verify_array = $verify_sql->fetchAll(pdo::FETCH_ASSOC);
 
 $mysqltable = 'case_lpdata';
-$schema = 'printvis';
+$schema = 'nahsi';
 $arraychunk = 1;
 pdoMultiInsert($mysqltable, $schema, $verify_array, $conn1, $arraychunk);
