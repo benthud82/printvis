@@ -142,7 +142,7 @@ foreach ($whsearray as $whse) {
                                                                                 PBPTJD,                                                                     
                                                                                 PBPTHM,
                                                                                 count(*) as LINE_COUNT,
-                                                                                sum(case when LMPRIM = 'P' then 1 else 0 end) as PRIM_PICKS, 
+                                                                                sum(GRE end) as PRIM_PICKS, 
                                                                                 sum(case when LMTIER = 'C01' then 1 else 0 end) as BULK_PICKS,  
                                                                                 sum(case when LMTIER in ('C02','C04') then 1 else 0 end) as PTB_PICKS, 
                                                                                 sum(case when substr(LMLOC#,6,1) = '1' then 1 else 0 end) as PALLET_PICKS, 
