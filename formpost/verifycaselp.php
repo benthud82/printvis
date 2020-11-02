@@ -9,7 +9,7 @@ $schema = $_POST['schema'];
 $now = date('Y-m-d H:i:s');
 
 $verify_sql = $as400_conn->prepare("SELECT A.PBWHSE AS shorts_item_whse,
-                                A.PBCART AS shorts_batch,
+                                A.PBCART AS shorts_item_batch,
                                 A.PBBIN# as shorts_item_tote,
                                 B.PDITEM as shorts_item_item,
                                 A.PBLOC# AS shorts_item_loc,
@@ -20,6 +20,11 @@ $verify_sql = $as400_conn->prepare("SELECT A.PBWHSE AS shorts_item_whse,
                                 '$now' as shorts_item_date,
                                 '999999' AS shorts_item_tsm,
                                 '999' as shorts_item_cart,
+                                0 as shorts_item_icissue,
+                                0 as shorts_item_delete,
+                                0 as shorts_item_oh,
+                                0 as shorts_item_alloc,
+                                0 as shorts_item_locempty,
                                 A.PBLP9D AS shorts_item_lp,
                                 Case when A.PBBXSZ = 'CSE' then 'CSE' else 'LSE' END as shorts_item_type
                                 
@@ -52,15 +57,15 @@ foreach ($result as $key => $value) {
     $sql_locoh->execute();
     $array_locoh = $sql_locoh->fetchAll(pdo::FETCH_ASSOC);
     if ($array_locoh) {
-        $result[$key]['shorts_item_icissue'] = $array_locoh[0]['issue_ic'];
-        $result[$key]['shorts_item_oh'] = $array_locoh[0]['locoh_onhand'];
-        $result[$key]['shorts_item_alloc'] = $array_locoh[0]['tot_alloc'];
-        $result[$key]['shorts_item_locempty'] = 0;
+        $result[$key]['SHORTS_ITEM_ICISSUE'] = $array_locoh[0]['issue_ic'];
+        $result[$key]['SHORTS_ITEM_OH'] = $array_locoh[0]['locoh_onhand'];
+        $result[$key]['SHORTS_ITEM_ALLOC'] = $array_locoh[0]['tot_alloc'];
+        $result[$key]['SHORTS_ITEM_LOCEMPTY'] = 0;
             } else {
-        $result[$key]['shorts_item_icissue'] = 2;
-        $result[$key]['shorts_item_oh'] = 0;
-        $result[$key]['shorts_item_alloc'] = 0;
-        $result[$key]['shorts_item_locempty'] = 0;
+        $result[$key]['SHORTS_ITEM_ICISSUE'] = 2;
+        $result[$key]['SHORTS_ITEM_OH'] = 0;
+        $result[$key]['SHORTS_ITEM_ALLOC'] = 0;
+        $result[$key]['SHORTS_ITEM_LOCEMPTY'] = 0;
             }
      //defaults to 0.  User must manually update through short_trim tool
 }

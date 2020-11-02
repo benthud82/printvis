@@ -4,8 +4,8 @@
     <head>
         <title>Case Pick Shorts Entry</title>
         <?php 
-        include '../global_dash/headerincludes.php';
-        //include_once 'headerincludes.php';
+        //include '../global_dash/headerincludes.php';
+        include_once 'headerincludes.php';
         require '../global_dash/includes/variables_NAHSI.php';?>
         
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
