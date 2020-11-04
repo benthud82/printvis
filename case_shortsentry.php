@@ -3,7 +3,10 @@
 
     <head>
         <title>Case Pick Shorts Entry</title>
-        <?php include_once 'headerincludes.php'; ?>
+        <?php 
+        //include '../global_dash/headerincludes.php';
+        include_once 'headerincludes.php';
+        require '../global_dash/includes/variables_NAHSI.php';?>
         
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <script src="js/jquery.scannerdetection.js" type="text/javascript"></script>
@@ -61,9 +64,9 @@
 
             function verifycaselp(barcode) {
                 var caselp = barcode;
-
+                var schema = '<?php echo $schema; ?>';      
                 $.ajax({
-                    data: {caselp: caselp},
+                    data: {caselp: caselp,schema:schema},
                     url: 'formpost/verifycaselp.php',
                     type: 'POST',
                     dataType: 'html',
@@ -77,6 +80,7 @@
             $(document).on("click touchstart", ".click_breaklunch", function (e) {
                 e.preventDefault();
                 var whse = $(this).attr('data-whse');
+                 
                 var tsmnum = $('#tsmnum').val();
                 var posttype = $(this).attr('data-type');
                 $.ajax({
@@ -125,12 +129,12 @@
                 avgTimeByChar: 40, // it's not a barcode if a character takes longer than 100ms
                 preventDefault: true,
                 endChar: [13],
-                onComplete: function (barcode, qty) {
+                onComplete: function (barcode) {
                     var barcode = barcode;
                     $('#caselp').val(barcode);
                     verifycaselp(barcode);
                 },
-                onError: function (string, qty) {
+                onError: function (string) {
 
                 }
             });
