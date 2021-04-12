@@ -13,7 +13,7 @@ $whsesel = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 include '../timezoneset.php';
 
 $currenttime = date('H:i');
-$buffermins = 30;  //change this back to 30
+$buffermins = 90;  //change this back to 30
 $displayarray = array();
 
 $today = date('Y-m-d');
