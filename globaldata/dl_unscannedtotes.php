@@ -50,12 +50,12 @@ $unscannedsql = $conn1->prepare("SELECT DISTINCT
                                                                     LEFT JOIN
                                                                 printvis.scannedtote_history ON totelp = allscan_lp
                                                                     LEFT JOIN
-                                                                printvis.allcart_history A ON cartstart_whse = totetimes_whse
-                                                                    AND totetimes_cart = cartstart_batch
+                                                                printvis.allcart_history_hist A ON cartstart_whse = totetimes_whse
+                                                                    AND totetimes_cart = cartstart_batch and date(cartstart_starttime) = date(totetimes_dateadded)
                                                             WHERE
                                                                 DATE(cartstart_starttime) >= '$var_startdate' and 
                                                                 DATE(cartstart_starttime) <= '$var_enddate' 
-																AND cartstart_whse = $var_whse
+                                                                    AND cartstart_whse = $var_whse
                                                                     AND A.cartstart_starttime IN (SELECT 
                                                                         MAX(B.cartstart_starttime)
                                                                     FROM
