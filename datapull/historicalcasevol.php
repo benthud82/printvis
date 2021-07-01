@@ -298,6 +298,7 @@ foreach ($whsearray as $whse) {
                                 SUM(hist_cubeinch) AS SUM_VOLUME
                             FROM
                                 printvis.hist_casevol
+                            WHERE predicted_availdate >= '$startday'
                             GROUP BY hist_whse , hist_build , hist_equip , predicted_availdate , predicted_availhour) 
                             on duplicate key update casevol_lines=VALUES(casevol_lines),casevol_cube=VALUES(casevol_cube)";
     $queryinsert = $conn1->prepare($sqlinsert);
