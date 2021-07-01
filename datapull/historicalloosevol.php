@@ -298,22 +298,23 @@ foreach ($whsearray as $whse) {
 
 
     $sqlinsert = "INSERT INTO printvis.hist_loosevol_summary(
-SELECT 
-    hist_whse,
-    hist_build,
-    hist_equip,
-    predicted_availdate,
-    CASE
-        WHEN predicted_availhour < 6 THEN 6
-        WHEN predicted_availhour > 17 THEN 17
-        ELSE predicted_availhour
-    END as predicted_availhour,
-    COUNT(*) AS COUNT_LINE,
-    SUM(hist_cubeinch) AS SUM_VOLUME
-FROM
-    printvis.hist_loosevol
-GROUP BY hist_whse , hist_build , hist_equip , predicted_availdate , predicted_availhour) 
-on duplicate key update loosevol_lines=VALUES(loosevol_lines),loosevol_cube=VALUES(loosevol_cube)";
+                            SELECT 
+                                hist_whse,
+                                hist_build,
+                                hist_equip,
+                                predicted_availdate,
+                                CASE
+                                    WHEN predicted_availhour < 6 THEN 6
+                                    WHEN predicted_availhour > 17 THEN 17
+                                    ELSE predicted_availhour
+                                END as predicted_availhour,
+                                COUNT(*) AS COUNT_LINE,
+                                SUM(hist_cubeinch) AS SUM_VOLUME
+                            FROM
+                                printvis.hist_loosevol
+                            WHERE predicted_availdate >= '$startday'
+                            GROUP BY hist_whse , hist_build , hist_equip , predicted_availdate , predicted_availhour) 
+                            on duplicate key update loosevol_lines=VALUES(loosevol_lines),loosevol_cube=VALUES(loosevol_cube)";
     $queryinsert = $conn1->prepare($sqlinsert);
     $queryinsert->execute();
 }
