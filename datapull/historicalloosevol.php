@@ -324,9 +324,11 @@ $sqlinsert2 = "INSERT IGNORE INTO printvis.tsm_firstpick
                             SELECT 
                                 ReserveUSerID, MIN(DATE(DateTimeFirstPick))
                             FROM
-                                printvis.voicepicks_hist
+                                printvis.voicepicks
+                                    LEFT JOIN
+                                printvis.tsm_firstpick ON PICK_TMSNUM = ReserveUSerID
                             WHERE
-                                UserDescription <> ' ' 
+                                UserDescription <> ' ' and PICK_TMSNUM is null
                             GROUP BY ReserveUSerID";
 $queryinsert2 = $conn1->prepare($sqlinsert2);
 $queryinsert2->execute();
