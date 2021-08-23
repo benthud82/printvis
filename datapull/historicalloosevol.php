@@ -51,8 +51,34 @@ foreach ($whsearray as $whse) {
             break;
     }
 
-//Pull data from A-system and place in temp table to pull for additional logic
-    $result1 = $connection->prepare("SELECT 
+    $sql_rowcount = $connection->prepare("SELECT 
+                                            count(PBWHSE) as ROWCOUNT
+                                        FROM
+                                            $schema.NOTWPT A
+                                                JOIN
+                                            $schema.NPFCPC ON PCITEM = PDITEM
+                                                JOIN
+                                            $schema.NOTWPS ON PDWCS# = PBWCS# AND PDWKNO = PBWKNO
+                                                AND PBBOX# = PDBOX#
+                                                LEFT JOIN
+                                            $schema.NPFLSM ON LMWHSE = PDWHSE AND LMLOC# = PDLOC#
+                                        WHERE
+                                            PDWHSE = $whse AND PDBXSZ <> 'CSE'
+                                                AND PDLOC# NOT LIKE '%SDS%'
+                                                AND PCWHSE = 0
+                                              AND   PBRCJD >= $startjday
+                                         --       AND PBRCJD > 18366 and PBRCJD <= 19017");
+    $sql_rowcount->execute();
+    $array_rowcount = $sql_rowcount->fetchAll(pdo::FETCH_ASSOC);
+
+    $rowcount = $array_rowcount[0]['ROWCOUNT'];
+    $offset_divisor = 25000;
+    $batches = $rowcount / $offset_divisor; // Number of while-loop calls
+
+    for ($i = 0; $i <= $batches; $i++) {
+        $offset = $i * $offset_divisor; // MySQL Limit offset number
+        //Pull data from A-system and place in temp table to pull for additional logic
+        $result1 = $connection->prepare("SELECT 
                                                                             PBWHSE,
                                                                             1 AS PBBUILD,
                                                                             CASE
@@ -105,76 +131,96 @@ foreach ($whsearray as $whse) {
                                                                                 AND PDLOC# NOT LIKE '%SDS%'
                                                                                 AND PCWHSE = 0
                                                                               AND   PBRCJD >= $startjday
-                                                                         --       AND PBRCJD > 18366 and PBRCJD <= 19017");
-    $result1->execute();
-    $mindaysarray = $result1->fetchAll(pdo::FETCH_ASSOC);
+                                                                         --       AND PBRCJD > 18366 and PBRCJD <= 19017
+                                                                            LIMIT $offset_divisor OFFSET $offset");
+        $result1->execute();
+        $mindaysarray = $result1->fetchAll(pdo::FETCH_ASSOC);
 
 
-    $columns = 'PBWHSE, PBBUILD, CUBIC_INCH, LOCATION, EQUIP_TYPE, PDITEM, PBPRIO, PBSHPZ, PBSHPC, PBWHTO, PBRCJD,  PBRCHM, PBRCHR, PBPTJD, PBPTHM, PBPTHR, PBPTEM, PBRLJD, PBRLHM, PBRLHR, PBWCS, PBORJD, PBORHM, PBLP9D, TWODAY, PBTX02';
+        $columns = 'PBWHSE, PBBUILD, CUBIC_INCH, LOCATION, EQUIP_TYPE, PDITEM, PBPRIO, PBSHPZ, PBSHPC, PBWHTO, PBRCJD,  PBRCHM, PBRCHR, PBPTJD, PBPTHM, PBPTHR, PBPTEM, PBRLJD, PBRLHM, PBRLHR, PBWCS, PBORJD, PBORHM, PBLP9D, TWODAY, PBTX02';
 
 
-    $values = array();
-
-    $maxrange = 3999;
-    $counter = 0;
-    $rowcount = count($mindaysarray);
-
-    do {
-        if ($maxrange > $rowcount) {  //prevent undefined offset
-            $maxrange = $rowcount - 1;
-        }
-
-        $data = array();
         $values = array();
-        while ($counter <= $maxrange) { //split into 5,000 lines segments to insert into merge table
-            $PBWHSE = $mindaysarray[$counter]['PBWHSE'];
-            $PBBUILD = $mindaysarray[$counter]['PBBUILD'];
-            $CUBIC_INCH = $mindaysarray[$counter]['CUBIC_INCH'];
-            $LOCATION = $mindaysarray[$counter]['LOCATION'];
-            $EQUIP_TYPE = $mindaysarray[$counter]['EQUIP_TYPE'];
-            $PDITEM = intval($mindaysarray[$counter]['PDITEM']);
-            $PBPRIO = $mindaysarray[$counter]['PBPRIO'];
-            $PBSHPZ = $mindaysarray[$counter]['PBSHPZ'];
-            $PBSHPC = $mindaysarray[$counter]['PBSHPC'];
-            $PBWHTO = $mindaysarray[$counter]['PBWHTO'];
-            $PBRCJD = $mindaysarray[$counter]['PBRCJD'];
-            $PBRCHM = $mindaysarray[$counter]['PBRCHM'];
-            $PBRCHR = $mindaysarray[$counter]['PBRCHR'];
-            $PBPTJD = $mindaysarray[$counter]['PBPTJD'];
-            $PBPTHM = $mindaysarray[$counter]['PBPTHM'];
-            $PBPTHR = $mindaysarray[$counter]['PBPTHR'];
-            $PBPTEM = $mindaysarray[$counter]['PBPTEM'];
-            $PBRLJD = $mindaysarray[$counter]['PBRLJD'];
-            $PBRLHM = $mindaysarray[$counter]['PBRLHM'];
-            $PBRLHR = $mindaysarray[$counter]['PBRLHR'];
-            $PBWCS = $mindaysarray[$counter]['PBWCS#'];
-            $PBORJD = $mindaysarray[$counter]['PBORJD'];
-            $PBORHM = $mindaysarray[$counter]['PBORHM'];
-            $PBLP9D = $mindaysarray[$counter]['PBLP9D'];
-            $TWODAY = $mindaysarray[$counter]['TWODAY'];
-            $PBTX02 = $mindaysarray[$counter]['PBTX02'];
+
+        $maxrange = 3999;
+        $counter = 0;
+        $rowcount = count($mindaysarray);
+
+        do {
+            if ($maxrange > $rowcount) {  //prevent undefined offset
+                $maxrange = $rowcount - 1;
+            }
+
+            $data = array();
+            $values = array();
+            while ($counter <= $maxrange) { //split into 5,000 lines segments to insert into merge table
+                $PBWHSE = $mindaysarray[$counter]['PBWHSE'];
+                $PBBUILD = $mindaysarray[$counter]['PBBUILD'];
+                $CUBIC_INCH = $mindaysarray[$counter]['CUBIC_INCH'];
+                $LOCATION = $mindaysarray[$counter]['LOCATION'];
+                $EQUIP_TYPE = $mindaysarray[$counter]['EQUIP_TYPE'];
+                $PDITEM = intval($mindaysarray[$counter]['PDITEM']);
+                $PBPRIO = $mindaysarray[$counter]['PBPRIO'];
+                $PBSHPZ = $mindaysarray[$counter]['PBSHPZ'];
+                $PBSHPC = $mindaysarray[$counter]['PBSHPC'];
+                $PBWHTO = $mindaysarray[$counter]['PBWHTO'];
+                $PBRCJD = $mindaysarray[$counter]['PBRCJD'];
+                $PBRCHM = $mindaysarray[$counter]['PBRCHM'];
+                $PBRCHR = $mindaysarray[$counter]['PBRCHR'];
+                $PBPTJD = $mindaysarray[$counter]['PBPTJD'];
+                $PBPTHM = $mindaysarray[$counter]['PBPTHM'];
+                $PBPTHR = $mindaysarray[$counter]['PBPTHR'];
+                $PBPTEM = $mindaysarray[$counter]['PBPTEM'];
+                $PBRLJD = $mindaysarray[$counter]['PBRLJD'];
+                $PBRLHM = $mindaysarray[$counter]['PBRLHM'];
+                $PBRLHR = $mindaysarray[$counter]['PBRLHR'];
+                $PBWCS = $mindaysarray[$counter]['PBWCS#'];
+                $PBORJD = $mindaysarray[$counter]['PBORJD'];
+                $PBORHM = $mindaysarray[$counter]['PBORHM'];
+                $PBLP9D = $mindaysarray[$counter]['PBLP9D'];
+                $TWODAY = $mindaysarray[$counter]['TWODAY'];
+                $PBTX02 = $mindaysarray[$counter]['PBTX02'];
 
 
-            $data[] = "($PBWHSE, $PBBUILD, '$CUBIC_INCH', '$LOCATION', '$EQUIP_TYPE', $PDITEM, '$PBPRIO', '$PBSHPZ', '$PBSHPC',  $PBWHTO, $PBRCJD, $PBRCHM, $PBRCHR, $PBPTJD, $PBPTHM , $PBPTHR, $PBPTEM, $PBRLJD, $PBRLHM, $PBRLHR, $PBWCS, $PBORJD, $PBORHM, $PBLP9D, $TWODAY, '$PBTX02')";
-            $counter += 1;
-        }
+                $data[] = "($PBWHSE, $PBBUILD, '$CUBIC_INCH', '$LOCATION', '$EQUIP_TYPE', $PDITEM, '$PBPRIO', '$PBSHPZ', '$PBSHPC',  $PBWHTO, $PBRCJD, $PBRCHM, $PBRCHR, $PBPTJD, $PBPTHM , $PBPTHR, $PBPTEM, $PBRLJD, $PBRLHM, $PBRLHR, $PBWCS, $PBORJD, $PBORHM, $PBLP9D, $TWODAY, '$PBTX02')";
+                $counter += 1;
+            }
 
 
-        $values = implode(',', $data);
+            $values = implode(',', $data);
 
-        if (empty($values)) {
-            break;
-        }
-        $sql = "INSERT IGNORE INTO printvis.hist_loosevol_merge ($columns) VALUES $values";
-        $query = $conn1->prepare($sql);
-        $query->execute();
-        $maxrange += 4000;
-    } while ($counter <= $rowcount);
+            if (empty($values)) {
+                break;
+            }
+            $sql = "INSERT IGNORE INTO printvis.hist_loosevol_merge ($columns) VALUES $values";
+            $query = $conn1->prepare($sql);
+            $query->execute();
+            $maxrange += 4000;
+        } while ($counter <= $rowcount);
+    }
 
-$mindaysarray = array();
+    $mindaysarray = array();
 
+    $sql_rowcount2 = $conn1->prepare("SELECT 
+                                                                count(PBWHSE) as ROWCOUNT 
+                                                            FROM
+                                                                printvis.hist_loosevol_merge
+                                                                    LEFT JOIN
+                                                                printvis.printcutoff ON PBWHSE = cutoff_DC
+                                                                    AND substr(PBSHPZ,1,2) = substr(cutoff_zone,1,2)
+                                                            WHERE
+                                                                PBWHSE = $whse");
+    $sql_rowcount2->execute();
+    $array_rowcount2 = $sql_rowcount2->fetchAll(pdo::FETCH_ASSOC);
+
+    $rowcount2 = $array_rowcount2[0]['ROWCOUNT'];
+
+    $batches2 = $rowcount2 / $offset_divisor; // Number of while-loop calls
+
+    for ($i = 0; $i <= $batches2; $i++) {
+        $offset = $i * $offset_divisor; // MySQL Limit offset number
 //Pull data from temp table just created and join with print cutoff times to determine when the order should be printed.
-    $asyshistory = $conn1->prepare("SELECT 
+        $asyshistory = $conn1->prepare("SELECT 
                                                                 PBWHSE as hist_whse,
                                                                 PBWHTO as hist_xferwhs,
                                                                 PBBUILD as hist_build,
@@ -213,89 +259,89 @@ $mindaysarray = array();
                                                                 printvis.printcutoff ON PBWHSE = cutoff_DC
                                                                     AND substr(PBSHPZ,1,2) = substr(cutoff_zone,1,2)
                                                             WHERE
-                                                                PBWHSE = $whse");
-    $asyshistory->execute();
-    $asyshistory_array = $asyshistory->fetchAll(pdo::FETCH_ASSOC);
+                                                                PBWHSE = $whse
+                                                            LIMIT $offset_divisor OFFSET $offset");
+        $asyshistory->execute();
+        $asyshistory_array = $asyshistory->fetchAll(pdo::FETCH_ASSOC);
 
 
 
 
-    $columns = 'hist_whse, hist_xferwhs, hist_build, hist_cubeinch, hist_loc, hist_equip, hist_item, hist_prior, hist_shipzone, hist_shipclass, hist_recdate, hist_rechrmin, hist_rechour,hist_printdate,hist_printhrmn, hist_printhr, hist_reldate, hist_relhrmin,hist_invnum,hist_orddate,hist_ordhrmin,hist_lp,hist_twoday,hist_tx02,cutoff_time,cutoff_group, predicted_availdate, predicted_availhour';
+        $columns = 'hist_whse, hist_xferwhs, hist_build, hist_cubeinch, hist_loc, hist_equip, hist_item, hist_prior, hist_shipzone, hist_shipclass, hist_recdate, hist_rechrmin, hist_rechour,hist_printdate,hist_printhrmn, hist_printhr, hist_reldate, hist_relhrmin,hist_invnum,hist_orddate,hist_ordhrmin,hist_lp,hist_twoday,hist_tx02,cutoff_time,cutoff_group, predicted_availdate, predicted_availhour';
 
 
-    $values = array();
-
-    $maxrange = 3999;
-    $counter = 0;
-    $rowcount = count($asyshistory_array);
-
-    do {
-        if ($maxrange > $rowcount) {  //prevent undefined offset
-            $maxrange = $rowcount - 1;
-        }
-
-        $data = array();
         $values = array();
 
-        while ($counter <= $maxrange) { //split into 5,000 lines segments to insert into merge table
-            $hist_whse = $asyshistory_array[$counter]['hist_whse'];
-            $hist_xferwhs = $asyshistory_array[$counter]['hist_xferwhs'];
-            $hist_build = $asyshistory_array[$counter]['hist_build'];
-            $hist_cubeinch = $asyshistory_array[$counter]['hist_cubeinch'];
-            $hist_loc = $asyshistory_array[$counter]['hist_loc'];
-            $hist_equip = $asyshistory_array[$counter]['hist_equip'];
-            $hist_item = $asyshistory_array[$counter]['hist_item'];
-            $hist_prior = $asyshistory_array[$counter]['hist_prior'];
-            $hist_shipzone = $asyshistory_array[$counter]['hist_shipzone'];
-            $hist_shipclass = $asyshistory_array[$counter]['hist_shipclass'];
-            $hist_recdate = $asyshistory_array[$counter]['hist_recdate'];
-            $converted_recdate = _1yydddtogregdate($hist_recdate);
-            $hist_rechrmin = $asyshistory_array[$counter]['hist_rechrmin'];
-            $hist_rechour = $asyshistory_array[$counter]['hist_rechour'];
-            $hist_printdate = $asyshistory_array[$counter]['hist_printdate'];
-            $converted_printdate = _1yydddtogregdate($hist_printdate);
-            $hist_printhrmn = $asyshistory_array[$counter]['hist_printhrmn'];
-            $hist_printhr = $asyshistory_array[$counter]['hist_printhr'];
-            $hist_reldate = $asyshistory_array[$counter]['hist_reldate'];
-            $converted_reldate = _1yydddtogregdate($hist_reldate);
-            $hist_relhrmin = $asyshistory_array[$counter]['hist_relhrmin'];
-            $hist_invnum = $asyshistory_array[$counter]['hist_invnum'];
-            $hist_orddate = $asyshistory_array[$counter]['hist_orddate'];
-            $converted_orderdate = _1yydddtogregdate($hist_orddate);
-            $hist_ordhrmin = $asyshistory_array[$counter]['hist_ordhrmin'];
-            $hist_lp = $asyshistory_array[$counter]['hist_lp'];
-            $hist_twoday = $asyshistory_array[$counter]['hist_twoday'];
-            $hist_tx02 = $asyshistory_array[$counter]['hist_tx02'];
-            $cutoff_time = $asyshistory_array[$counter]['cutoff_time'];
-            if (is_null($cutoff_time)) {
-                $cutoff_time = 1700;
-            }
-            $cutoff_group = $asyshistory_array[$counter]['cutoff_group'];
+        $maxrange = 3999;
+        $counter = 0;
+        $rowcount = count($asyshistory_array);
 
-            $predicted_availdate = _printdatepredictor($converted_recdate, $hist_rechrmin, $cutoff_time, $hist_shipzone, $hist_shipclass, $cutoff_group);
+        do {
+            if ($maxrange > $rowcount) {  //prevent undefined offset
+                $maxrange = $rowcount - 1;
+            }
+
+            $data = array();
+            $values = array();
+
+            while ($counter <= $maxrange) { //split into 5,000 lines segments to insert into merge table
+                $hist_whse = $asyshistory_array[$counter]['hist_whse'];
+                $hist_xferwhs = $asyshistory_array[$counter]['hist_xferwhs'];
+                $hist_build = $asyshistory_array[$counter]['hist_build'];
+                $hist_cubeinch = $asyshistory_array[$counter]['hist_cubeinch'];
+                $hist_loc = $asyshistory_array[$counter]['hist_loc'];
+                $hist_equip = $asyshistory_array[$counter]['hist_equip'];
+                $hist_item = $asyshistory_array[$counter]['hist_item'];
+                $hist_prior = $asyshistory_array[$counter]['hist_prior'];
+                $hist_shipzone = $asyshistory_array[$counter]['hist_shipzone'];
+                $hist_shipclass = $asyshistory_array[$counter]['hist_shipclass'];
+                $hist_recdate = $asyshistory_array[$counter]['hist_recdate'];
+                $converted_recdate = _1yydddtogregdate($hist_recdate);
+                $hist_rechrmin = $asyshistory_array[$counter]['hist_rechrmin'];
+                $hist_rechour = $asyshistory_array[$counter]['hist_rechour'];
+                $hist_printdate = $asyshistory_array[$counter]['hist_printdate'];
+                $converted_printdate = _1yydddtogregdate($hist_printdate);
+                $hist_printhrmn = $asyshistory_array[$counter]['hist_printhrmn'];
+                $hist_printhr = $asyshistory_array[$counter]['hist_printhr'];
+                $hist_reldate = $asyshistory_array[$counter]['hist_reldate'];
+                $converted_reldate = _1yydddtogregdate($hist_reldate);
+                $hist_relhrmin = $asyshistory_array[$counter]['hist_relhrmin'];
+                $hist_invnum = $asyshistory_array[$counter]['hist_invnum'];
+                $hist_orddate = $asyshistory_array[$counter]['hist_orddate'];
+                $converted_orderdate = _1yydddtogregdate($hist_orddate);
+                $hist_ordhrmin = $asyshistory_array[$counter]['hist_ordhrmin'];
+                $hist_lp = $asyshistory_array[$counter]['hist_lp'];
+                $hist_twoday = $asyshistory_array[$counter]['hist_twoday'];
+                $hist_tx02 = $asyshistory_array[$counter]['hist_tx02'];
+                $cutoff_time = $asyshistory_array[$counter]['cutoff_time'];
+                if (is_null($cutoff_time)) {
+                    $cutoff_time = 1700;
+                }
+                $cutoff_group = $asyshistory_array[$counter]['cutoff_group'];
+
+                $predicted_availdate = _printdatepredictor($converted_recdate, $hist_rechrmin, $cutoff_time, $hist_shipzone, $hist_shipclass, $cutoff_group);
 
 
 //set print hour to 6 if predicted print date is greater than red date
-            if ($predicted_availdate > $converted_recdate) {
-                $predicted_availhour = intval(6);
-            } else {
-                $predicted_availhour = $hist_rechour;
+                if ($predicted_availdate > $converted_recdate) {
+                    $predicted_availhour = intval(6);
+                } else {
+                    $predicted_availhour = $hist_rechour;
+                }
+                $data[] = "($hist_whse, $hist_xferwhs, $hist_build, '$hist_cubeinch', '$hist_loc', '$hist_equip', $hist_item, '$hist_prior', '$hist_shipzone', '$hist_shipclass', '$converted_recdate', $hist_rechrmin, $hist_rechour, '$converted_printdate', $hist_printhrmn, $hist_printhr, '$converted_reldate', $hist_relhrmin, $hist_invnum, '$converted_orderdate', $hist_ordhrmin, $hist_lp, $hist_twoday, '$hist_tx02', $cutoff_time, '$cutoff_group', '$predicted_availdate', $predicted_availhour)";
+                $counter += 1;
             }
-            $data[] = "($hist_whse, $hist_xferwhs, $hist_build, '$hist_cubeinch', '$hist_loc', '$hist_equip', $hist_item, '$hist_prior', '$hist_shipzone', '$hist_shipclass', '$converted_recdate', $hist_rechrmin, $hist_rechour, '$converted_printdate', $hist_printhrmn, $hist_printhr, '$converted_reldate', $hist_relhrmin, $hist_invnum, '$converted_orderdate', $hist_ordhrmin, $hist_lp, $hist_twoday, '$hist_tx02', $cutoff_time, '$cutoff_group', '$predicted_availdate', $predicted_availhour)";
-            $counter += 1;
-        }
-        $values = implode(',', $data);
+            $values = implode(',', $data);
 
-        if (empty($values)) {
-            break;
-        }
-        $sql = "INSERT  INTO printvis.hist_loosevol ($columns) VALUES $values ON DUPLICATE KEY UPDATE hist_printdate=VALUES(hist_printdate), hist_printhrmn=VALUES(hist_printhrmn), hist_printhr=VALUES(hist_printhr), hist_reldate=VALUES(hist_reldate), hist_relhrmin=VALUES(hist_relhrmin), predicted_availdate=VALUES(predicted_availdate), predicted_availhour=VALUES(predicted_availhour)";
-        $query = $conn1->prepare($sql);
-        $query->execute();
-        $maxrange += 4000;
-    } while ($counter <= $rowcount);
-
-
+            if (empty($values)) {
+                break;
+            }
+            $sql = "INSERT  INTO printvis.hist_loosevol ($columns) VALUES $values ON DUPLICATE KEY UPDATE hist_printdate=VALUES(hist_printdate), hist_printhrmn=VALUES(hist_printhrmn), hist_printhr=VALUES(hist_printhr), hist_reldate=VALUES(hist_reldate), hist_relhrmin=VALUES(hist_relhrmin), predicted_availdate=VALUES(predicted_availdate), predicted_availhour=VALUES(predicted_availhour)";
+            $query = $conn1->prepare($sql);
+            $query->execute();
+            $maxrange += 4000;
+        } while ($counter <= $rowcount);
+    }
 
     $sqlinsert = "INSERT INTO printvis.hist_loosevol_summary(
                             SELECT 
