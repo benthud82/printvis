@@ -171,7 +171,7 @@ foreach ($whsearray as $whse) {
         $maxrange += 4000;
     } while ($counter <= $rowcount);
 
-
+$mindaysarray = array();
 
 //Pull data from temp table just created and join with print cutoff times to determine when the order should be printed.
     $asyshistory = $conn1->prepare("SELECT 
