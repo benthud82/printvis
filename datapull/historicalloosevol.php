@@ -11,6 +11,7 @@ include '../functions/functions_totetimes.php';
 $today = date('Y-m-d');
 $startday = date('Y-m-d', (strtotime('-5 days', strtotime($today))));
 $startjday = _gregdatetoyyddd($startday);
+$todayjday = _gregdatetoyyddd($today);
 
 $whsearray = array(2, 7, 3, 6, 9, 11, 12, 16);
 //$whsearray = array(16);  //still need to do 3,6,9 then all history has been loaded
@@ -67,6 +68,7 @@ foreach ($whsearray as $whse) {
                                                 AND PDLOC# NOT LIKE '%SDS%'
                                                 AND PCWHSE = 0
                                               AND   PBRCJD >= $startjday
+                                              and PBRCJD <> $todayjday
                                          --       AND PBRCJD > 18366 and PBRCJD <= 19017");
     $sql_rowcount->execute();
     $array_rowcount = $sql_rowcount->fetchAll(pdo::FETCH_ASSOC);
@@ -130,8 +132,9 @@ foreach ($whsearray as $whse) {
                                                                             PDWHSE = $whse AND PDBXSZ <> 'CSE'
                                                                                 AND PDLOC# NOT LIKE '%SDS%'
                                                                                 AND PCWHSE = 0
-                                                                              AND   PBRCJD >= $startjday
-                                                                         --       AND PBRCJD > 18366 and PBRCJD <= 19017
+                                                                                AND PBRCJD >= $startjday
+                                                                                AND PBRCJD <> $todayjday
+                                                                         --     AND PBRCJD > 18366 and PBRCJD <= 19017
                                                                             LIMIT $offset_divisor OFFSET $offset");
         $result1->execute();
         $mindaysarray = $result1->fetchAll(pdo::FETCH_ASSOC);
