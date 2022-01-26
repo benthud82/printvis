@@ -38,7 +38,8 @@ function _ftpupload($ftpfilename, $ftpwhse) {
     ftp_close($connection);
 }
 
-$whsearray = array(11, 2, 3, 6, 7, 9);
+//put denver last because the dbh connection could error out while testing the new server
+$whsearray = array(11, 2, 3, 7, 9, 6);
 
 //$whsearray = array(6);
 
@@ -91,7 +92,15 @@ foreach ($whsearray as $whsesel) {
     }
 
     include '../timezoneset.php';
+    $maxret = 1;
+    $dbh = false;
+    //if no connection break and continue.  This is just for testing
+
     include '../../globalincludes/voice_' . $whsesel . '.php';
+
+
+
+
     $todaydatetime = date('Y-m-d H:i:s');
     $sqldelete1 = "DELETE from  printvis.temp_looselines WHERE temploose_whse = $whsesel ";
     $querydelete1 = $conn1->prepare($sqldelete1);
@@ -331,7 +340,11 @@ FROM
 GROUP BY     loose_whse,
     loose_cart,
     SUBSTR(loose_loc, 1, 3),
-    loose_main)
+    loose_main,
+    loose_picktype,
+    '$todaydatetime',
+    loose_printdatetime,
+    loose_recdatetime)
                                                                         ON DUPLICATE key update 
                                                                         aisletime_count_line=values(aisletime_count_line), 
                                                                         aisletime_count_unit=values(aisletime_count_unit), 
@@ -510,7 +523,7 @@ GROUP BY aisletime_whse , aisletime_cart)
         $data = "";
         $updatearray = array();
         foreach ($sql_looselines_taskpred as $picktimerow) {
-            $data .= $picktimerow['batchnum'] . $picktimerow['MAXTIME'] . "\r\n";
+            $data .= $picktimerow['batchnum'] . $picktimerow['MAXTIME'] . "     \r\n";
             $updatearray[] = $picktimerow['batchnum'];
         }
         fwrite($fp, $data);
