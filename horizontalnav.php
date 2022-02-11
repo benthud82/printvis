@@ -5,7 +5,7 @@
     
     <?php if (isset($_SESSION['MYUSER'])) { ?>
         <?php
-        if (strtoupper($_SESSION['MYUSER']) === 'BHUD01' || strtoupper($_SESSION['MYUSER']) === 'JMOO07' || strtoupper($_SESSION['MYUSER']) === 'KDIC01' || strtoupper($_SESSION['MYUSER']) === 'DMCKEE' || strtoupper($_SESSION['MYUSER']) === 'AROB01'|| strtoupper($_SESSION['MYUSER']) === 'EIGRIS' ||strtoupper($_SESSION['MYUSER']) === 'WHILL'){
+        if (strtoupper($_SESSION['MYUSER']) === 'BHUD01' || strtoupper($_SESSION['MYUSER']) === 'JMOO07' || strtoupper($_SESSION['MYUSER']) === 'ARAJ1' || strtoupper($_SESSION['MYUSER']) === 'KDIC01' || strtoupper($_SESSION['MYUSER']) === 'DMCKEE' || strtoupper($_SESSION['MYUSER']) === 'AROB01'|| strtoupper($_SESSION['MYUSER']) === 'EIGRIS' ||strtoupper($_SESSION['MYUSER']) === 'WHILL'){
             $var_userid = $_SESSION['MYUSER'];
             $whssql = $conn1->prepare("SELECT prodvisdb_users_PRIMDC from printvis.prodvisdb_users WHERE prodvisdb_users_ID = '$var_userid'");
             $whssql->execute();
