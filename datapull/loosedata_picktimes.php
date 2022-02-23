@@ -39,7 +39,7 @@ function _ftpupload($ftpfilename, $ftpwhse) {
 }
 
 //put denver last because the dbh connection could error out while testing the new server
-$whsearray = array(11, 2, 3, 7, 9, 6);
+$whsearray = array(6, 3, 7, 9, 2, 11);
 
 //$whsearray = array(6);
 
@@ -235,33 +235,33 @@ foreach ($whsearray as $whsesel) {
     //The pickprediction_loosepickmap should be automatically downloaded from the NV server once access is gained.
     //Write to the looselines table
     $sql_looselines_joined = $conn1->prepare("INSERT IGNORE into printvis.looselines(
-                                                                                                            SELECT 
-                                                                                                                temploose_whse,
-                                                                                                                temploose_wcs,
-                                                                                                                temploose_cart,
-                                                                                                                temploose_picktype,
-                                                                                                                temploose_loc,
-                                                                                                                loosemap_main,
-                                                                                                                temploose_units,
-                                                                                                                temploose_wcard,
-                                                                                                                temploose_loctype,
-                                                                                                                temploose_locjoin,
-                                                                                                                loosemap_xcoor,
-                                                                                                                loosemap_ycoor,
-                                                                                                                loosemap_zcoor,
-                                                                                                                loosemap_tier,
-                                                                                                                loosemap_openingheight,
-                                                                                                                loosemap_baydistance,
-                                                                                                                temploose_predshort,
-                                                                                                                temploose_printdatetime,
-                                                                                                                temploose_recdatetime,
-                                                                                                                 temploose_shipzone,
-                                                                                                                 temploose_colg
-                                                                                                            FROM
-                                                                                                                printvis.temp_looselines
-                                                                                                                    JOIN
-                                                                                                                printvis.pickprediction_loosepickmap ON temploose_locjoin = loosemap_location and temploose_whse = loosemap_whse
-                                                                                                                WHERE temploose_whse = $whsesel)");
+                                            SELECT 
+                                                temploose_whse,
+                                                temploose_wcs,
+                                                temploose_cart,
+                                                temploose_picktype,
+                                                temploose_loc,
+                                                loosemap_main,
+                                                temploose_units,
+                                                temploose_wcard,
+                                                temploose_loctype,
+                                                temploose_locjoin,
+                                                loosemap_xcoor,
+                                                loosemap_ycoor,
+                                                loosemap_zcoor,
+                                                loosemap_tier,
+                                                loosemap_openingheight,
+                                                loosemap_baydistance,
+                                                temploose_predshort,
+                                                temploose_printdatetime,
+                                                temploose_recdatetime,
+                                                 temploose_shipzone,
+                                                 temploose_colg
+                                            FROM
+                                                printvis.temp_looselines
+                                                    JOIN
+                                                printvis.pickprediction_loosepickmap ON temploose_locjoin = loosemap_location and temploose_whse = loosemap_whse
+                                                WHERE temploose_whse = $whsesel)");
     $sql_looselines_joined->execute();
 
     //Group the looselines table by aisle to determine maximum travel distance by aisle and calculate aisle time and write to looselines_aisletime table
@@ -452,7 +452,10 @@ FROM
         AND aisletime_whse = voice_whse
 WHERE
     aisletime_whse = $whsesel
-GROUP BY aisletime_whse , aisletime_cart)
+GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
+    voice_prep,
+    voice_complete,
+    voice_scanoff)
                                                                     ON duplicate key update
                                                                     batchtime_count_line=values(batchtime_count_line),
                                                                     batchtime_count_unit=values(batchtime_count_unit),
