@@ -657,12 +657,74 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
         $query->execute();
     }
 
-    //insert voice picked info into printvis.voicepicks table
-    $linespicked = $dbh->prepare("SELECT Pick.Pick_ID, Pick.Batch_Num, Pick.Status, Pick.Short_Status, Pick.Location, Pick.Sect, Pick.Aisle, Pick.Bay, Pick.Lev, Pick.Pos, Pick.PickType, Pick.LotReq, Pick.QtyOrder, Pick.QtyPick, Pick.PackageUnit, Pick.Drug, Pick.Ice, Pick.Haz, Pick.SO, Pick.SN, Pick.NSI, Pick.Ped, Pick.ExpyChkReq, Pick.ItemCode, Pick.NDC_Num, Pick.EachWeight, Pick.DateTimeFirstPick, Pick.DATECREATED, Pick.BO, Pick.PutAwayFlag, substring(Location,1,6) as LOCJOIN, Tote.WCS_NUM, Tote.WORKORDER_NUM, Tote.BOX_NUM, Tote.TOTELOCATION, Tote.SHIP_ZONE, Users.UserDescription, Pick.ReserveUSerID   
+    switch ($whsesel) {
+        case 6:
+            
+                        $linespicked = $dbh->prepare("SELECT DISTINCT
+                                                            T.[TaskNumber],
+                                                            JSON_VALUE(T.UserDefinedData, '$.BatchNum'),
+                                                            99 as Status,
+                                                            case when TS.[QuantityScratched] > 0 then 1 else 0 end as Short_Status,
+                                                            T.[LocationString] as Location,
+                                                            SUBSTRING( T.[LocationString] ,1,1) as Sect,
+                                                            SUBSTRING( T.[LocationString] ,2,2) as Aisle,
+                                                            SUBSTRING( T.[LocationString] ,4,2) as Bay,
+                                                            SUBSTRING( T.[LocationString] ,6,1) as Lev,
+                                                            SUBSTRING( T.[LocationString] ,7,1) as Pos,
+                                                            JSON_VALUE(T.UserDefinedData, '$.PickType') as PickType,
+                                                            case when JSON_VALUE(T.UserDefinedData, '$.LotNum') is null then 0 else 1 end as LotReq,
+                                                            [QuantityOrdered] as QtyOrder,
+                                                            [QuantityPicked] as QtyPick,
+                                                            JSON_VALUE(T.UserDefinedData, '$.PackageUnit') as PackageUnit,
+                                                            JSON_VALUE(T.UserDefinedData, '$.DrugFlag') as Drug,
+                                                            JSON_VALUE(T.UserDefinedData, '$.IceFlag') as Ice,
+                                                            JSON_VALUE(T.UserDefinedData, '$.HazFlag') as Haz,
+                                                            JSON_VALUE(T.UserDefinedData, '$.SOFlag') as SO,
+                                                            JSON_VALUE(T.UserDefinedData, '$.SNFlag') as SN,
+                                                            JSON_VALUE(T.UserDefinedData, '$.NSIFlag') as NSI,
+                                                            JSON_VALUE(T.UserDefinedData, '$.PEDFlag') as Ped,
+                                                            case when JSON_VALUE(T.UserDefinedData, '$.ExpirationDate') is null then 0 else 1 end as ExpyChkReq,
+                                                            T.[ProductCode] as ItemCode,
+                                                            JSON_VALUE(T.UserDefinedData, '$.NDCNum') as NDC_Num,
+                                                            [Weight] as EachWeight,
+                                                            [LastEventOccurredBusinessDate] as DateTimeFirstPick,
+                                                            [CreatedDateTime],
+                                                            JSON_VALUE(T.UserDefinedData, '$.BOFlag') as BO,
+                                                            IIF(PE.ExceptionEventId = 3, 1, 0) as PutAwayFlag,
+                                                            SUBSTRING( T.[LocationString] ,1,6) as LOCJOIN,
+                                                            T.[OrderNumber] as WCS_NUM,
+                                                            JSON_VALUE(T.UserDefinedData, '$.WorkOrderNum') as WORKORDER_NUM,
+                                                            JSON_VALUE(T.UserDefinedData, '$.BoxNumber') as BOX_NUM,
+                                                            JSON_VALUE(T.UserDefinedData, '$.ToteLocation') as TOTELOCATION,
+                                                            JSON_VALUE(T.UserDefinedData, '$.ShipZone') as SHIP_ZONE,
+                                                            [LastPickedUserDisplayName] as UserDescription,
+                                                            [LastPickedUserLogin] as ReserveUSerID
+                                                  FROM dbo.Task T (NOLOCK) INNER JOIN  dbo.TaskState TS (NOLOCK) on T.TaskID = TS.TaskID
+                                                  LEFT JOIN dbo.PickingException PE (NOLOCK) on PE.TaskNumber = T.TaskNumber
+                                                  WHERE (([LastEventOccurredBusinessDate]>='$today $printhourmin_colon'))");
+            $linespicked->execute();
+            $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
+            
+         
+            break;
+
+        default:
+            //insert voice picked info into printvis.voicepicks table
+            $linespicked = $dbh->prepare("SELECT Pick.Pick_ID, Pick.Batch_Num, Pick.Status, Pick.Short_Status, Pick.Location, Pick.Sect, Pick.Aisle, Pick.Bay, Pick.Lev, Pick.Pos, Pick.PickType, Pick.LotReq, Pick.QtyOrder, Pick.QtyPick, Pick.PackageUnit, Pick.Drug, Pick.Ice, Pick.Haz, Pick.SO, Pick.SN, Pick.NSI, Pick.Ped, Pick.ExpyChkReq, Pick.ItemCode, Pick.NDC_Num, Pick.EachWeight, Pick.DateTimeFirstPick, Pick.DATECREATED, Pick.BO, Pick.PutAwayFlag, substring(Location,1,6) as LOCJOIN, Tote.WCS_NUM, Tote.WORKORDER_NUM, Tote.BOX_NUM, Tote.TOTELOCATION, Tote.SHIP_ZONE, Users.UserDescription, Pick.ReserveUSerID   
                                                         FROM HenrySchein.dbo.Batch Batch JOIN HenrySchein.dbo.Pick Pick on Batch.Batch_ID = Pick.Batch_ID JOIN HenrySchein.dbo.Tote Tote on Tote.Batch_ID = Batch.Batch_ID JOIN JenX.dbo.Users Users on Pick.ReserveUserID = Users.UserName 
                                                         WHERE Tote.Tote_ID = Pick.Tote_ID AND Pick.Batch_ID = Tote.Batch_ID AND ((Pick.DateTimeFirstPick>='$today $printhourmin_colon'))");
-    $linespicked->execute();
-    $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
+            $linespicked->execute();
+            $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
+
+            break;
+    }
+
+
+
+
+
+
+
     foreach ($linespicked_array as $key => $value) {
 
         $Pick_ID = $linespicked_array[$key]['Pick_ID'];
