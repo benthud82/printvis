@@ -76,7 +76,6 @@ $col_cartspicked = 'voice_whse, voice_batch, voice_startdatetime, voice_userid, 
 $col_linespicked = 'Pick_ID, Whse, Batch_Num, Status, Short_Status, Location, Sect, Aisle, Bay, Lev, Pos, PickType, LotReq, QtyOrder, QtyPick, PackageUnit, Drug, Ice, Haz, SO, SN, NSI, Ped, ExpyChkReq, ItemCode, NDC_Num, EachWeight, DateTimeFirstPick, DATECREATED, BO, PutAwayFlag, LOCJOIN, WCS_NUM, WORKORDER_NUM, BOX_NUM, TOTELOC, SHIP_ZONE, UserDescription, ReserveUSerID';
 $col_linespicked_hist = 'Pick_ID, Whse, Batch_Num, Location, ItemCode, DateTimeFirstPick, WCS_NUM, WORKORDER_NUM, BOX_NUM, UserDescription, ReserveUSerID';
 
-
 foreach ($whsearray as $whsesel) {
 
     switch ($whsesel) {
@@ -97,9 +96,6 @@ foreach ($whsearray as $whsesel) {
     //if no connection break and continue.  This is just for testing
 
     include '../../globalincludes/voice_' . $whsesel . '.php';
-
-
-
 
     $todaydatetime = date('Y-m-d H:i:s');
     $sqldelete1 = "DELETE from  printvis.temp_looselines WHERE temploose_whse = $whsesel ";
@@ -229,8 +225,6 @@ foreach ($whsearray as $whsesel) {
                                                                                 loosemap_whse = error_whse and loosemap_location = error_loc)");
     $sql_error_delete->execute();
 
-
-
     //Join the temp_looselines to the pickprediction_loosepickmap to get additional info of x,y,z, opening height and distance
     //The pickprediction_loosepickmap should be automatically downloaded from the NV server once access is gained.
     //Write to the looselines table
@@ -271,8 +265,6 @@ foreach ($whsearray as $whsesel) {
                                 WHEN COUNT(*) >= 3 or  SUM(loose_units) >=10 THEN 1
                                 ELSE 0
                             END';
-
-
 
     $sql_aisletimes = $conn1->prepare("INSERT INTO  printvis.looselines_aisletime ( SELECT 
     loose_whse,
@@ -596,12 +588,37 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
                                                                     batchtime_time_totaltime=values(batchtime_time_totaltime)");
     $sql_looselines_batchtimehist->execute();
 
-    //pull in batches that have started picking to clean up display
-    $cartspicked = $dbh->prepare("SELECT DISTINCT  Batch.Warehouse, Batch.Batch_Num, Batch.DateTimeFirstPick, Batch.ReserveUserID, Batch.CartConfigTemp, Batch.CartShelves
+    switch ($whsesel) {
+        case 6:
+
+            //pull in batches that have started picking to clean up display
+            $cartspicked = $dbh->prepare("SELECT DISTINCT
+                                           CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT) as Warehouse,
+                                               JSON_VALUE(T.UserDefinedData, '$.BatchNum') as Batch_Num,
+                                               min([LastEventOccurredDateTimeLocal]) as DateTimeFirstPick,
+                                               LastPickedUserLogin as ReserveUserID,
+                                               JSON_VALUE(T.UserDefinedData, '$.CartFlag') as CartConfigTemp,
+                                               JSON_VALUE(T.UserDefinedData, '$.CartShelves') as CartShelves
+                                    FROM dbo.Task T (NOLOCK) INNER JOIN  dbo.TaskState TS (NOLOCK) on T.TaskID = TS.TaskID
+                                    WHERE CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT) = $whsesel
+                                    GROUP BY  CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT), JSON_VALUE(T.UserDefinedData, '$.BatchNum'), LastPickedUserLogin, JSON_VALUE(T.UserDefinedData, '$.CartFlag'), JSON_VALUE(T.UserDefinedData, '$.CartShelves')
+                                    HAVING  min([LastEventOccurredDateTimeLocal]) >= '$printcutoff'");
+            $cartspicked->execute();
+            $cartspicked_array = $cartspicked->fetchAll(pdo::FETCH_ASSOC);
+
+            break;
+
+        default:
+            //pull in batches that have started picking to clean up display
+            $cartspicked = $dbh->prepare("SELECT DISTINCT  Batch.Warehouse, Batch.Batch_Num, Batch.DateTimeFirstPick, Batch.ReserveUserID, Batch.CartConfigTemp, Batch.CartShelves
                                                             FROM HenrySchein.dbo.Batch Batch
                                                             WHERE   Batch.Warehouse = $whsesel and Batch.DATECREATED > '$printcutoff' ");
-    $cartspicked->execute();
-    $cartspicked_array = $cartspicked->fetchAll(pdo::FETCH_ASSOC);
+            $cartspicked->execute();
+            $cartspicked_array = $cartspicked->fetchAll(pdo::FETCH_ASSOC);
+            break;
+    }
+
+
 
     //delete records in open box file that are now printed
     $sql_delete = $conn1->prepare("DELETE FROM t1 USING printvis.looselines_aisletime_open t1
@@ -713,7 +730,6 @@ $sqldelete8 = "DELETE FROM printvis.voicepicks
 $querydelete8 = $conn1->prepare($sqldelete8);
 $querydelete8->execute();
 
-
 //write for all DCs the current pick status of carts to looselines_cartsinprocess_temp
 //write to a temp table, do a left join on main table to delete carts no longer needed
 //do a left join on carts that are in the packing area and delete as no longer in picking if they are currenlty being packed.
@@ -793,7 +809,6 @@ $sql_cartupdate = $conn1->prepare("INSERT INTO printvis.looselines_cartsinproces
                                                                 cartpick_status=values(cartpick_status)");
 $sql_cartupdate->execute();
 
-
 //Cases manifested by batch
 $casesman = $connection->prepare("SELECT PBCART,PBPTJD, count(*) as BOX_COUNT, sum(case when PBRLJD > 0 then 1 else 0 end) as REL_COUNT
                                                                                      FROM $schema.NOTWPB
@@ -822,7 +837,5 @@ $sql6 = "INSERT  INTO printvis.case_boxesreleased ($casesman_cols) VALUES $value
 $query6 = $conn1->prepare($sql6);
 $query6->execute();
 
-
 include 'badges_updateshipzone.php';
-
 
