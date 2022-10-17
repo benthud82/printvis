@@ -5,7 +5,12 @@ if (isset($_SESSION['MYUSER'])) {
     $whssql = $conn1->prepare("SELECT prodvisdb_users_PRIMDC from printvis.prodvisdb_users WHERE prodvisdb_users_ID = '$var_userid'");
     $whssql->execute();
     $whssqlarray = $whssql->fetchAll(pdo::FETCH_ASSOC);
-    $whsesel = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
+    if ($whssqlarray) {
+        $whsesel = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
+    } else {
+        $whsesel = NULL;
+        $var_userid = NULL;
+    }
 } else {
     $whsesel = NULL;
     $var_userid = NULL;
