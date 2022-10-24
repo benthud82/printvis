@@ -50,7 +50,6 @@ $columns_aisletime = 'openputaway_aisletime_whse,
                             openputaway_aisletime_totaltime,
                             openputaway_aisletime_datetime';
 
-
 //call log equipment estimator.  For each log today, will determine equipment most likely to be used.
 include 'logequip.php';
 
@@ -87,14 +86,11 @@ foreach ($whsearray as $whsesel) {
     $pcstop_xcoor = $pcstop_array[0]['putcartmap_xcoor'];
     $pcstop_zcoor = $pcstop_array[0]['putcartmap_zcoor'];
 
-
-
     $foottravel = $conn1->prepare("select put_foottraveltime from printvis.pm_putawaytimes where put_whse = $whsesel;");
 
     $foottravel->execute();
     $foottravelarray = $foottravel->fetchAll(pdo::FETCH_ASSOC);
     $foottraveltime = $foottravelarray[0]['put_foottraveltime'];
-
 
 //pull in all open putaway
     $result1 = $aseriesconn->prepare("SELECT
@@ -183,14 +179,11 @@ WHERE
     $result1->execute();
     $mindaysarray = $result1->fetchAll(pdo::FETCH_ASSOC);
 
-
     $temptable = 'temp_openputaway';
     $schema = 'printvis';
     $arraychunk = 10000; //each result array will be split into 1000 line chunks to prevent memory over allocation
 //insert into table
     pdoMultiInsert($temptable, $schema, $mindaysarray, $conn1, $arraychunk);
-
-
 
     //Join temp open putaway table with map to get x, y z coordinates of each putaway transaction
     $sql_putawaylines_joined = $conn1->prepare("INSERT IGNORE into printvis.openputaway(SELECT temp_openputaway_whse,
@@ -223,7 +216,6 @@ WHERE
 
     $sql_putawaylines_joined->execute();
 
-    
     //Group at the aisle level to determine how long it should take to be in each aisle
     $sql_aisletimes = $conn1->prepare("INSERT IGNORE INTO  printvis.openputaway_aisletime (SELECT 
     openputaway_whse,
@@ -365,8 +357,6 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
     //initiate batch variable
     $openbatchcount = 0;
 
-
-
     foreach ($openputdataarray as $key => $value) {
         $openputaway_aisletime_whse = $openputdataarray[$key]['openputaway_aisletime_whse'];
         $openputaway_aisletime_log = $openputdataarray[$key]['openputaway_aisletime_log'];
@@ -398,7 +388,6 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
         $openputaway_aisletime_timeexpirycheck = $openputdataarray[$key]['openputaway_aisletime_timeexpirycheck'];
         $openputaway_aisletime_timelotcheck = $openputdataarray[$key]['openputaway_aisletime_timelotcheck'];
 
-
         $LOWSTART_X = $openputdataarray[$key]['LOWSTART_X'];
         $LOWSTART_Z = $openputdataarray[$key]['LOWSTART_Z'];
         $HIGHSTART_X = $openputdataarray[$key]['HIGHSTART_X'];
@@ -415,8 +404,9 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
             $previousaisleH_Z = $openputdataarray[$key - 1]['HIGHSTART_Z'];  //previous aisle high parking Z
             $previousaisleL_X = $openputdataarray[$key - 1]['LOWSTART_X'];  //previous aisle low parking X
             $previousaisleL_Z = $openputdataarray[$key - 1]['LOWSTART_Z'];  //previous aisle low parking Z
+            $previouslog = intval($openputdataarray[$key - 1]['openputaway_aisletime_log']);
         } else {//First record in array
-            $previousloc_X = $previousloc_Z = $previousaisleH_X = $previousaisleH_Z = $previousaisleL_X = $previousaisleL_Z = 0; //set all to 0 if first record
+            $previousloc_X = $previousloc_Z = $previousaisleH_X = $previousaisleH_Z = $previousaisleL_X = $previousaisleL_Z = $previouslog = 0; //set all to 0 if first record
         }
         if ($key !== $openarraycount) { //Not the last record
             $nextloc_X = $openputdataarray[$key + 1]['LASTLOCATION_X'];  //next aisle last location X
@@ -437,8 +427,11 @@ ORDER BY openputaway_aisletime_log , openputaway_aisletime_putcartmap_smartseq ,
             $nextcart = 0;
         }
 
+
+
         //calculate time from this P point to next P point.
-        if ($openputaway_aisletime_log != $nextcart && $openputaway_aisletime_log != intval($openputdataarray[$key - 1]['openputaway_aisletime_log'])) {
+
+        if ($openputaway_aisletime_log != $nextcart && $openputaway_aisletime_log != $previouslog) {
             $outeraisle_min = abs($FIRSTLOC_X - $pcstart_xcoor) + abs($FIRSTLOC_Z - $pcstart_zcoor);
             $outeraisle_min += abs($LASTLOC_X - $pcstop_xcoor) + abs($LASTLOC_Z - $pcstop_zcoor);
             $openbatchcount = 0;
@@ -525,12 +518,6 @@ openputaway_aisletime_hist.openputaway_aisletime_datetime = IF(openputaway_aisle
 
 $aislesqlhistory->execute();
 
-
-
-
-
-
-
 $logsql = $conn1->prepare("insert into printvis.openputaway_logtime (SELECT
 openputaway_aisletime_whse AS PUTAWAY_WHSE,
 openputaway_aisletime_log AS PUTAWAY_LOG,
@@ -592,7 +579,6 @@ openputaway_logtime_totaltime=VALUES(openputaway_logtime_totaltime)
 
 $logsql->execute();
 
-
 //only insert into log history
 $logsqlhistory = $conn1->prepare("insert into printvis.openputaway_logtime_hist 
 (SELECT * FROM printvis.openputaway_logtime) 
@@ -622,7 +608,6 @@ openputaway_logtime_hist.openputaway_logtime_totaltime = IF(openputaway_logtime_
 openputaway_logtime_hist.openputaway_logtime_datetime = IF(openputaway_logtime_hist.openputaway_logtime_datetime < VALUES(openputaway_logtime_datetime), VALUES(openputaway_logtime_datetime), openputaway_logtime_hist.openputaway_logtime_datetime)");
 
 $logsqlhistory->execute();
-
 
 //add to taskpred table
 $taskpredcolumns = 'taskpred_id, taskpred_whse, taskpred_function, taskpred_type, taskpred_mintime, taskpred_maxtime, taskpred_updatetime';
