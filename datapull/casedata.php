@@ -310,7 +310,11 @@ foreach ($whsearray as $whse) {
         if ($allpicks_binnum == 1) {
             $prevloc = 'X';
         } else {
-            $prevloc = $alldata_array[$key - 1]['LOCATION'];
+            if ($alldata_array[$key - 1]) {
+                $prevloc = $alldata_array[$key - 1]['LOCATION'];
+            } else {
+                $prevloc = 'X';
+            }
         }
 
         //what is next location
