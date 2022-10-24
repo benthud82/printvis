@@ -8,7 +8,6 @@ include '../functions/functions_totetimes.php';
 //include '../../globalfunctions/custdbfunctions.php';
 $whsearray = array(3.1, 3.2, 6, 9, 2, 7);
 
-
 $today = date('Y-m-d');
 $dayofweek = date('w', strtotime($today));
 if ($dayofweek == 1) {
@@ -21,7 +20,6 @@ $yestJdate = _gregdatetoyyddd($yesterday);
 
 //initialize variables
 $equipdata = $data = $data_totetimes = $batchcompletedata = $datafortaskpred = NULL;
-
 
 $yesterdaytime = ('17:20:59');
 $todaydatetime = date('Y-m-d H:i:s');
@@ -37,8 +35,6 @@ $casetotetimes_cols = 'casetote_time_whse, casetote_time_build, casetote_time_ca
 
 $casebatchtimes_cols = 'casebatches_whse,casebatches_build,casebatches_cart,casebatches_equipment,casebatches_printdate,casebatches_time_kiosk,casebatches_time_batch,casebatches_time_complete,casebatches_time_short,casebatches_trip,casebatches_totaltrips,casebatches_time_tripcube,casebatches_lines,casebatches_firstloc,casebatches_lastloc,casebatches_time_pickloc,casebatches_time_unit,casebatches_time_indirect,casebatches_time_dropoff,casebatches_time_noncon,casebatches_aisleinches,casebatches_time_aisletravel,casebatches_time_verttravel,casebatches_starttofirst,casebatches_lasttostop,casebatches_inchpermin,casebatches_startstopinches,casebatches_time_startstop,casebatches_time_final';
 
-
-
 //Delete from casebatchstarttime table where batches are older than yesterday's cutoff time
 $sqldelete4 = "DELETE from  printvis.case_boxesreleased WHERE boxrel_printdate < $yestJdate ";
 $querydelete4 = $conn1->prepare($sqldelete4);
@@ -53,7 +49,6 @@ $querydelete6->execute();
 $sqldelete7 = "DELETE FROM  printvis.casepick_openpicks WHERE allpicks_ptjd <= '$yestJdate'";
 $querydelete7 = $conn1->prepare($sqldelete7);
 $querydelete7->execute();
-
 
 foreach ($whsearray as $whse) {
     if ($whse == 3.1) {
@@ -95,12 +90,6 @@ foreach ($whsearray as $whse) {
     $sqldelete4 = "DELETE FROM  printvis.casebatchstarttime WHERE starttime_whse = $whsesel and  date(starttime_starttime) <> '$today' and starttime_build = $building";
     $querydelete4 = $conn1->prepare($sqldelete4);
     $querydelete4->execute();
-
-
-
-
-
-
 
     //Batch start times
     $casebatchstart = $aseriesconn->prepare("SELECT TRIM(substr(NVCFLT,3,2)) as WHSE,
@@ -194,7 +183,6 @@ foreach ($whsearray as $whse) {
         $LAST_LOC = $batcharray[$key]['LAST_LOC'];
         $FIRST_LOC = $batcharray[$key]['FIRST_LOC'];
 
-
         $equiptype = _equipestimator($LINE_COUNT, $PRIM_PICKS, $BULK_PICKS, $PTB_PICKS, $PALLET_PICKS, $HALFDECK_PICKS, $OTHER_PICKS, $FIRST_LOC, $LAST_LOC, $whsesel);
 
         $equipdata[] = "($PBWHSE, $PBBUILD, $PBCART, '$printdatetime', $LINE_COUNT,$PRIM_PICKS, $BULK_PICKS, $PTB_PICKS,$PALLET_PICKS, $HALFDECK_PICKS,$OTHER_PICKS, '$equiptype')";
@@ -231,7 +219,6 @@ foreach ($whsearray as $whse) {
     $cutoff = $conn1->prepare("SELECT cutoff_zone, cutoff_time FROM printvis.printcutoff WHERE cutoff_DC = $whsesel");
     $cutoff->execute();
     $cutoffarray = $cutoff->fetchAll(pdo::FETCH_ASSOC);
-
 
     //All picks currently in open file.
     $alldata = $aseriesconn->prepare("SELECT 
@@ -411,7 +398,6 @@ foreach ($whsearray as $whse) {
     $totedata->execute();
     $totedataarray = $totedata->fetchAll(pdo::FETCH_ASSOC);
 
-
     foreach ($totedataarray as $key => $value) {
         //Is print date greater than yesterday at 5:00 PM?
         $PBPTJD = intval($totedataarray[$key]['PBPTJD']);
@@ -575,13 +561,9 @@ ORDER BY casebatch_cart , casebatch_minbin");
     $opentotedata->execute();
     $opentotedataarray = $opentotedata->fetchAll(pdo::FETCH_ASSOC);
 
-
-
     //initiate batch variable
     $openbatchcount = 0;
     $openarraycount = count($opentotedataarray) - 1;
-
-
 
     foreach ($opentotedataarray as $key => $value) {
 
@@ -602,9 +584,13 @@ ORDER BY casebatch_cart , casebatch_minbin");
                                                                                 AND casemap_loc = 'CSTART' ");
         $cstart->execute();
         $cstart_array = $cstart->fetchAll(pdo::FETCH_ASSOC);
-        $cstart_xcoor = $cstart_array[0]['pickprediction_xcoor'];
-        $cstart_zcoor = $cstart_array[0]['casemap_zcoor'];
-
+        if ($cstart_array) {
+            $cstart_xcoor = $cstart_array[0]['pickprediction_xcoor'];
+            $cstart_zcoor = $cstart_array[0]['casemap_zcoor'];
+        } else {
+            $cstart_xcoor = 0;
+            $cstart_zcoor = 0;
+        }
         //What is CSTOP
         $cstop = $conn1->prepare("SELECT 
                                                                             pickprediction_xcoor, casemap_zcoor
@@ -616,10 +602,13 @@ ORDER BY casebatch_cart , casebatch_minbin");
                                                                                 AND casemap_loc = 'CSTOP' ");
         $cstop->execute();
         $cstop_array = $cstop->fetchAll(pdo::FETCH_ASSOC);
-        $cstop_xcoor = $cstop_array[0]['pickprediction_xcoor'];
-        $cstop_zcoor = $cstop_array[0]['casemap_zcoor'];
-
-
+        if ($cstop_array) {
+            $cstop_xcoor = $cstop_array[0]['pickprediction_xcoor'];
+            $cstop_zcoor = $cstop_array[0]['casemap_zcoor'];
+        } else {
+            $cstop_xcoor = 0;
+            $cstop_zcoor = 0;
+        }
 
         $casebatch_cart = intval($opentotedataarray[$key]['casebatch_cart']);
         $casebatch_aisle = $opentotedataarray[$key]['casebatch_aisle'];
@@ -701,7 +690,6 @@ ORDER BY casebatch_cart , casebatch_minbin");
             $outeraisle_bridge = 99999999999;
         }
         $outeraisle_min = min($outeraisle_high, $outeraisle_low, $outeraisle_bridge, $outeraisle_hightoL, $outeraisle_lowtoH);
-
 
         if (isset($opentotedataarray[$key + 1]['casebatch_cart'])) {
             $nextcart = intval($opentotedataarray[$key + 1]['casebatch_cart']);
@@ -1050,5 +1038,4 @@ $queryupdate->execute();
 $sql5 = "INSERT IGNORE INTO printvis.casebatchstarttime_hist ($casestartcols) VALUES $values99";
 $query5 = $conn1->prepare($sql5);
 $query5->execute();
-
 
