@@ -2,8 +2,6 @@
 include '../../connections/conn_printvis.php';
 include_once '../sessioninclude.php';
 
-
-
 if (isset($_SESSION['MYUSER'])) {
     $var_userid = $_SESSION['MYUSER'];
     $whssql = $conn1->prepare("SELECT prodvisdb_users_PRIMDC from printvis.prodvisdb_users WHERE prodvisdb_users_ID = '$var_userid'");
@@ -68,7 +66,6 @@ $forstat_forecasthours_array = $forstat_forecasthours_sql->fetchAll(pdo::FETCH_A
 
 $forestat_forecasthoursneeded = round(($forstat_forecasthours_array[0]['FORECAST_TOT']), 1);
 
-
 //Is volume trending above or below forecast and what are the extra/fewer hours needed
 $forstat_trend_sql = $conn1->prepare("SELECT 
                                                                         t.fcase_hour,
@@ -112,10 +109,13 @@ $forstat_trend_sql = $conn1->prepare("SELECT
 $forstat_trend_sql->execute();
 $forstat_trend_array = $forstat_trend_sql->fetchAll(pdo::FETCH_ASSOC);
 $currentminpercent = (date('i') / 60);
-$actualforecastforhour = $forstat_trend_array[0]['cumulative_sum'] - ($forstat_trend_array[0]['fcase_minuteforecast'] * (1 - $currentminpercent));
-
-$actminreceived = $forstat_trend_array[0]['ACTMINTOT'];
-
+if ($forstat_trend_array) {
+    $actualforecastforhour = $forstat_trend_array[0]['cumulative_sum'] - ($forstat_trend_array[0]['fcase_minuteforecast'] * (1 - $currentminpercent));
+    $actminreceived = $forstat_trend_array[0]['ACTMINTOT'];
+} else {
+    $actualforecastforhour = 1;
+    $actminreceived = 1;
+}
 if ($actminreceived >= $actualforecastforhour) {
     $hours = round((($actminreceived - $actualforecastforhour) / 60), 1);
     $tsms = round($hours / 6.75, 1);
