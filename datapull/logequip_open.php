@@ -12,7 +12,7 @@ foreach ($truncatetables as $value) {
     $querydelete2 = $conn1->prepare("TRUNCATE printvis.$value");
     $querydelete2->execute();
 }
-$building = $_POST['building'];
+//$building = $_POST['building'];
 
 //pull in all open putaway (logged and non logged)
 $putawayopen = $aseriesconn->prepare("SELECT eawhse as LOGEQUIPOPEN_WHSE,
@@ -85,7 +85,7 @@ $PUTOPENTIMES = $conn1->prepare("SELECT LOGEQUIPOPEN_WHSE AS LOGEQUIPOPENTIMES_W
                                        LOGEQUIPOPEN_TOBLDG = FORECAST_BUILDING AND 
                                        LOGEQUIPOPEN_EQUIP = FORECAST_FUNCTION
                                        
-                                       WHERE LOGEQUIPOPEN_TOBLDG = '$building'
+                                      
                                        GROUP BY LOGEQUIPOPENTIMES_WHSE, LOGEQUIPOPENTIMES_FROMBLDG, LOGEQUIPOPENTIMES_TOBLDG, LOGEQUIPOPENTIMES_EQUIP");
 
 $PUTOPENTIMES->execute();
