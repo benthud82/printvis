@@ -310,7 +310,7 @@ foreach ($whsearray as $whse) {
         if ($allpicks_binnum == 1) {
             $prevloc = 'X';
         } else {
-            if ($alldata_array[$key - 1]) {
+            if ($key != 0) {
                 $prevloc = $alldata_array[$key - 1]['LOCATION'];
             } else {
                 $prevloc = 'X';
@@ -702,7 +702,10 @@ ORDER BY casebatch_cart , casebatch_minbin");
         }
 
         //calculate time from this P point to next P point.
-        if ($casebatch_cart != $nextcart && $casebatch_cart != intval($opentotedataarray[$key - 1]['casebatch_cart'])) {
+        if ($key == 0) {  //first aisle on batch.  what is distance from CSTART to first location
+            $outeraisle_min = abs($FIRSTLOC_X - $cstart_xcoor) + abs($FIRSTLOC_Z - $cstart_zcoor);
+            $openbatchcount += 1;
+        } elseif ($casebatch_cart != $nextcart && $casebatch_cart != intval($opentotedataarray[$key - 1]['casebatch_cart'])) {
             $outeraisle_min = abs($FIRSTLOC_X - $cstart_xcoor) + abs($FIRSTLOC_Z - $cstart_zcoor);
             $outeraisle_min += abs($LASTLOC_X - $cstop_xcoor) + abs($LASTLOC_Z - $cstop_zcoor);
             $openbatchcount = 0;
