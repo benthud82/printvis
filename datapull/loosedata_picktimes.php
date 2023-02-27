@@ -607,6 +607,25 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
             $cartspicked_array = $cartspicked->fetchAll(pdo::FETCH_ASSOC);
 
             break;
+        
+        case 7:
+
+            //pull in batches that have started picking to clean up display
+            $cartspicked = $dbh->prepare("SELECT DISTINCT
+                                           CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT) as Warehouse,
+                                               JSON_VALUE(T.UserDefinedData, '$.BatchNum') as Batch_Num,
+                                               min([LastEventOccurredDateTimeLocal]) as DateTimeFirstPick,
+                                               LastPickedUserLogin as ReserveUserID,
+                                               JSON_VALUE(T.UserDefinedData, '$.CartFlag') as CartConfigTemp,
+                                               JSON_VALUE(T.UserDefinedData, '$.CartShelves') as CartShelves
+                                    FROM dbo.Task T (NOLOCK) INNER JOIN  dbo.TaskState TS (NOLOCK) on T.TaskID = TS.TaskID
+                                    WHERE CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT) = $whsesel
+                                    GROUP BY  CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT), JSON_VALUE(T.UserDefinedData, '$.BatchNum'), LastPickedUserLogin, JSON_VALUE(T.UserDefinedData, '$.CartFlag'), JSON_VALUE(T.UserDefinedData, '$.CartShelves')
+                                    HAVING  min([LastEventOccurredDateTimeLocal]) >= '$printcutoff'");
+            $cartspicked->execute();
+            $cartspicked_array = $cartspicked->fetchAll(pdo::FETCH_ASSOC);
+
+            break;
 
         default:
             //pull in batches that have started picking to clean up display
