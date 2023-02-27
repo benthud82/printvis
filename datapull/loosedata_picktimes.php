@@ -703,8 +703,7 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
                                                   LEFT JOIN dbo.PickingException PE (NOLOCK) on PE.TaskNumber = T.TaskNumber");
             $linespicked->execute();
             $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
-            
-         
+                    
             break;
         case 7:
             
