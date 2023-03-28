@@ -1,6 +1,6 @@
 
 <?php
-include '../../CustomerAudit/connection/connection_details.php';
+include_once '../../connections/conn_printvis.php';
 include '../sessioninclude.php';
 include '../functions/functions_totetimes.php';
 require '../../globalincludes/usa_asys.php';
@@ -29,7 +29,8 @@ $result_asoboxhold = $aseriesconn->prepare("SELECT
                                                 0      as idasoboxholds,
                                                 PBWHSE as asohold_whse ,
                                                 PLITEM as asohold_item ,
-                                                PLLOC# as asohold_location
+                                                PLLOC# as asohold_location,
+                                                PBBOXL as asohold_boxlines
                                             FROM
                                                 HSIPCORDTA.NOTWPB
                                                 JOIN

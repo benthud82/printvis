@@ -82,7 +82,9 @@
 
             $(document).ready(function () {
                 var dldata = 0;
-                refreshall(dldata);
+                var ascdesc = 'desc';
+                var orderby = 'COUNT_TOTAL';
+                refreshall(dldata, orderby, ascdesc);
             });
 
             function _get_aso_holds() {
@@ -120,11 +122,11 @@
                 });
             }
 
-            function _get_display(sel_lsecse, dldata) {
+            function _get_display(sel_lsecse, dldata, orderby, ascdesc) {
                 $('#ajaxloadergif').removeClass('hidden');
                 $.ajax({
                     url: 'globaldata/dt_asoexpeditor.php',
-                    data: {sel_lsecse: sel_lsecse, dldata: dldata},
+                    data: {sel_lsecse: sel_lsecse, dldata: dldata, sort_class: ascdesc, orderby: orderby},
                     type: 'POST',
                     dataType: 'html',
                     success: function (ajaxresult) {
@@ -162,17 +164,32 @@
                 $('#container_helpmodal').modal('toggle');
             }
 
-            function refreshall() {
+            function refreshall(dldata, orderby, ascdesc) {
 //                debugger;
                 $('#container_asoexpedite').addClass('hidden');
                 var sel_lsecse = $('#sel_cselse').val();
-                var dldata = 0;  //set default to NOT download data.
+
                 _get_aso_holds();
                 _get_dropzone_replen();
                 _get_deleteold_deletes();
-                _get_display(sel_lsecse, dldata);
+                _get_display(sel_lsecse, dldata, orderby, ascdesc);
             }
 
+            //sort div table based on column heading 
+            $(document).on("click touchstart", ".click_sort", function (e) {
+                debugger;
+                var sort_class = $(this).attr('data-sort');
+                if (sort_class === 'asc') {
+                    $(this).attr('data-sort', 'desc');
+                }
+                if (sort_class === 'desc') {
+                    $(this).attr('data-sort', 'asc');
+                }
+                var sort_class2 = $(this).attr('data-sort');
+                var link_name = $(this).attr('name'); //name pulled from column header settings
+                refreshall(0, link_name, sort_class2);
+
+            });
 
             $(document).on("click touchstart", "#btn_download", function (e) {
                 var dldata = 1;
