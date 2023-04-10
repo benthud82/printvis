@@ -39,7 +39,7 @@ function _ftpupload($ftpfilename, $ftpwhse) {
 }
 
 //put denver last because the dbh connection could error out while testing the new server
-$whsearray = array(9, 3, 7, 6, 2, 11);
+$whsearray = array(2, 3, 7, 6, 9, 11);
 
 //$whsearray = array(6);
 
