@@ -97,7 +97,7 @@ foreach ($whsearray as $whse) {
                                                                                          TRIM(substr(NVCFLT,49,10)) as TSM,
                                                                                          TRIM(substr(NVCFLT,120,26))  as STARTTIME
                                                                                      FROM HSIPCORDTA.NOFCAS
-                                                                                     WHERE TRIM(substr(NVCFLT,3,2)) = $whsesel and TRIM(substr(NVCFLT,120,10)) = '$today'");
+                                                                                     WHERE TRIM(substr(NVCFLT,3,2)) = $whsesel and TRIM(substr(NVCFLT,120,10)) >= '$yesterday'");
     $casebatchstart->execute();
     $casebatchstart_array = $casebatchstart->fetchAll(pdo::FETCH_ASSOC);
     $casestartdata = array();
@@ -121,7 +121,10 @@ foreach ($whsearray as $whse) {
         $query5->execute();
     }
 
-
+    //Delete from casebatchstarttime table where batches are older than yesterday's cutoff time
+    $sqldelete4 = "DELETE FROM  printvis.casebatchstarttime WHERE starttime_whse = $whsesel and  date(starttime_starttime) <> '$today' and starttime_build = $building";
+    $querydelete4 = $conn1->prepare($sqldelete4);
+    $querydelete4->execute();
 
     //Batch equipment estimator
     $batchdata = $aseriesconn->prepare("SELECT
