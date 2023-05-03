@@ -64,7 +64,7 @@ $sqldelete3 = "DELETE from  printvis.looselines_aisletime WHERE date(aisletime_d
 $querydelete3 = $conn1->prepare($sqldelete3);
 $querydelete3->execute();
 
-$sqldelete3 = "DELETE from  printvis.voice_batchespicked WHERE date(voice_startdatetime) between between  '1901-01-01' and '$yesterday'";
+$sqldelete3 = "DELETE from  printvis.voice_batchespicked WHERE date(voice_startdatetime) between '1901-01-01' and '$yesterday'";
 $querydelete3 = $conn1->prepare($sqldelete3);
 $querydelete3->execute();
 
