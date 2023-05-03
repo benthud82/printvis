@@ -755,8 +755,8 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
                                                             JSON_VALUE(T.UserDefinedData, '$.ShipZone') as SHIP_ZONE,
                                                             [LastPickedUserDisplayName] as UserDescription,
                                                             [LastPickedUserLogin] as ReserveUSerID
-                                                  FROM dbo.Task T (NOLOCK) INNER JOIN  dbo.TaskState TS (NOLOCK) on T.TaskID = TS.TaskID
-                                                  LEFT JOIN dbo.PickingException PE (NOLOCK) on PE.TaskNumber = T.TaskNumber
+                                                  FROM [Local_PickingSupervisor].[dbo].[Task] T (NOLOCK) INNER JOIN  [Local_PickingSupervisor].[dbo].[TaskState] TS (NOLOCK) on T.TaskID = TS.TaskID
+                                                  LEFT JOIN [Local_PickingSupervisor].[dbo].[PickingException] PE (NOLOCK) on PE.TaskNumber = T.TaskNumber
                                                   WHERE  [CreatedDateTime]>= '$today $printhourmin_colon'");
             $linespicked->execute();
             $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
