@@ -643,6 +643,24 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
             $cartspicked_array = $cartspicked->fetchAll(pdo::FETCH_ASSOC);
 
             break;
+        case 3:
+
+            //pull in batches that have started picking to clean up display
+            $cartspicked = $dbh->prepare("SELECT DISTINCT
+                                           CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT) as Warehouse,
+                                               JSON_VALUE(T.UserDefinedData, '$.BatchNum') as Batch_Num,
+                                               min([LastEventOccurredDateTimeLocal]) as DateTimeFirstPick,
+                                               LastPickedUserLogin as ReserveUserID,
+                                               JSON_VALUE(T.UserDefinedData, '$.CartFlag') as CartConfigTemp,
+                                               JSON_VALUE(T.UserDefinedData, '$.CartShelves') as CartShelves
+                                    FROM dbo.Task T (NOLOCK) INNER JOIN  dbo.TaskState TS (NOLOCK) on T.TaskID = TS.TaskID
+                                    WHERE CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT) = $whsesel
+                                    GROUP BY  CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT), JSON_VALUE(T.UserDefinedData, '$.BatchNum'), LastPickedUserLogin, JSON_VALUE(T.UserDefinedData, '$.CartFlag'), JSON_VALUE(T.UserDefinedData, '$.CartShelves')
+                                    HAVING  min([LastEventOccurredDateTimeLocal]) >= '$printcutoff'");
+            $cartspicked->execute();
+            $cartspicked_array = $cartspicked->fetchAll(pdo::FETCH_ASSOC);
+
+            break;
 
         default:
             //pull in batches that have started picking to clean up display
@@ -790,6 +808,54 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
          
             break;
         case 9:
+            
+                        $linespicked = $dbh->prepare("SELECT DISTINCT
+                                                            T.[TaskNumber] as Pick_ID,
+                                                            JSON_VALUE(T.UserDefinedData, '$.BatchNum') as Batch_Num,
+                                                            99 as Status,
+                                                            case when TS.[QuantityScratched] > 0 then 1 else 0 end as Short_Status,
+                                                            T.[LocationString] as Location,
+                                                            SUBSTRING( T.[LocationString] ,1,1) as Sect,
+                                                            SUBSTRING( T.[LocationString] ,2,2) as Aisle,
+                                                            SUBSTRING( T.[LocationString] ,4,2) as Bay,
+                                                            SUBSTRING( T.[LocationString] ,6,1) as Lev,
+                                                            SUBSTRING( T.[LocationString] ,7,1) as Pos,
+                                                            JSON_VALUE(T.UserDefinedData, '$.PickType') as PickType,
+                                                            case when JSON_VALUE(T.UserDefinedData, '$.LotNum') is null then 0 else 1 end as LotReq,
+                                                            [QuantityOrdered] as QtyOrder,
+                                                            [QuantityPicked] as QtyPick,
+                                                            JSON_VALUE(T.UserDefinedData, '$.PackageUnit') as PackageUnit,
+                                                            JSON_VALUE(T.UserDefinedData, '$.DrugFlag') as Drug,
+                                                            JSON_VALUE(T.UserDefinedData, '$.IceFlag') as Ice,
+                                                            JSON_VALUE(T.UserDefinedData, '$.HazFlag') as Haz,
+                                                            JSON_VALUE(T.UserDefinedData, '$.SOFlag') as SO,
+                                                            JSON_VALUE(T.UserDefinedData, '$.SNFlag') as SN,
+                                                            JSON_VALUE(T.UserDefinedData, '$.NSIFlag') as NSI,
+                                                            JSON_VALUE(T.UserDefinedData, '$.PEDFlag') as Ped,
+                                                            case when JSON_VALUE(T.UserDefinedData, '$.ExpirationDate') is null then 0 else 1 end as ExpyChkReq,
+                                                            T.[ProductCode] as ItemCode,
+                                                            JSON_VALUE(T.UserDefinedData, '$.NDCNum') as NDC_Num,
+                                                            [Weight] as EachWeight,
+                                                            [LastEventOccurredBusinessDate] as DateTimeFirstPick,
+                                                            [CreatedDateTime] as DATECREATED,
+                                                            JSON_VALUE(T.UserDefinedData, '$.BOFlag') as BO,
+                                                            IIF(PE.ExceptionEventId = 3, 1, 0) as PutAwayFlag,
+                                                            SUBSTRING( T.[LocationString] ,1,6) as LOCJOIN,
+                                                            T.[OrderNumber] as WCS_NUM,
+                                                            JSON_VALUE(T.UserDefinedData, '$.WorkOrderNum') as WORKORDER_NUM,
+                                                            JSON_VALUE(T.UserDefinedData, '$.BoxNumber') as BOX_NUM,
+                                                            JSON_VALUE(T.UserDefinedData, '$.ToteLocation') as TOTELOCATION,
+                                                            JSON_VALUE(T.UserDefinedData, '$.ShipZone') as SHIP_ZONE,
+                                                            [LastPickedUserDisplayName] as UserDescription,
+                                                            [LastPickedUserLogin] as ReserveUSerID
+                                                  FROM dbo.Task T (NOLOCK) INNER JOIN  dbo.TaskState TS (NOLOCK) on T.TaskID = TS.TaskID
+                                                  LEFT JOIN dbo.PickingException PE (NOLOCK) on PE.TaskNumber = T.TaskNumber");
+            $linespicked->execute();
+            $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
+            
+         
+            break;
+        case 3:
             
                         $linespicked = $dbh->prepare("SELECT DISTINCT
                                                             T.[TaskNumber] as Pick_ID,
