@@ -676,11 +676,11 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
 
 
 
-    //delete records in open box file that are now printed
-    $sql_delete = $conn1->prepare("DELETE FROM t1 USING printvis.looselines_aisletime_open t1
-                                                            INNER JOIN
-                                                        printvis.looselines t2 ON (t1.aisletime_wcs = t2.loose_wcs) WHERE aisletime_whse = $whsesel;");
-    $sql_delete->execute();
+//    //delete records in open box file that are now printed
+//    $sql_delete = $conn1->prepare("DELETE FROM t1 USING printvis.looselines_aisletime_open t1
+//                                                            INNER JOIN
+//                                                        printvis.looselines t2 ON (t1.aisletime_wcs = t2.loose_wcs) WHERE aisletime_whse = $whsesel;");
+//    $sql_delete->execute();
 
     //loop $cartspicked_array and add to voice_batchespicked table
     $cartsdata = array();
