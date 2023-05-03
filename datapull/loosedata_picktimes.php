@@ -756,7 +756,8 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
                                                             [LastPickedUserDisplayName] as UserDescription,
                                                             [LastPickedUserLogin] as ReserveUSerID
                                                   FROM dbo.Task T (NOLOCK) INNER JOIN  dbo.TaskState TS (NOLOCK) on T.TaskID = TS.TaskID
-                                                  LEFT JOIN dbo.PickingException PE (NOLOCK) on PE.TaskNumber = T.TaskNumber");
+                                                  LEFT JOIN dbo.PickingException PE (NOLOCK) on PE.TaskNumber = T.TaskNumber
+                                                  WHERE  [CreatedDateTime]>= '$today $printhourmin_colon'");
             $linespicked->execute();
             $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
                     
@@ -803,7 +804,8 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
                                                             [LastPickedUserDisplayName] as UserDescription,
                                                             [LastPickedUserLogin] as ReserveUSerID
                                                   FROM dbo.Task T (NOLOCK) INNER JOIN  dbo.TaskState TS (NOLOCK) on T.TaskID = TS.TaskID
-                                                  LEFT JOIN dbo.PickingException PE (NOLOCK) on PE.TaskNumber = T.TaskNumber");
+                                                  LEFT JOIN dbo.PickingException PE (NOLOCK) on PE.TaskNumber = T.TaskNumber
+                                                  WHERE  [CreatedDateTime]>= '$today $printhourmin_colon'");
             $linespicked->execute();
             $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
             
@@ -851,7 +853,8 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
                                                             [LastPickedUserDisplayName] as UserDescription,
                                                             [LastPickedUserLogin] as ReserveUSerID
                                                   FROM dbo.Task T (NOLOCK) INNER JOIN  dbo.TaskState TS (NOLOCK) on T.TaskID = TS.TaskID
-                                                  LEFT JOIN dbo.PickingException PE (NOLOCK) on PE.TaskNumber = T.TaskNumber");
+                                                  LEFT JOIN dbo.PickingException PE (NOLOCK) on PE.TaskNumber = T.TaskNumber
+                                                  WHERE  [CreatedDateTime]>= '$today $printhourmin_colon'");
             $linespicked->execute();
             $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
             
@@ -899,7 +902,8 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
                                                             [LastPickedUserDisplayName] as UserDescription,
                                                             [LastPickedUserLogin] as ReserveUSerID
                                                   FROM dbo.Task T (NOLOCK) INNER JOIN  dbo.TaskState TS (NOLOCK) on T.TaskID = TS.TaskID
-                                                  LEFT JOIN dbo.PickingException PE (NOLOCK) on PE.TaskNumber = T.TaskNumber");
+                                                  LEFT JOIN dbo.PickingException PE (NOLOCK) on PE.TaskNumber = T.TaskNumber
+                                                  WHERE  [CreatedDateTime]>= '$today $printhourmin_colon'");
             $linespicked->execute();
             $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
             
