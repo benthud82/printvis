@@ -29,8 +29,8 @@ $batches = $conn1->prepare("SELECT
                                     AND cutoff_rank = batchtime_shipzone
                             WHERE
                                 batchtime_printdatetime >= CASE
-                                    WHEN 2 = 3 THEN DATE_SUB(NOW(), INTERVAL 6 HOUR)
-                                    WHEN 2 = 7 THEN DATE_SUB(NOW(), INTERVAL 4 HOUR)
+                                    WHEN $whsesel = 3 THEN DATE_SUB(NOW(), INTERVAL 6 HOUR)
+                                    WHEN $whsesel = 7 THEN DATE_SUB(NOW(), INTERVAL 4 HOUR)
                                     ELSE DATE_SUB(NOW(), INTERVAL 3 HOUR)
                                 END
                                     AND batchtime_whse = $whsesel
