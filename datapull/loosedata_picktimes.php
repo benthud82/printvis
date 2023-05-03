@@ -1,5 +1,7 @@
 <?php
-
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 //calculates time needed to pick each batch
 
 include '../../globalincludes/usa_asys.php';
