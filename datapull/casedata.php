@@ -121,10 +121,7 @@ foreach ($whsearray as $whse) {
         $query5->execute();
     }
 
-    //Delete from casebatchstarttime table where batches are older than yesterday's cutoff time
-    $sqldelete4 = "DELETE FROM  printvis.casebatchstarttime WHERE starttime_whse = $whsesel and  date(starttime_starttime) <> '$today' and starttime_build = $building";
-    $querydelete4 = $conn1->prepare($sqldelete4);
-    $querydelete4->execute();
+
 
     //Batch equipment estimator
     $batchdata = $aseriesconn->prepare("SELECT
