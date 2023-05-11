@@ -21,7 +21,7 @@ $yestJdate = _gregdatetoyyddd($yesterday);
 //initialize variables
 $equipdata = $data = $data_totetimes = $batchcompletedata = $datafortaskpred = NULL;
 
-$yesterdaytime = ('17:20:59');
+$yesterdaytime = ('20:20:59');
 $todaydatetime = date('Y-m-d H:i:s');
 $printcutoff = date('Y-m-d H:i:s', strtotime("$yesterday $yesterdaytime"));
 $turninches = intval(300);
@@ -87,7 +87,7 @@ foreach ($whsearray as $whse) {
 //    $querydelete5 = $conn1->prepare($sqldelete5);
 //    $querydelete5->execute();
     //Delete from casebatchstarttime table where batches are older than yesterday's cutoff time
-    $sqldelete4 = "DELETE FROM  printvis.casebatchstarttime WHERE starttime_whse = $whsesel and  date(starttime_starttime) <> '$today' and starttime_build = $building";
+    $sqldelete4 = "DELETE FROM  printvis.casebatchstarttime WHERE starttime_whse = $whsesel and  date(starttime_starttime) < '$yesterday' and starttime_build = $building";
     $querydelete4 = $conn1->prepare($sqldelete4);
     $querydelete4->execute();
 
