@@ -594,7 +594,7 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
     switch ($whsesel) {
         case 2:
             //pull in batches that have started picking to clean up display
-            $cartspicked = $dbh->prepare("SELECT TOP (1000) 
+            $cartspicked = $dbh->prepare("SELECT
                                             [Warehouse]
                                             ,[Batch_Num]
                                             ,[DateTimeFirstPick]
@@ -713,6 +713,7 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
  WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID] AND [Pick].[Batch_ID] = [Tote].[Batch_ID] AND ((Pick.DateTimeFirstPick>='$today $printhourmin_colon'));");
             $linespicked->execute();
             $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
+            print($linespicked_array);
 
         default:
 
