@@ -667,7 +667,7 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
     switch ($whsesel) {
         case 2:
             //insert voice picked info into printvis.voicepicks table
-            $linespicked = $dbh->prepare("SELECT TOP (1) 
+            $linespicked = $dbh->prepare("SELECT 
          [Pick].[Pick_ID]                      ,
          [Pick].[Batch_Num]                    ,
          [Pick].[Status]                       ,
