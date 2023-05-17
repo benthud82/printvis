@@ -594,9 +594,15 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
     switch ($whsesel) {
         case 2:
             //pull in batches that have started picking to clean up display
-            $cartspicked = $dbh->prepare("SELECT DISTINCT  Batch.Warehouse, Batch.Batch_Num, Batch.DateTimeFirstPick, Batch.ReserveUserID, Batch.CartConfigTemp, Batch.CartShelves
-                                                            FROM HenrySchein.dbo.Batch Batch
-                                                            WHERE   Batch.Warehouse = $whsesel and Batch.DATECREATED > '$printcutoff' ");
+            $cartspicked = $dbh->prepare("SELECT TOP (1000) 
+                                            [Warehouse]
+                                            ,[Batch_Num]
+                                            ,[DateTimeFirstPick]
+                                            ,[ReserveUserID]
+                                            ,[CartConfigTemp]
+                                            ,[CartShelves]
+                                        FROM [HenrySchein].[dbo].[Batch]
+                                        WHERE [DATECREATED] >= '$printcutoff'");
             $cartspicked->execute();
             $cartspicked_array = $cartspicked->fetchAll(pdo::FETCH_ASSOC);
             break;
