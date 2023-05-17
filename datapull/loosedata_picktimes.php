@@ -712,7 +712,7 @@ JOIN [HenrySchein].[dbo].[Tote] ON [Tote].[Batch_ID] = [Batch].[Batch_ID]
 JOIN [JenX].[dbo].[Users] ON [Pick].[ReserveUserID] = [Users].[UserName]
 WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID]
     AND [Pick].[Batch_ID] = [Tote].[Batch_ID]
-    AND [Pick].[DateTimeFirstPick] >= '$today $printhourmin_colon';((Pick.DateTimeFirstPick>='$today $printhourmin_colon'));");
+    AND [Pick].[DateTimeFirstPick] >= '$today $printhourmin_colon';");
             $linespicked->execute();
             $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
             print($linespicked_array);
