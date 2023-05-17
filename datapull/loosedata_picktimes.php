@@ -611,7 +611,7 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
                                                JSON_VALUE(T.UserDefinedData, '$.CartFlag') as CartConfigTemp,
                                                JSON_VALUE(T.UserDefinedData, '$.CartShelves') as CartShelves
                                     FROM [Local_PickingSupervisor].[dbo].[Task] T (NOLOCK) INNER JOIN  [Local_PickingSupervisor].[dbo].[TaskState] TS (NOLOCK) on T.TaskID = TS.TaskID
-                                    WHERE CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT) = 6
+                               --     WHERE CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT) = $whsesel
                                     GROUP BY  CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT), JSON_VALUE(T.UserDefinedData, '$.BatchNum'), LastPickedUserLogin, JSON_VALUE(T.UserDefinedData, '$.CartFlag'), JSON_VALUE(T.UserDefinedData, '$.CartShelves')
                                     HAVING  min([LastEventOccurredDateTimeLocal]) >= '$printcutoff'");
             $cartspicked->execute();
