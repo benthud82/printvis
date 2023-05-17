@@ -715,8 +715,8 @@ WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID]
     AND [Pick].[DateTimeFirstPick] >= '$today $printhourmin_colon';");
             $linespicked->execute();
             $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
-            print($linespicked_array);
-
+         
+            break;
         default:
 
             $linespicked = $dbh->prepare("SELECT DISTINCT
