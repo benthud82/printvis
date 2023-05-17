@@ -667,50 +667,52 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
     switch ($whsesel) {
         case 2:
             //insert voice picked info into printvis.voicepicks table
-            $linespicked = $dbh->prepare("SELECT 
-         [Pick].[Pick_ID]                      ,
-         [Pick].[Batch_Num]                    ,
-         [Pick].[Status]                       ,
-         [Pick].[Short_Status]                 ,
-         [Pick].[Location]                     ,
-         [Pick].[Sect]                         ,
-         [Pick].[Aisle]                        ,
-         [Pick].[Bay]                          ,
-         [Pick].[Lev]                          ,
-         [Pick].[Pos]                          ,
-         [Pick].[PickType]                     ,
-         [Pick].[LotReq]                       ,
-         [Pick].[QtyOrder]                     ,
-         [Pick].[QtyPick]                      ,
-         [Pick].[PackageUnit]                  ,
-         [Pick].[Drug]                         ,
-         [Pick].[Ice]                          ,
-         [Pick].[Haz]                          ,
-         [Pick].[SO]                           ,
-         [Pick].[SN]                           ,
-         [Pick].[NSI]                          ,
-         [Pick].[Ped]                          ,
-         [Pick].[ExpyChkReq]                   ,
-         [Pick].[ItemCode]                     ,
-         [Pick].[NDC_Num]                      ,
-         [Pick].[EachWeight]                   ,
-         [Pick].[DateTimeFirstPick]            ,
-         [Pick].[DATECREATED]                  ,
-         [Pick].[BO]                           ,
-         [Pick].[PutAwayFlag]                  ,
-         substring([Location],1,6) as LOCJOIN,
-         [Tote].[WCS_NUM]                      ,
-         [Tote].[WORKORDER_NUM]                ,
-         [Tote].[BOX_NUM]                      ,
-         [Tote].[TOTELOCATION]                 ,
-         [Tote].[SHIP_ZONE]                    ,
-         [Users].[UserDescription]             ,
-         [Pick].[ReserveUSerID]
-  FROM [HenrySchein].[dbo].[Batch] 
-  JOIN [HenrySchein].[dbo].[Pick] on [Batch].[Batch_ID] = [Pick].[Batch_ID] 
-  JOIN [HenrySchein].[dbo].[Tote] on [Tote].[Batch_ID] = [Batch].[Batch_ID] 
-  JOIN [JenX].[dbo].[Users] on [Pick].[ReserveUserID] = [Users].[UserName] 
- WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID] AND [Pick].[Batch_ID] = [Tote].[Batch_ID] AND ((Pick.DateTimeFirstPick>='$today $printhourmin_colon'));");
+            $linespicked = $dbh->prepare(" SELECT 
+    [Pick].[Pick_ID],
+    [Pick].[Batch_Num],
+    [Pick].[Status],
+    [Pick].[Short_Status],
+    [Pick].[Location],
+    [Pick].[Sect],
+    [Pick].[Aisle],
+    [Pick].[Bay],
+    [Pick].[Lev],
+    [Pick].[Pos],
+    [Pick].[PickType],
+    [Pick].[LotReq],
+    [Pick].[QtyOrder],
+    [Pick].[QtyPick],
+    [Pick].[PackageUnit],
+    [Pick].[Drug],
+    [Pick].[Ice],
+    [Pick].[Haz],
+    [Pick].[SO],
+    [Pick].[SN],
+    [Pick].[NSI],
+    [Pick].[Ped],
+    [Pick].[ExpyChkReq],
+    [Pick].[ItemCode],
+    [Pick].[NDC_Num],
+    [Pick].[EachWeight],
+    [Pick].[DateTimeFirstPick],
+    [Pick].[DATECREATED],
+    [Pick].[BO],
+    [Pick].[PutAwayFlag],
+    SUBSTRING([Pick].[Location], 1, 6) AS LOCJOIN,
+    [Tote].[WCS_NUM],
+    [Tote].[WORKORDER_NUM],
+    [Tote].[BOX_NUM],
+    [Tote].[TOTELOCATION],
+    [Tote].[SHIP_ZONE],
+    [Users].[UserDescription],
+    [Pick].[ReserveUSerID]
+FROM [HenrySchein].[dbo].[Batch]
+JOIN [HenrySchein].[dbo].[Pick] ON [Batch].[Batch_ID] = [Pick].[Batch_ID]
+JOIN [HenrySchein].[dbo].[Tote] ON [Tote].[Batch_ID] = [Batch].[Batch_ID]
+JOIN [JenX].[dbo].[Users] ON [Pick].[ReserveUserID] = [Users].[UserName]
+WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID]
+    AND [Pick].[Batch_ID] = [Tote].[Batch_ID]
+    AND [Pick].[DateTimeFirstPick] >= '$today $printhourmin_colon';((Pick.DateTimeFirstPick>='$today $printhourmin_colon'));");
             $linespicked->execute();
             $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
             print($linespicked_array);
