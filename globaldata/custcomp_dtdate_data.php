@@ -12,56 +12,28 @@ if (isset($_SESSION['MYUSER'])) {
     $whsesel = $whssqlarray[0]['prodvisdb_users_PRIMDC'];
 }
 $var_date = date('Y-m-d', strtotime($_GET['startdate']));
-$itemsql = $conn1->prepare("SELECT 
-                                                            ITEMCODE,
-                                                            ORD_RETURNDATE,
-                                                            RETURNCODE,
-                                                            CONCAT(WCSNUM, '-', WONUM) AS WCSNUM,
-                                                            SHIPZONE,
-                                                            BOXSIZE,
-                                                            TRACERNUM,
-                                                            UPPER(CASE
-                                                                WHEN PICK_TSM IS NULL THEN CASEPICK_TSMNAME
-                                                                ELSE PICK_TSM
-                                                            END) AS PICK_TSM,
-                                                            UPPER(CASE
-                                                                WHEN PACK_TSMNAME IS NULL THEN CASEPICK_TSMNAME
-                                                                ELSE PACK_TSMNAME
-                                                            END) AS PACK_TSMNAME,
-                                                            PICK_LOCATION,
-                                                            CASE
-                                                                WHEN PICK_DATE IS NULL THEN CASEPICK_DATETIME
-                                                                ELSE PICK_DATE
-                                                            END AS PICK_DATE,
-                                                            CASE
-                                                                WHEN
-                                                                    (SELECT 
-                                                                            tsm_name
-                                                                        FROM
-                                                                            printvis.tsm
-                                                                        WHERE
-                                                                            tsm_num = CASE
-                                                                                WHEN EOLLOOSE_TSM IS NULL THEN EOLCASE_TSM
-                                                                                ELSE EOLLOOSE_TSM
-                                                                            END) IS NULL
-                                                                THEN
-                                                                    '-'
-                                                                ELSE (SELECT 
-                                                                        tsm_name
-                                                                    FROM
-                                                                        printvis.tsm
-                                                                    WHERE
-                                                                        tsm_num = CASE
-                                                                            WHEN EOLLOOSE_TSM IS NULL THEN EOLCASE_TSM
-                                                                            ELSE EOLLOOSE_TSM
-                                                                        END)
-                                                            END AS EOL_TSM
-                                                        FROM
-                                                            custaudit.complaint_detail
-                                                        WHERE
-                                                            ORD_RETURNDATE = '$var_date'
-                                                                AND PICK_WHSE = $var_whse
-                                                        ORDER BY ORD_RETURNDATE DESC");
+$itemsql = $conn1->prepare("SELECT
+    cd.ITEMCODE,
+    cd.ORD_RETURNDATE,
+    cd.RETURNCODE,
+    CONCAT(cd.WCSNUM, '-', cd.WONUM) AS WCSNUM,
+    cd.SHIPZONE,
+    cd.BOXSIZE,
+    cd.TRACERNUM,
+    UPPER(IFNULL(cd.PICK_TSM, cd.CASEPICK_TSMNAME)) AS PICK_TSM,
+    UPPER(IFNULL(cd.PACK_TSMNAME, cd.CASEPICK_TSMNAME)) AS PACK_TSMNAME,
+    cd.PICK_LOCATION,
+    IFNULL(cd.PICK_DATE, cd.CASEPICK_DATETIME) AS PICK_DATE,
+    IFNULL(t.tsm_name, '-') AS EOL_TSM
+FROM
+    custaudit.complaint_detail cd
+    LEFT JOIN printvis.tsm t ON t.tsm_num = IFNULL(cd.EOLLOOSE_TSM, cd.EOLCASE_TSM)
+WHERE
+    cd.ORD_RETURNDATE = '$var_date'
+    AND cd.PICK_WHSE = $var_whse
+ORDER BY
+    cd.ORD_RETURNDATE DESC
+");
 $itemsql->execute();
 $item_array = $itemsql->fetchAll(pdo::FETCH_ASSOC);
 
