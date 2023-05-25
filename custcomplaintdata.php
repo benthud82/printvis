@@ -69,6 +69,7 @@
                                             <th>Ship Zone</th>
                                             <th>Box Size</th>
                                             <th>Tracer#</th>
+                                            <th>Batch#</th>
                                             <th>Pick TSM</th>
                                             <th>Pack TSM</th>
                                             <th>Pick Location</th>
