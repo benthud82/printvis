@@ -347,7 +347,7 @@ foreach ($whsearray as $whse) {
     }
 
     //All totes that are currently in the open box and open detail file.   ***Will have to modify this to group from newly created casepick_allpicks table to account for vertical travel***
-    $totedata = $conn1->prepare("SELECT 
+    $totedata = $conn1->prepare("SELECT DISTINCT
                                                         allpicks_whse AS PBWHSE,
                                                         allpicks_build AS PBBUILD,
                                                         allpicks_cart AS PBCART,
@@ -357,26 +357,26 @@ foreach ($whsearray as $whse) {
                                                         SUM(allpicks_cubeinch) AS TRIPS_CUBE,
                                                         SUM(allpicks_cubeinch) AS CUBIC_INCH,
                                                         COUNT(allpicks_cart) AS LINE_COUNT,
-                                                        (SELECT 
+                                                        (SELECT DISTINCT
                                                                 T.allpicks_location
                                                             FROM
                                                                 printvis.casepick_openpicks T
                                                             WHERE
-                                                                T.allpicks_cart = A.allpicks_cart
+                                                                T.allpicks_cart = A.allpicks_cart and T.allpicks_whse = A.allpicks_whse
                                                                     AND T.allpicks_binnum = MIN(A.allpicks_binnum)) AS FIRSTLOC,
-                                                        (SELECT 
+                                                        (SELECT DISTINCT
                                                                 T.allpicks_location
                                                             FROM
                                                                 printvis.casepick_openpicks T
                                                             WHERE
-                                                                T.allpicks_cart = A.allpicks_cart
+                                                                T.allpicks_cart = A.allpicks_cart and T.allpicks_whse = A.allpicks_whse
                                                                     AND T.allpicks_binnum = MAX(A.allpicks_binnum)) AS LASTLOC,
-                                                        (SELECT 
+                                                        (SELECT DISTINCT
                                                                 MIN(A.allpicks_binnum)
                                                             FROM
                                                                 printvis.casepick_openpicks T
                                                             WHERE
-                                                                T.allpicks_cart = A.allpicks_cart
+                                                                T.allpicks_cart = A.allpicks_cart and T.allpicks_whse = A.allpicks_whse
                                                                     AND T.allpicks_binnum = MIN(A.allpicks_binnum)) AS MINBIN,
                                                         SUM(allpicks_primpicks) AS PRIM_PICKS,
                                                         SUM(allpicks_bulkpicks) AS BULK_PICKS,
