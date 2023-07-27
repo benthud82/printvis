@@ -34,7 +34,7 @@ $batches = $conn1->prepare("SELECT
                                     ELSE DATE_SUB(NOW(), INTERVAL 3 HOUR)
                                 END
                                     AND batchtime_whse = $whsesel
-                                    AND voice_userid = 0
+                                    AND voice_userid is null
                                     AND batchtime_count_line > 5
                                     AND batchtime_colgcount / batchtime_count_line <= .95
                                    -- AND voice_cartconfig <> ' '
