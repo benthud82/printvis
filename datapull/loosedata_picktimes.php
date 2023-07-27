@@ -592,7 +592,7 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
     $sql_looselines_batchtimehist->execute();
 
     switch ($whsesel) {
-        case 2:
+        case 99:
             //pull in batches that have started picking to clean up display
             $cartspicked = $dbh->prepare("SELECT
                                             [Warehouse]
@@ -665,7 +665,7 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
     }
 
     switch ($whsesel) {
-        case 2:
+        case 99:
             //insert voice picked info into printvis.voicepicks table
             $linespicked = $dbh->prepare(" SELECT 
     [Pick].[Pick_ID],
