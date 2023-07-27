@@ -37,7 +37,7 @@ $batches = $conn1->prepare("SELECT
                                     AND voice_userid = 0
                                     AND batchtime_count_line > 5
                                     AND batchtime_colgcount / batchtime_count_line <= .95
-                                    AND voice_cartconfig <> ' '
+                                   -- AND voice_cartconfig <> ' '
                                     AND batchtime_count_ice / batchtime_count_line <> 1
                             GROUP BY batchtime_cart , CAST(batchtime_time_totaltime AS UNSIGNED) , batchtime_printdatetime , cutoff_color
                             ORDER BY batchtime_cart");
