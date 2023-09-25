@@ -106,7 +106,7 @@
 
                 $.ajax({
                     url: 'globaldata/dropzone_replen.php',
-                    data: {onlydrop: onlydrop},
+                    data: {onlydrop: onlydrop },
                     type: 'post',
                     success: function () {
                     }
@@ -165,7 +165,7 @@
             }
 
             function refreshall(dldata, orderby, ascdesc) {
-//                debugger;
+                debugger;
                 $('#container_asoexpedite').addClass('hidden');
                 var sel_lsecse = $('#sel_cselse').val();
 

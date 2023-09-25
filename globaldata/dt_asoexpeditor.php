@@ -15,10 +15,13 @@ if ($_GET) {
     $dl_data = ($_GET['dldata']); //if 1, dl data, else display 
 }
 if ($_POST) {
+    if ($_POST['sel_lsecse']) {
+        $sel_lsecse = ($_POST['sel_lsecse']);
+    } else {
+        $sel_lsecse = '*';
+    }
+    $dl_data = isset($_POST['dldata']) ? $_POST['dldata'] : 0; //if 1, dl data, else display 
 
-    $sel_lsecse = ($_POST['sel_lsecse']);
-
-    $dl_data = ($_POST['dldata']); //if 1, dl data, else display 
 }
 
 
@@ -52,7 +55,7 @@ if (isset($_POST['sort_class'])) {
     $asc_desc = 'desc';
 }
 
-$orderbyvalue = $_POST['orderby'];
+$orderbyvalue = isset($_POST['orderby']) ? $_POST['orderby'] : 'COUNT_TOTAL';
 switch ($orderbyvalue) {
     case 'item':
         $orderbysql = " ORDER BY dropzone_item $asc_desc";
@@ -238,6 +241,6 @@ if ($dl_data == 1) {
 
         </div>
     </div>    
-<?php
+    <?php
 }
 

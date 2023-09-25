@@ -168,91 +168,91 @@ foreach ($whsearray as $whsesel) {
                             END';
 
     $sql_aisletimes = $conn1->prepare("INSERT INTO  printvis.looselines_aisletime_open (  SELECT 
-                                                                                                                                                                                            loose_whse,
-                                                                                                                                                                                            loose_wcs,
-                                                                                                                                                                                            loose_box,
-                                                                                                                                                                                            SUBSTR(loose_loc, 1, 3) AS AISLE,
-                                                                                                                                                                                            loose_main,
-                                                                                                                                                                                            loose_picktype,
-                                                                                                                                                                                            COUNT(*) AS LINE_COUNT,
-                                                                                                                                                                                            SUM(loose_units) AS UNIT_COUNT,
-                                                                                                                                                                                            SUM(loose_wcard) AS WC_COUNT,
-                                                                                                                                                                                            SUM(CASE
-                                                                                                                                                                                                WHEN loose_loctype = 'R' THEN 1
-                                                                                                                                                                                                ELSE 0
-                                                                                                                                                                                            END) AS FRIDGE_COUNT,
-                                                                                                                                                                                            SUM(CASE
-                                                                                                                                                                                                WHEN loose_loctype IN ('RI' , 'RS') THEN 1
-                                                                                                                                                                                                ELSE 0
-                                                                                                                                                                                            END) AS ICE_COUNT,
-                                                                                                                                                                                            SUM(CASE
-                                                                                                                                                                                                WHEN loose_ycoor > 60 THEN 1
-                                                                                                                                                                                                ELSE 0
-                                                                                                                                                                                            END) AS LADDER_COUNT,
-                                                                                                                                                                                            SUM(CASE
-                                                                                                                                                                                                WHEN loose_openheight = 6 THEN 1
-                                                                                                                                                                                                ELSE 0
-                                                                                                                                                                                            END) AS PULLBIN_COUNT,
-                                                                                                                                                                                            $jmputsql AS JMPUT_COUNT,
-                                                                                                                                                                                            MAX(loose_baydistance) + (CASE
-                                                                                                                                                                                                WHEN loose_main = 'AISLE' THEN ((COUNT(*) - 1) * 3.68)
-                                                                                                                                                                                                ELSE 0
-                                                                                                                                                                                            END)  + ((MAX(loose_baydistance)/4) * $jmputsql)  AS INNERAISLETRAVEL,
-                                                                                                                                                                                            voice_pickline * COUNT(*) AS TIME_PICKLINE,
-                                                                                                                                                                                            voice_watchcard * SUM(loose_wcard) AS TIME_WATCHCARD,
-                                                                                                                                                                                            voice_refrigerated * SUM(CASE
-                                                                                                                                                                                                WHEN loose_loctype = 'R' THEN 1
-                                                                                                                                                                                                ELSE 0
-                                                                                                                                                                                            END) AS TIME_FRIDGE,
-                                                                                                                                                                                            voice_pullbin * SUM(CASE
-                                                                                                                                                                                                WHEN loose_openheight = 6 THEN 1
-                                                                                                                                                                                                ELSE 0
-                                                                                                                                                                                            END) AS TIME_PULLBIN,
-                                                                                                                                                                                            voice_pickunit * SUM(loose_units) AS TIME_UNIT,
-                                                                                                                                                                                            voice_ladderr * SUM(CASE
-                                                                                                                                                                                                WHEN loose_ycoor > 60 THEN 1
-                                                                                                                                                                                                ELSE 0
-                                                                                                                                                                                            END) AS TIME_LADDER,
-                                                                                                                                                                                            voice_putline * (1 +  $jmputsql) AS TIME_PUTLINE,
-                                                                                                                                                                                            voice_putunits * SUM(loose_units) AS TIME_PUTUNIT,
-                                                                                                                                                                                            (voice_foottraveltime * 12 * (((MAX(loose_baydistance)/4) * $jmputsql) + MAX(loose_baydistance) + (CASE
-                                                                                                                                                                                                WHEN loose_main = 'AISLE' THEN ((COUNT(*) - 1) * 3.68)
-                                                                                                                                                                                                ELSE 0
-                                                                                                                                                                                            END))) AS TIME_AISLETRAVEL,
-                                                                                                                                                                                            SUM(loose_predshort) as PREDSHORT,
-                                                                                                                                                                                            '$todaydatetime',
-                                                                                                                                                                                            loose_recdatetime,
-                                                                                                                                                                                            MIN(case when cutoff_rank is null then 999 else cutoff_rank end) as SHIPZONERANK,
-                                                                                                                                                                                            sum(case when loose_colg = 'COLGATE' then 1 else 0 end)  as COLG_COUNT
-                                                                                                                                                                                        FROM
-                                                                                                                                                                                            printvis.looselines_open
-                                                                                                                                                                                                JOIN
-                                                                                                                                                                                            printvis.pm_voicetimes ON loose_picktype = voice_function and loose_whse = voice_whse
-                                                                                                                                                                                            LEFT JOIN printvis.printcutoff on substr(loose_shipzone,1,2) = substr(cutoff_zone,1,2)  and cutoff_DC = loose_whse
-                                                                                                                                                                                            WHERE loose_whse = $whsesel
-                                                                                                                                                                                        GROUP BY loose_whse ,loose_wcs, loose_box , SUBSTR(loose_loc, 1, 3) , loose_main) 
-                                                                                                                                                                                                                                                                ON DUPLICATE key update 
-                                                                                                                                                                                                                                                                aisletime_count_line=values(aisletime_count_line), 
-                                                                                                                                                                                                                                                                aisletime_count_unit=values(aisletime_count_unit), 
-                                                                                                                                                                                                                                                                aisletime_count_wcard=values(aisletime_count_wcard), 
-                                                                                                                                                                                                                                                                aisletime_count_fridge=values(aisletime_count_fridge), 
-                                                                                                                                                                                                                                                                aisletime_count_ice=values(aisletime_count_ice), 
-                                                                                                                                                                                                                                                                aisletime_count_ladder=values(aisletime_count_ladder), 
-                                                                                                                                                                                                                                                                aisletime_count_pullbin=values(aisletime_count_pullbin), 
-                                                                                                                                                                                                                                                                aisletime_count_jmput=values(aisletime_count_jmput), 
-                                                                                                                                                                                                                                                                aisletime_sum_aisletravel=values(aisletime_sum_aisletravel), 
-                                                                                                                                                                                                                                                                aisletime_time_pickline=values(aisletime_time_pickline), 
-                                                                                                                                                                                                                                                                aisletime_time_wcard=values(aisletime_time_wcard), 
-                                                                                                                                                                                                                                                                aisletime_time_fridge=values(aisletime_time_fridge), 
-                                                                                                                                                                                                                                                                aisletime_time_pullbin=values(aisletime_time_pullbin), 
-                                                                                                                                                                                                                                                                aisletime_time_unit=values(aisletime_time_unit), 
-                                                                                                                                                                                                                                                                aisletime_time_ladder=values(aisletime_time_ladder), 
-                                                                                                                                                                                                                                                                aisletime_time_putline=values(aisletime_time_putline), 
-                                                                                                                                                                                                                                                                aisletime_time_putunit=values(aisletime_time_putunit), 
-                                                                                                                                                                                                                                                                aisletime_predshort=values(aisletime_predshort), 
-                                                                                                                                                                                                                                                                aisletime_shipzone=values(aisletime_shipzone), 
-                                                                                                                                                                                                                                                                aisletime_colgcount=values(aisletime_colgcount), 
-                                                                                                                                                                                                                                                                aisletime_time_aisletravel=values(aisletime_time_aisletravel)");
+                        loose_whse,
+                        loose_wcs,
+                        loose_box,
+                        SUBSTR(loose_loc, 1, 3) AS AISLE,
+                        loose_main,
+                        loose_picktype,
+                        COUNT(*) AS LINE_COUNT,
+                        SUM(loose_units) AS UNIT_COUNT,
+                        SUM(loose_wcard) AS WC_COUNT,
+                        SUM(CASE
+                            WHEN loose_loctype = 'R' THEN 1
+                            ELSE 0
+                        END) AS FRIDGE_COUNT,
+                        SUM(CASE
+                            WHEN loose_loctype IN ('RI' , 'RS') THEN 1
+                            ELSE 0
+                        END) AS ICE_COUNT,
+                        SUM(CASE
+                            WHEN loose_ycoor > 60 THEN 1
+                            ELSE 0
+                        END) AS LADDER_COUNT,
+                        SUM(CASE
+                            WHEN loose_openheight = 6 THEN 1
+                            ELSE 0
+                        END) AS PULLBIN_COUNT,
+                        $jmputsql AS JMPUT_COUNT,
+                        MAX(loose_baydistance) + (CASE
+                            WHEN loose_main = 'AISLE' THEN ((COUNT(*) - 1) * 3.68)
+                            ELSE 0
+                        END)  + ((MAX(loose_baydistance)/4) * $jmputsql)  AS INNERAISLETRAVEL,
+                        voice_pickline * COUNT(*) AS TIME_PICKLINE,
+                        voice_watchcard * SUM(loose_wcard) AS TIME_WATCHCARD,
+                        voice_refrigerated * SUM(CASE
+                            WHEN loose_loctype = 'R' THEN 1
+                            ELSE 0
+                        END) AS TIME_FRIDGE,
+                        voice_pullbin * SUM(CASE
+                            WHEN loose_openheight = 6 THEN 1
+                            ELSE 0
+                        END) AS TIME_PULLBIN,
+                        voice_pickunit * SUM(loose_units) AS TIME_UNIT,
+                        voice_ladderr * SUM(CASE
+                            WHEN loose_ycoor > 60 THEN 1
+                            ELSE 0
+                        END) AS TIME_LADDER,
+                        voice_putline * (1 +  $jmputsql) AS TIME_PUTLINE,
+                        voice_putunits * SUM(loose_units) AS TIME_PUTUNIT,
+                        (voice_foottraveltime * 12 * (((MAX(loose_baydistance)/4) * $jmputsql) + MAX(loose_baydistance) + (CASE
+                            WHEN loose_main = 'AISLE' THEN ((COUNT(*) - 1) * 3.68)
+                            ELSE 0
+                        END))) AS TIME_AISLETRAVEL,
+                        SUM(loose_predshort) as PREDSHORT,
+                        '$todaydatetime',
+                        loose_recdatetime,
+                        MIN(case when cutoff_rank is null then 999 else cutoff_rank end) as SHIPZONERANK,
+                        sum(case when loose_colg = 'COLGATE' then 1 else 0 end)  as COLG_COUNT
+                    FROM
+                        printvis.looselines_open
+                            JOIN
+                        printvis.pm_voicetimes ON loose_picktype = voice_function and loose_whse = voice_whse
+                        LEFT JOIN printvis.printcutoff on substr(loose_shipzone,1,2) = substr(cutoff_zone,1,2)  and cutoff_DC = loose_whse
+                        WHERE loose_whse = $whsesel
+                    GROUP BY loose_whse ,loose_wcs, loose_box , SUBSTR(loose_loc, 1, 3) , loose_main) 
+                                                                                            ON DUPLICATE key update 
+                                                                                            aisletime_count_line=values(aisletime_count_line), 
+                                                                                            aisletime_count_unit=values(aisletime_count_unit), 
+                                                                                            aisletime_count_wcard=values(aisletime_count_wcard), 
+                                                                                            aisletime_count_fridge=values(aisletime_count_fridge), 
+                                                                                            aisletime_count_ice=values(aisletime_count_ice), 
+                                                                                            aisletime_count_ladder=values(aisletime_count_ladder), 
+                                                                                            aisletime_count_pullbin=values(aisletime_count_pullbin), 
+                                                                                            aisletime_count_jmput=values(aisletime_count_jmput), 
+                                                                                            aisletime_sum_aisletravel=values(aisletime_sum_aisletravel), 
+                                                                                            aisletime_time_pickline=values(aisletime_time_pickline), 
+                                                                                            aisletime_time_wcard=values(aisletime_time_wcard), 
+                                                                                            aisletime_time_fridge=values(aisletime_time_fridge), 
+                                                                                            aisletime_time_pullbin=values(aisletime_time_pullbin), 
+                                                                                            aisletime_time_unit=values(aisletime_time_unit), 
+                                                                                            aisletime_time_ladder=values(aisletime_time_ladder), 
+                                                                                            aisletime_time_putline=values(aisletime_time_putline), 
+                                                                                            aisletime_time_putunit=values(aisletime_time_putunit), 
+                                                                                            aisletime_predshort=values(aisletime_predshort), 
+                                                                                            aisletime_shipzone=values(aisletime_shipzone), 
+                                                                                            aisletime_colgcount=values(aisletime_colgcount), 
+                                                                                            aisletime_time_aisletravel=values(aisletime_time_aisletravel)");
     $sql_aisletimes->execute();
 
     //Group looselines_aisle table by batch to determine total batch times.  Add batch header times!
