@@ -196,7 +196,7 @@ foreach ($whsearray as $whse) {
             $notprinted_shipclass = $casesavailarray[$counter]['notprinted_shipclass'];
             $notprinted_cart = $casesavailarray[$counter]['notprinted_cart'];
             $notprinted_printdate = $casesavailarray[$counter]['notprinted_printdate'];
-            $converted_printdate = _1yydddtogregdate($notprinted_printdate);
+            $converted_printdate = ($notprinted_printdate == 0) ? '0000-00-00' : _1yydddtogregdate($notprinted_printdate);
             $notprinted_printtime = $casesavailarray[$counter]['notprinted_printtime'];
             $notprinted_twoday = $casesavailarray[$counter]['notprinted_twoday'];
             $cutoff_time = $casesavailarray[$counter]['cutoff_time'];
@@ -481,8 +481,8 @@ ORDER BY notprinted_batch , notprinted_location");
                                                                                 AND casemap_loc = 'CSTART' ");
     $cstart->execute();
     $cstart_array = $cstart->fetchAll(pdo::FETCH_ASSOC);
-    $cstart_xcoor = $cstart_array[0]['pickprediction_xcoor'];
-    $cstart_zcoor = $cstart_array[0]['casemap_zcoor'];
+    $cstart_xcoor = isset($cstart_array[0]['pickprediction_xcoor']) ? $cstart_array[0]['pickprediction_xcoor'] : 0;
+    $cstart_zcoor = isset($cstart_array[0]['casemap_zcoor']) ? $cstart_array[0]['casemap_zcoor'] : 0;
 
     //What is CSTOP
     $cstop = $conn1->prepare("SELECT 
@@ -495,8 +495,8 @@ ORDER BY notprinted_batch , notprinted_location");
                                                                                 AND casemap_loc = 'CSTOP' ");
     $cstop->execute();
     $cstop_array = $cstop->fetchAll(pdo::FETCH_ASSOC);
-    $cstop_xcoor = $cstop_array[0]['pickprediction_xcoor'];
-    $cstop_zcoor = $cstop_array[0]['casemap_zcoor'];
+    $cstop_xcoor = isset($cstop_array[0]['pickprediction_xcoor']) ? $cstop_array[0]['pickprediction_xcoor'] : 0;
+    $cstop_zcoor = isset($cstop_array[0]['casemap_zcoor']) ? $cstop_array[0]['casemap_zcoor'] : 0;
 
     $openbatchcount = 0;
     $openarraycount = count($opentotedataarray) - 1;
@@ -1219,7 +1219,7 @@ WHERE
     $result1->execute();
 //}
 ////Post to case_actuallaborbyhour for Beltline
-    $result2 = $conn1->prepare("INSERT INTO printvis.case_actuallaborbyhour (caseactbyhour_whse,caseactbyhour_build,caseactbyhour_date,caseactbyhour_hour, caseactbyhour_equip, caseactbyhour_minutes)
+    $result2 = $conn1->prepare("INSERT INTO printvis.case_actuallaborbyhour (caseactbyhour_whse,caseactbyhour_build,caseactbyhour_date,caseactbyhour_hour, caseactbyhour_equip, caseactbyhour_minutes, caseactbyhour_lines)
                                                            SELECT 
                                                                     $whsesel,
                                                                     $building,
@@ -1232,11 +1232,13 @@ WHERE
                                                                         ELSE HOUR(NOW())
                                                                     END AS CURHOUR,
                                                                     EQUIP,
-                                                                    SUM(MINS) AS caseactbyhour_minutes
+                                                                    SUM(MINS) AS caseactbyhour_minutes,
+                                                                    SUM(CASE_LINES) as caseactbyhour_lines
                                                                 FROM
                                                                     (SELECT 
                                                                         casebatches_equipment AS EQUIP,
-                                                                            SUM(casebatches_time_final) AS MINS
+                                                                            SUM(casebatches_time_final) AS MINS,
+                                                                            SUM(casebatches_lines) as CASE_LINES
                                                                     FROM
                                                                         printvis.notprintedcasebatches_time
                                                                     WHERE
@@ -1244,7 +1246,8 @@ WHERE
                                                                             AND casebatches_build = $building
                                                                     GROUP BY casebatches_equipment UNION ALL SELECT 
                                                                         casebatches_equipment AS EQUIP,
-                                                                            SUM(casebatches_time_final) AS MINS
+                                                                            SUM(casebatches_time_final) AS MINS,
+                                                                            SUM(casebatches_lines) as CASE_LINES
                                                                     FROM
                                                                         printvis.casebatches_time
                                                                     WHERE

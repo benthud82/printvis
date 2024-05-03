@@ -20,8 +20,8 @@ $today = date('Y-m-d');
 $result1 = $conn1->prepare("SELECT 
                                                     fcase_hour,
                                                     fcase_equipment,
-                                                    fcase_minuteforecast,
-                                                    caseactbyhour_minutes
+                                                    fcase_lines,
+                                                    caseactbyhour_lines
                                                 FROM
                                                     printvis.forecast_case
                                                         LEFT JOIN
@@ -39,9 +39,9 @@ $result1->execute();
 
 $result2 = $conn1->prepare("SELECT 
                                                     t.fcase_hour,
-                                                    SUM(caseactbyhour_minutes) AS ACTMINTOT,
+                                                    SUM(caseactbyhour_lines) AS ACTMINTOT,
                                                     (SELECT 
-                                                            SUM(x.fcase_minuteforecast)
+                                                            SUM(x.fcase_lines)
                                                         FROM
                                                             printvis.forecast_case x
                                                         WHERE
@@ -105,18 +105,18 @@ foreach ($result1 as $row) {
     $equipment = $row['fcase_equipment'];
     switch ($equipment) {
         case 'BELTLINE':
-            $beltruntot += $row['fcase_minuteforecast'] * 1;
+            $beltruntot += $row['fcase_lines'] * 1;
             $rows5['data'][] = ($beltruntot) * 1;
-            $rows1['data'][] = $row['caseactbyhour_minutes'] * 1;
+            $rows1['data'][] = $row['caseactbyhour_lines'] * 1;
             break;
         case 'PALLETJACK':
-            $palletruntot += $row['fcase_minuteforecast'] * 1;
+            $palletruntot += $row['fcase_lines'] * 1;
             $rows6['data'][] = ($palletruntot) * 1;
-            $rows2['data'][] = $row['caseactbyhour_minutes'] * 1;
+            $rows2['data'][] = $row['caseactbyhour_lines'] * 1;
             break;
         case 'ORDERPICKER':
-            $opruntot += $row['fcase_minuteforecast'] * 1;
-            $rows3['data'][] = $row['caseactbyhour_minutes'] * 1;
+            $opruntot += $row['fcase_lines'] * 1;
+            $rows3['data'][] = $row['caseactbyhour_lines'] * 1;
             $rows7['data'][] = ($opruntot) * 1;
             break;
 

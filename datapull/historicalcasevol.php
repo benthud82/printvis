@@ -20,13 +20,13 @@ foreach ($whsearray as $whse) {
 
 
 
-//Delete from casebatchstarttime table where batches are older than yesterday's cutoff time
+    //Delete from casebatchstarttime table where batches are older than yesterday's cutoff time
     $sqldelete4 = "TRUNCATE  printvis.hist_casevol_merge ";
     $querydelete4 = $conn1->prepare($sqldelete4);
     $querydelete4->execute();
 
 
-//Pull data from A-system and place in temp table to pull for additional logic
+    //Pull data from A-system and place in temp table to pull for additional logic
     $result1 = $aseriesconn->prepare("SELECT 
                                                                             PBWHSE,
                                                                             CASE
@@ -159,7 +159,7 @@ foreach ($whsearray as $whse) {
 
 
 
-//Pull data from temp table just created and join with print cutoff times to determine when the order should be printed.
+    //Pull data from temp table just created and join with print cutoff times to determine when the order should be printed.
     $asyshistory = $conn1->prepare("SELECT 
                                                                 PBWHSE as hist_whse,
                                                                 PBWHTO as hist_xferwhs,
@@ -260,7 +260,7 @@ foreach ($whsearray as $whse) {
 
             $predicted_availdate = _printdatepredictor($converted_recdate, $hist_rechrmin, $cutoff_time, $hist_shipzone, $hist_shipclass, $cutoff_group);
 
-//set print hour to 6 if predicted print date is greater than red date
+            //set print hour to 6 if predicted print date is greater than red date
             if ($predicted_availdate > $converted_recdate) {
                 $predicted_availhour = intval(6);
             } else {
@@ -310,7 +310,7 @@ foreach ($whsearray as $whse) {
 $currentdate = date('Y-m-d');
 $startdate = date('Y-m-d', strtotime('-8 days'));
 
-    $sqlinsert2 = "INSERT INTO printvis.casedash_equippicks
+$sqlinsert2 = "INSERT INTO printvis.casedash_equippicks
 SELECT 
     hist_whse,
     hist_build,
@@ -360,7 +360,7 @@ SELECT
     END) / 110)) AS HOUR_RED
 FROM
     printvis.hist_casevol
-        JOIN
+       LEFT JOIN
     slotting.my_npfmvc_cse ON hist_whse = WAREHOUSE
         AND hist_item = ITEM_NUMBER
 WHERE
@@ -375,5 +375,5 @@ equippicks_suggptb=values(equippicks_suggptb),
 equippicks_currpj=values(equippicks_currpj),
 equippicks_suggpj=values(equippicks_suggpj),
 equippicks_hourred=values(equippicks_hourred)";
-    $queryinsert2 = $conn1->prepare($sqlinsert2);
-    $queryinsert2->execute();
+$queryinsert2 = $conn1->prepare($sqlinsert2);
+$queryinsert2->execute();

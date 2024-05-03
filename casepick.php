@@ -101,6 +101,26 @@
                     </section>
                 </div>
 
+                <!--highchart for forecast to actual graph goes here-->        
+                <div class="hidewrapper">
+                    <section class="panel portlet-item" style="opacity: 1; z-index: 0; margin-top: 15px;"> 
+                        <header class="panel-heading bg-inverse"> Warehouse Lines - Forecast to Actual <i class="fa fa-close pull-right closehidden" style="cursor: pointer;" id="close_foretoact"></i><i class="fa fa-chevron-up pull-right clicktotoggle-chevron" style="cursor: pointer;"></i></header> 
+                        <!--Stats about forecast to actual go here.  From the php include globaldata/forecaststats.php-->
+                        <div class="panel-body">
+                            <!--forecasts stats data goes here-->
+                            <div id="forecaststats"></div>
+                            <?php // include 'globaldata/forecaststats.php';    ?>
+
+
+                            <div id="foretoact_lines"  class="page-break" style="width: 100%">
+                                <div id="chart_foretoact_lines" class="hidden">
+                                    <div id="ctn_foretoact_lines" class="largecustchartstyle printrotate"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
 
 
 
@@ -331,12 +351,118 @@
                 ajaxpull_picking();
             });
 
+
+
+            //Chart options and ajax for labor hours by hour
+            function highchartoptions_forecast_lines() {
+                var building = $('#building').val();
+                //Highchart variables for total hours not printed history
+                var options2 = {
+                    chart: {
+                        marginTop: 50,
+                        marginBottom: 130,
+                        renderTo: 'ctn_foretoact_lines',
+                        type: 'spline',
+                        zoomType: 'x',
+                        height: 600
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        spline: {
+                            marker: {
+                                enabled: false
+                            }
+                        }
+                    },
+                    title: {
+                        text: ' '
+                    },
+                    xAxis: {
+                        categories: [],
+                        labels: {
+                            rotation: -90,
+                            y: 25,
+                            align: 'right',
+                            style: {
+                                fontSize: '12px',
+                                fontFamily: 'Verdana, sans-serif'
+                            }
+                        },
+                        minTickInterval: 1,
+                        legend: {
+                            y: "10",
+                            x: "5"
+                        }
+
+                    },
+                    yAxis: {
+                        opposite: true,
+                        min: 0,
+                        title: {
+                            text: 'Lines Forecasted over Time'
+                        },
+                        labels: {
+                            formatter: function () {
+                                return Math.floor(this.value);
+                            }
+                        }
+                    },
+
+                    tooltip: {
+                        formatter: function () {
+                            return '<b>' + this.series.name + '</b><br/>' +
+                                    '<b>At time:  </b>' + this.x + '<br/> ' + this.y + ' forecasted lines.';
+                        }
+                    },
+                    series: []
+                };
+                $.ajax({
+                    data: {building: building},
+                    url: 'globaldata/graphdata_foretoact_lines.php',
+                    type: 'GET',
+                    dataType: 'json',
+                    async: 'true',
+                    success: function (json) {
+                        options2.xAxis.categories = json[0]['data'];
+                        options2.series[4] = json[5];
+                        options2.series[5] = json[6];
+                        options2.series[6] = json[7];
+                        options2.series[7] = json[8];
+                        options2.series[0] = json[1];
+                        options2.series[1] = json[2];
+                        options2.series[2] = json[3];
+                        options2.series[3] = json[4];
+                        options2.series[0].type = 'column';
+                        options2.series[1].type = 'column';
+                        options2.series[2].type = 'column';
+                        options2.series[3].type = 'column';
+
+
+                        options2.series[0].visible = false;
+                        options2.series[1].visible = false;
+                        options2.series[2].visible = false;
+                        options2.series[4].visible = false;
+                        options2.series[5].visible = false;
+                        options2.series[6].visible = false;
+                        chart = new Highcharts.Chart(options2);
+                        series = chart.series;
+                        $('#chart_foretoact_lines').removeClass('hidden');
+                        $(window).resize();
+                    }
+                });
+            }
+
+
+
             //Set the interval function to refresh a set time period
             setInterval(function () {
                 //set header data to refresh every 120 seconds (120,000 ms)
                 refreshheaderdata();
                 highchartoptions();
                 highchartoptions_forecast();
+                highchartoptions_forecast_lines();
                 ajaxpull_forecaststats();
                 $(window).resize();
             }, 245000);
@@ -555,6 +681,9 @@
 
                 //call highchart on load
                 highchartoptions_forecast();
+
+                //call highchart on load
+                highchartoptions_forecast_lines();
 
                 //call forecast stats function
                 ajaxpull_forecaststats();

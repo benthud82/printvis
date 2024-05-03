@@ -11,6 +11,7 @@ include '../../connections/conn_printvis.php';
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
+include '../../globalincludes/whse_build_array.php';
 
 $today = date('Y-m-d');
 $startday = date('Y-m-d', (strtotime('-5 days', strtotime($today))));
@@ -28,7 +29,7 @@ function _ftpupload($ftpfilename, $ftpwhse) {
     $connection = ftp_connect($server);
     $login = ftp_login($connection, $ftp_user_name, $ftp_user_pass);
     if (!$connection || !$login) {
-        die('Connection attempt failed!');
+        echo 'Connection attempt failed!';
     }
     //echo "<br /><br />Uploading $ftpfilename for Whse $ftpwhse<br /><br />";
     $upload = ftp_put($connection, $dest, $source, FTP_ASCII);
@@ -114,7 +115,7 @@ foreach ($whsearray as $whsesel) {
     $todayjdate = _gregdatetoyyddd($today);
     $printlimiter = "and PBPTJD = $todayjdate and PBPTHM >= $printhourmin";
 
-//pull in all loose lines and write to temporary table to join later with pickprediction_loosepickmap table
+    //pull in all loose lines and write to temporary table to join later with pickprediction_loosepickmap table
     $sql_looselines = $connection->prepare("SELECT
                                                                             PDWHSE, 
                                                                             PDWCS#,
@@ -260,6 +261,8 @@ foreach ($whsearray as $whsesel) {
                                                 printvis.pickprediction_loosepickmap ON temploose_locjoin = loosemap_location and temploose_whse = loosemap_whse
                                                 WHERE temploose_whse = $whsesel)");
     $sql_looselines_joined->execute();
+
+
 
     //Group the looselines table by aisle to determine maximum travel distance by aisle and calculate aisle time and write to looselines_aisletime table
 
@@ -948,4 +951,29 @@ $query6 = $conn1->prepare($sql6);
 $query6->execute();
 
 include 'badges_updateshipzone.php';
+
+
+
+
+$tablesToUpdate = [
+    'printvis.looselines',
+    'printvis.looselines_aisletime',
+    'printvis.looselines_batchtime',
+    'printvis.looselines_aisletime_hist',
+    'printvis.looselines_batchtime_hist',
+    'printvis.voicepicks',
+    'printvis.voicepicks_hist',
+    'printvis.looselines_cartsinprocess',
+    'printvis.case_boxesreleased'
+];
+
+foreach ($whsebuild_array as $key => $value) {
+    foreach ($tablesToUpdate as $table) {
+        list($schema, $tableupdated) = explode('.', $table);
+        $whse = $whsebuild_array[$key]['whse'];
+        $build = $whsebuild_array[$key]['build'];
+        include '../../heatmap_logic/tbl_update_NAHSI_table_updatetimes.php';
+    }
+}
+
 
