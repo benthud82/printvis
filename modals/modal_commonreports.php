@@ -149,17 +149,20 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close_visible" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Search by Date</h4>
+                <h4 class="modal-title">Search by Date Range</h4>
             </div>
             <div class="modal-body">
                 <div class="" style="margin-left: 15px" >
-                    <label>Enter Date</label>
-                    <input autocomplete="off"  name="startfiscal" id="startfiscal" class="selectstyle" style="cursor: pointer; max-width: 120px;"onKeyDown="if (event.keyCode === 13)
-                                _dt_date();"  />
+                    <label>Enter Start Date: </label>
+                    <input autocomplete="off" name="startfiscal" id="startfiscal" class="selectstyle" style="cursor: pointer; max-width: 120px;" onKeyDown="if (event.keyCode === 13)
+                                _dt_date();" />
+                    <label>Enter End Date: </label>
+                    <input autocomplete="off" name="endfiscal" id="endfiscal" class="selectstyle" style="cursor: pointer; max-width: 120px;" onKeyDown="if (event.keyCode === 13)
+                                _dt_date();" />
                 </div>
             </div>
             <div class="modal-footer" >
-                <button id="loaddata" type="button" class="btn btn-primary pull-left"  onclick="_dt_date();" style="margin-bottom: 5px;">Load Data</button>
+                <button id="loaddata" type="button" class="btn btn-primary pull-left" onclick="_dt_date();" style="margin-bottom: 5px;">Load Data</button>
             </div>
         </div>
     </div>
@@ -231,4 +234,5 @@
 
 <script>
     $('#startfiscal').datepicker();
+    $('#endfiscal').datepicker();
 </script>

@@ -76,7 +76,6 @@
                 refreshall();
             }, 245000);
 
-
             $("body").tooltip({selector: '[data-toggle="tooltip"]'});
             $("#aso").addClass('active');
 

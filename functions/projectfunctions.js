@@ -62,10 +62,10 @@ function getmodaldata(idval, modal) {
     $.ajax({
         url: 'globaldata/custcomplaint_data.php',
         type: 'POST',
-        data: {sqldata: sqldata, reporttype: reporttype},
+        data: { sqldata: sqldata, reporttype: reporttype },
         dataType: 'html',
         success: function (ajaxresult) {
-//             $('#datareturn').html($('#datareturn',ajaxresult).html());
+            //             $('#datareturn').html($('#datareturn',ajaxresult).html());
             $("#datareturn").html(ajaxresult);
             //    datatables
             switch (reporttype) {
@@ -104,7 +104,7 @@ function getmodaldata_cookie(idval, modal) {
     $.ajax({
         url: 'globaldata/custcomplaint_data.php',
         type: 'POST',
-        data: {sqldata: sqldata, reporttype: reporttype},
+        data: { sqldata: sqldata, reporttype: reporttype },
         dataType: 'html',
         success: function (ajaxresult) {
             $("#datareturn").html(ajaxresult);
@@ -116,12 +116,12 @@ function getmodaldata_cookie(idval, modal) {
 //clear modal input on hide
 $('.modal').on('hidden.bs.modal', function (e) {
     $(this)
-            .find("input,textarea,select")
-            .val('')
-            .end()
-            .find("input[type=checkbox], input[type=radio]")
-            .prop("checked", "")
-            .end();
+        .find("input,textarea,select")
+        .val('')
+        .end()
+        .find("input[type=checkbox], input[type=radio]")
+        .prop("checked", "")
+        .end();
 });
 
 // Load Datable on click for item code
@@ -225,12 +225,15 @@ function _dt_picktsm(clickedval) {
 
 // Load Datable on click for date
 function _dt_date(clickedval) {
-        $('#datareturn').addClass('hidden');
+    $('#datareturn').addClass('hidden');
     $('.hidewrapper').addClass('hidden');
     if (clickedval == null) {
         var startdate = $('#startfiscal').val();
+        var enddate = $('#endfiscal').val();
+        debugger;
     } else {
-        var startdate = clickedval;
+        var startdate = clickedval.startdate;
+        var enddate = clickedval.enddate;
     }
     oTable = $('#table_date').DataTable({
         dom: "<'row'<'col-sm-4 pull-left'l><'col-sm-4 text-center'B><'col-sm-4 pull-right'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-4 pull-left'i><'col-sm-8 pull-right'p>>",
@@ -246,7 +249,7 @@ function _dt_date(clickedval) {
                 }
             }
         ],
-        'sAjaxSource': "globaldata/custcomp_dtdate_data.php?startdate=" + startdate,
+        'sAjaxSource': "globaldata/custcomp_dtdate_data.php?startdate=" + startdate + "&enddate=" + enddate,
         buttons: [
             'copyHtml5',
             'excelHtml5'
@@ -267,4 +270,3 @@ function deleteAllCookies() {
     }
 }
 
- 

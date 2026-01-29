@@ -26,14 +26,14 @@ $todaydatetime = date('Y-m-d H:i:s');
 $printcutoff = date('Y-m-d H:i:s', strtotime("$yesterday $yesterdaytime"));
 $turninches = intval(300);
 
-$openbatches_case_cols = 'casebatch_whse, casebatch_build, casebatch_cart, casebatch_aisle, casebatch_trips, casebatch_cubicinch, casebatch_lines, casebatch_firstloc, casebatch_lastloc, casebatch_minbin, openbatches_printdatetime,casebatch_uniquelocs, casebatch_noncon, casebatch_vertdist';
+$openbatches_case_cols = 'casebatch_whse, casebatch_build, casebatch_cart, casebatch_aisle, casebatch_trips, casebatch_cubicinch, casebatch_lines, casebatch_firstloc, casebatch_lastloc, casebatch_minbin, openbatches_printdatetime,casebatch_uniquelocs, casebatch_noncon, casebatch_vertdist, casebatch_shipzone';
 
 $equipmenttype_case_cols = 'caseequip_whse, caseequip_build, caseequip_batch, caseequip_printdate, caseequip_lines, caseequip_primpicks, caseequip_bulkpicks, caseequip_ptbpicks, caseequip_palletpicks, caseequip_halfdeckpicks, caseequip_otherpicks, caseequip_equipment';
 
 $casetotetimes_cols = 'casetote_time_whse, casetote_time_build, casetote_time_cart, casetote_time_aisle, casetote_time_equipment, casetote_time_trips, casetote_time_lines, casetote_time_firstloc,'
-        . 'casetote_time_lastloc, casetote_time_printdate, casetote_time_pickloctime, casetote_time_pickunittime, casetote_time_indirecttime, casetote_time_dropofftime, casetote_time_noncontime, casetote_time_inches_inneraisle, casetote_time_inches_outeraisle, casetote_time_traveltime, casetote_time_verttime, casetote_time_totaltime';
+    . 'casetote_time_lastloc, casetote_time_printdate, casetote_time_pickloctime, casetote_time_pickunittime, casetote_time_indirecttime, casetote_time_dropofftime, casetote_time_noncontime, casetote_time_inches_inneraisle, casetote_time_inches_outeraisle, casetote_time_traveltime, casetote_time_verttime, casetote_time_totaltime, casetote_time_shipzone';
 
-$casebatchtimes_cols = 'casebatches_whse,casebatches_build,casebatches_cart,casebatches_equipment,casebatches_printdate,casebatches_time_kiosk,casebatches_time_batch,casebatches_time_complete,casebatches_time_short,casebatches_trip,casebatches_totaltrips,casebatches_time_tripcube,casebatches_lines,casebatches_firstloc,casebatches_lastloc,casebatches_time_pickloc,casebatches_time_unit,casebatches_time_indirect,casebatches_time_dropoff,casebatches_time_noncon,casebatches_aisleinches,casebatches_time_aisletravel,casebatches_time_verttravel,casebatches_starttofirst,casebatches_lasttostop,casebatches_inchpermin,casebatches_startstopinches,casebatches_time_startstop,casebatches_time_final';
+$casebatchtimes_cols = 'casebatches_whse,casebatches_build,casebatches_cart,casebatches_equipment,casebatches_printdate,casebatches_time_kiosk,casebatches_time_batch,casebatches_time_complete,casebatches_time_short,casebatches_trip,casebatches_totaltrips,casebatches_time_tripcube,casebatches_lines,casebatches_firstloc,casebatches_lastloc,casebatches_time_pickloc,casebatches_time_unit,casebatches_time_indirect,casebatches_time_dropoff,casebatches_time_noncon,casebatches_aisleinches,casebatches_time_aisletravel,casebatches_time_verttravel,casebatches_starttofirst,casebatches_lasttostop,casebatches_inchpermin,casebatches_startstopinches,casebatches_time_startstop,casebatches_time_final, casebatches_time_shipzone';
 
 //Delete from casebatchstarttime table where batches are older than yesterday's cutoff time
 $sqldelete4 = "DELETE from  printvis.case_boxesreleased WHERE boxrel_printdate < $yestJdate ";
@@ -124,35 +124,40 @@ foreach ($whsearray as $whse) {
 
 
     //Batch equipment estimator
+    $where_stm = "PDWHSE = $whsesel    
+        and CASE WHEN PBWHSE = 3 and PDLOC# >= 'W400000' then 2 else 1 end = $building
+        and PDBXSZ = 'CSE'                                                                    
+        and PDCART > 0                                                                     
+        and PDLOC# not like '%SDS%'      
+        AND PBSHPC <> 'CPL'
+        and LMLOC# <> 'WDN0000'
+        AND LMLOC# not like 'A%' and LMLOC# not like 'B%' and LMLOC# not like 'Y%'";
+
+    if ($whsesel == 2) {
+        $where_stm .= " AND PDLOC# not like 'W70%'";
+    }
+
     $batchdata = $aseriesconn->prepare("SELECT
-                                                                                PBWHSE,                                                                     
-                                                                                CASE WHEN PBWHSE = 3 and PDLOC# >= 'W400000' then 2 else 1 end as PBBUILD,
-                                                                                PBCART,                                                                     
-                                                                                PBPTJD,                                                                     
-                                                                                PBPTHM,
-                                                                                count(*) as LINE_COUNT,
-                                                                                sum(case when LMPRIM = 'P' then 1 else 0 end) as PRIM_PICKS, 
-                                                                                sum(case when LMTIER = 'C01' then 1 else 0 end) as BULK_PICKS,  
-                                                                                sum(case when LMTIER in ('C02','C04') then 1 else 0 end) as PTB_PICKS, 
-                                                                                sum(case when substr(LMLOC#,6,1) = '1' then 1 else 0 end) as PALLET_PICKS, 
-                                                                                sum(case when LMTIER in ('C05', 'C06')  and substr(LMLOC#,6,1) >= '2' then 1 else 0 end) as HALFDECK_PICKS,
-                                                                                sum(case when LMTIER not in ('C01', 'C02', 'C03', 'C05', 'C06') then 1 else 0 end) as OTHER_PICKS,
-                                                                                MAX(PDLOC#) as LAST_LOC,
-                                                                                MIN(PDLOC#) as FIRST_LOC
-                                                                        FROM HSIPCORDTA.NOTWPD
-                                                                        JOIN HSIPCORDTA.NOTWPB on PDWCS# = PBWCS# and PDWKNO = PBWKNO and PBBOX# = PDBOX# 
-                                                                        LEFT JOIN HSIPCORDTA.NPFLSM on LMWHSE = PDWHSE and LMLOC# = PDLOC#
-                                                                        WHERE PDWHSE = $whsesel    
-                                                                            and CASE WHEN PBWHSE = 3 and PDLOC# >= 'W400000' then 2 else 1 end = $building
-                                                                                and PDBXSZ = 'CSE'                                                                    
-                                                                                and PDCART > 0                                                                     
-                                                                                and PDLOC# not like '%SDS%'      
-                                                                                 AND PBSHPC <> 'CPL'
-                                                                                and LMLOC# <> 'WDN0000'
-                                                 --                               and PDCART = 90537
-                                                                                AND LMLOC# not like 'A%' and LMLOC# not like 'B%' and LMLOC# not like 'Y%'
-                                                                        GROUP BY PBWHSE, CASE WHEN PBWHSE = 3 and PDLOC# >= 'W400000' then 2 else 1 end , PBCART, PBPTJD, PBPTHM                                                                 
-                                                                        ORDER BY PBWHSE, CASE WHEN PBWHSE = 3 and PDLOC# >= 'W400000' then 2 else 1 end , PBCART, PBPTJD, PBPTHM");
+        PBWHSE,                                                                     
+        CASE WHEN PBWHSE = 3 and PDLOC# >= 'W400000' then 2 else 1 end as PBBUILD,
+        PBCART,                                                                     
+        PBPTJD,                                                                     
+        PBPTHM,
+        count(*) as LINE_COUNT,
+        sum(case when LMPRIM = 'P' then 1 else 0 end) as PRIM_PICKS, 
+        sum(case when LMTIER = 'C01' then 1 else 0 end) as BULK_PICKS,  
+        sum(case when LMTIER in ('C02','C04') then 1 else 0 end) as PTB_PICKS, 
+        sum(case when substr(LMLOC#,6,1) = '1' then 1 else 0 end) as PALLET_PICKS, 
+        sum(case when LMTIER in ('C05', 'C06')  and substr(LMLOC#,6,1) >= '2' then 1 else 0 end) as HALFDECK_PICKS,
+        sum(case when LMTIER not in ('C01', 'C02', 'C03', 'C05', 'C06') then 1 else 0 end) as OTHER_PICKS,
+        MAX(PDLOC#) as LAST_LOC,
+        MIN(PDLOC#) as FIRST_LOC
+    FROM HSIPCORDTA.NOTWPD
+    JOIN HSIPCORDTA.NOTWPB on PDWCS# = PBWCS# and PDWKNO = PBWKNO and PBBOX# = PDBOX# 
+    LEFT JOIN HSIPCORDTA.NPFLSM on LMWHSE = PDWHSE and LMLOC# = PDLOC#
+    WHERE $where_stm
+    GROUP BY PBWHSE, CASE WHEN PBWHSE = 3 and PDLOC# >= 'W400000' then 2 else 1 end , PBCART, PBPTJD, PBPTHM                                                                 
+    ORDER BY PBWHSE, CASE WHEN PBWHSE = 3 and PDLOC# >= 'W400000' then 2 else 1 end , PBCART, PBPTJD, PBPTHM");
     $batchdata->execute();
     $batcharray = $batchdata->fetchAll(pdo::FETCH_ASSOC);
 
@@ -215,7 +220,7 @@ foreach ($whsearray as $whse) {
 
 
 
-//Pull in ship zone cutoff times
+    //Pull in ship zone cutoff times
     $cutoff = $conn1->prepare("SELECT cutoff_zone, cutoff_time FROM printvis.printcutoff WHERE cutoff_DC = $whsesel");
     $cutoff->execute();
     $cutoffarray = $cutoff->fetchAll(pdo::FETCH_ASSOC);
@@ -237,6 +242,7 @@ foreach ($whsearray as $whse) {
                                                                                 END) AS CUBIC_INCH,
                                                                                  PDLOC# as LOCATION,
                                                                                  PDBIN#  as BINNUM,
+                                                                                 PBSHPZ,
                                                                                 (CASE
                                                                                     WHEN LMPRIM = 'P' THEN 1
                                                                                     ELSE 0
@@ -298,6 +304,7 @@ foreach ($whsearray as $whse) {
         $allpicks_cubeinch = $alldata_array[$key]['CUBIC_INCH'];
         $allpicks_location = $alldata_array[$key]['LOCATION'];
         $allpicks_binnum = $alldata_array[$key]['BINNUM'];
+        $allpicks_shipzone = $alldata_array[$key]['PBSHPZ'];
         $allpicks_primpicks = $alldata_array[$key]['PRIM_PICKS'];
         $allpicks_bulkpicks = $alldata_array[$key]['BULK_PICKS'];
         $allpicks_ptbpicks = $alldata_array[$key]['PTB_PICKS'];
@@ -336,9 +343,9 @@ foreach ($whsearray as $whse) {
         //If either the previous or the next location is different, must add vertical distance
         $vertadd = max($diff_next, $diff_prev);
 
-        $data1[] = "($allpicks_whse, $allpicks_build, $allpicks_cart, $allpicks_ptjd, $allpicks_pthm, '$allpicks_aisle', '$allpicks_cubeinch', '$allpicks_location', $allpicks_binnum, $allpicks_primpicks, $allpicks_bulkpicks, $allpicks_ptbpicks, $allpicks_palletpicks, $allpicks_halfpicks, $allpicks_deckpicks, $allpicks_otherpicks, $allpicks_noncon, $vertadd)";
+        $data1[] = "($allpicks_whse, $allpicks_build, $allpicks_cart, $allpicks_ptjd, $allpicks_pthm, '$allpicks_aisle', '$allpicks_cubeinch', '$allpicks_location', $allpicks_binnum, '$allpicks_shipzone', $allpicks_primpicks, $allpicks_bulkpicks, $allpicks_ptbpicks, $allpicks_palletpicks, $allpicks_halfpicks, $allpicks_deckpicks, $allpicks_otherpicks, $allpicks_noncon, $vertadd)";
     }
-    $openpicks_case_cols = 'allpicks_whse, allpicks_build, allpicks_cart, allpicks_ptjd, allpicks_pthm, allpicks_aisle, allpicks_cubeinch, allpicks_location, allpicks_binnum, allpicks_primpicks, allpicks_bulkpicks, allpicks_ptbpicks, allpicks_palletpicks, allpicks_halfpicks, allpicks_deckpicks, allpicks_otherpicks, allpicks_noncon, allpicks_vertadd';
+    $openpicks_case_cols = 'allpicks_whse, allpicks_build, allpicks_cart, allpicks_ptjd, allpicks_pthm, allpicks_aisle, allpicks_cubeinch, allpicks_location, allpicks_binnum, allpicks_shipzone, allpicks_primpicks, allpicks_bulkpicks, allpicks_ptbpicks, allpicks_palletpicks, allpicks_halfpicks, allpicks_deckpicks, allpicks_otherpicks, allpicks_noncon, allpicks_vertadd';
     if (!empty($data1)) {
         $values1 = implode(',', $data1);
         $sql = "INSERT IGNORE INTO printvis.casepick_openpicks ($openpicks_case_cols) VALUES $values1 ";
@@ -348,57 +355,70 @@ foreach ($whsearray as $whse) {
 
     //All totes that are currently in the open box and open detail file.   ***Will have to modify this to group from newly created casepick_allpicks table to account for vertical travel***
     $totedata = $conn1->prepare("SELECT DISTINCT
-                                                        allpicks_whse AS PBWHSE,
-                                                        allpicks_build AS PBBUILD,
-                                                        allpicks_cart AS PBCART,
-                                                        allpicks_ptjd PBPTJD,
-                                                        allpicks_pthm AS PBPTHM,
-                                                        allpicks_aisle AISLE,
-                                                        SUM(allpicks_cubeinch) AS TRIPS_CUBE,
-                                                        SUM(allpicks_cubeinch) AS CUBIC_INCH,
-                                                        COUNT(allpicks_cart) AS LINE_COUNT,
-                                                        (SELECT DISTINCT
-                                                                T.allpicks_location
-                                                            FROM
-                                                                printvis.casepick_openpicks T
-                                                            WHERE
-                                                                T.allpicks_cart = A.allpicks_cart and T.allpicks_whse = A.allpicks_whse
-                                                                    AND T.allpicks_binnum = MIN(A.allpicks_binnum)) AS FIRSTLOC,
-                                                        (SELECT DISTINCT
-                                                                T.allpicks_location
-                                                            FROM
-                                                                printvis.casepick_openpicks T
-                                                            WHERE
-                                                                T.allpicks_cart = A.allpicks_cart and T.allpicks_whse = A.allpicks_whse
-                                                                    AND T.allpicks_binnum = MAX(A.allpicks_binnum)) AS LASTLOC,
-                                                        (SELECT DISTINCT
-                                                                MIN(A.allpicks_binnum)
-                                                            FROM
-                                                                printvis.casepick_openpicks T
-                                                            WHERE
-                                                                T.allpicks_cart = A.allpicks_cart and T.allpicks_whse = A.allpicks_whse
-                                                                    AND T.allpicks_binnum = MIN(A.allpicks_binnum)) AS MINBIN,
-                                                        SUM(allpicks_primpicks) AS PRIM_PICKS,
-                                                        SUM(allpicks_bulkpicks) AS BULK_PICKS,
-                                                        SUM(allpicks_ptbpicks) AS PTB_PICKS,
-                                                        SUM(allpicks_palletpicks) AS PALLET_PICKS,
-                                                        SUM(allpicks_halfpicks) AS HALF_PICKS,
-                                                        SUM(allpicks_deckpicks) AS DECK_PICKS,
-                                                        SUM(allpicks_otherpicks) AS OTHER_PICKS,
-                                                        COUNT(DISTINCT allpicks_location) AS UNIQUE_LOCS,
-                                                        SUM(allpicks_noncon) AS COUNT_NONCON,
-                                                        SUM(CASE
-                                                            WHEN allpicks_vertadd = 1 THEN casemap_ycoor
-                                                            ELSE 0
-                                                        END) AS VERTDIST
-                                                    FROM
-                                                        printvis.casepick_openpicks A
-                                                            LEFT JOIN
-                                                        printvis.pickprediction_casemap ON SUBSTRING(allpicks_location, 1, 6) = casemap_loc
-                                                        and casemap_whse = allpicks_whse
-                                                    WHERE
-                                                        allpicks_whse = $whsesel
-                                                    GROUP BY allpicks_whse , allpicks_build , allpicks_cart , allpicks_ptjd , allpicks_pthm , allpicks_aisle");
+                                    allpicks_whse AS PBWHSE,
+                                    allpicks_build AS PBBUILD,
+                                    allpicks_cart AS PBCART,
+                                    allpicks_ptjd PBPTJD,
+                                    allpicks_pthm AS PBPTHM,
+                                    allpicks_aisle AISLE,
+                                    SUM(allpicks_cubeinch) AS TRIPS_CUBE,
+                                    SUM(allpicks_cubeinch) AS CUBIC_INCH,
+                                    COUNT(allpicks_cart) AS LINE_COUNT,
+                                    (SELECT DISTINCT
+                                            T.allpicks_location
+                                        FROM
+                                            printvis.casepick_openpicks T
+                                        WHERE
+                                            T.allpicks_cart = A.allpicks_cart
+                                                AND T.allpicks_whse = A.allpicks_whse
+                                                AND T.allpicks_binnum = MIN(A.allpicks_binnum)) AS FIRSTLOC,
+                                    (SELECT DISTINCT
+                                            T.allpicks_location
+                                        FROM
+                                            printvis.casepick_openpicks T
+                                        WHERE
+                                            T.allpicks_cart = A.allpicks_cart
+                                                AND T.allpicks_whse = A.allpicks_whse
+                                                AND T.allpicks_binnum = MAX(A.allpicks_binnum)) AS LASTLOC,
+                                    (SELECT DISTINCT
+                                            MIN(A.allpicks_binnum)
+                                        FROM
+                                            printvis.casepick_openpicks T
+                                        WHERE
+                                            T.allpicks_cart = A.allpicks_cart
+                                                AND T.allpicks_whse = A.allpicks_whse
+                                                AND T.allpicks_binnum = MIN(A.allpicks_binnum)) AS MINBIN,
+                                    SUM(allpicks_primpicks) AS PRIM_PICKS,
+                                    SUM(allpicks_bulkpicks) AS BULK_PICKS,
+                                    SUM(allpicks_ptbpicks) AS PTB_PICKS,
+                                    SUM(allpicks_palletpicks) AS PALLET_PICKS,
+                                    SUM(allpicks_halfpicks) AS HALF_PICKS,
+                                    SUM(allpicks_deckpicks) AS DECK_PICKS,
+                                    SUM(allpicks_otherpicks) AS OTHER_PICKS,
+                                    COUNT(DISTINCT allpicks_location) AS UNIQUE_LOCS,
+                                    SUM(allpicks_noncon) AS COUNT_NONCON,
+                                    SUM(CASE
+                                        WHEN allpicks_vertadd = 1 THEN casemap_ycoor
+                                        ELSE 0
+                                    END) AS VERTDIST,
+                                    (SELECT 
+                                            X.cutoff_zone
+                                        FROM
+                                            printvis.printcutoff X
+                                        WHERE
+                                            X.cutoff_rank = MIN(B.cutoff_rank)
+                                                AND X.cutoff_DC = B.cutoff_DC) AS SHIPZONE
+                                FROM
+                                    printvis.casepick_openpicks A
+                                        LEFT JOIN
+                                    printvis.pickprediction_casemap ON SUBSTRING(allpicks_location, 1, 6) = casemap_loc
+                                        AND casemap_whse = allpicks_whse
+                                        LEFT JOIN
+                                    printvis.printcutoff B ON B.cutoff_DC = allpicks_whse
+                                        AND SUBSTRING(B.cutoff_zone, 1, 2) = SUBSTR(allpicks_shipzone, 1, 2)
+                                WHERE
+                                    allpicks_whse = $whsesel
+                                GROUP BY allpicks_whse , allpicks_build , allpicks_cart , allpicks_ptjd , allpicks_pthm , allpicks_aisle");
     $totedata->execute();
     $totedataarray = $totedata->fetchAll(pdo::FETCH_ASSOC);
 
@@ -429,13 +449,16 @@ foreach ($whsearray as $whse) {
         $UNIQUE_LOCS = intval($totedataarray[$key]['UNIQUE_LOCS']);
         $casebatch_noncon = intval($totedataarray[$key]['COUNT_NONCON']);
         $vertdistance = intval($totedataarray[$key]['VERTDIST']);
-        $data[] = "($PBWHSE, $PBBUILD, $PBCART, '$AISLE', '$TRIPS_CUBE', '$CUBIC_INCH',  $LINE_COUNT, '$FIRSTLOC', '$LASTLOC', $casebatch_minbin, '$printdatetime', $UNIQUE_LOCS,$casebatch_noncon, $vertdistance)";
+        $casebatch_shipzone = ($totedataarray[$key]['SHIPZONE']);
+
+
+        $data[] = "($PBWHSE, $PBBUILD, $PBCART, '$AISLE', '$TRIPS_CUBE', '$CUBIC_INCH',  $LINE_COUNT, '$FIRSTLOC', '$LASTLOC', $casebatch_minbin, '$printdatetime', $UNIQUE_LOCS,$casebatch_noncon, $vertdistance, '$casebatch_shipzone')";
     }
 
     //insert ignore into mysql table openbatches_case current open batches
     if (!is_null($data)) {
         $values = implode(',', $data);
-        $sql = "INSERT INTO printvis.openbatches_case ($openbatches_case_cols) VALUES $values ON DUPLICATE KEY UPDATE casebatch_trips=VALUES(casebatch_trips), casebatch_lines=VALUES(casebatch_lines), casebatch_firstloc=VALUES(casebatch_firstloc), casebatch_lastloc=VALUES(casebatch_lastloc), openbatches_printdatetime=VALUES(openbatches_printdatetime), casebatch_cubicinch=VALUES(casebatch_cubicinch) , casebatch_vertdist=VALUES(casebatch_vertdist) ";
+        $sql = "INSERT INTO printvis.openbatches_case ($openbatches_case_cols) VALUES $values ON DUPLICATE KEY UPDATE casebatch_trips=VALUES(casebatch_trips), casebatch_lines=VALUES(casebatch_lines), casebatch_firstloc=VALUES(casebatch_firstloc), casebatch_lastloc=VALUES(casebatch_lastloc), openbatches_printdatetime=VALUES(openbatches_printdatetime), casebatch_cubicinch=VALUES(casebatch_cubicinch) , casebatch_vertdist=VALUES(casebatch_vertdist), casebatch_shipzone=VALUES(casebatch_shipzone) ";
         $query = $conn1->prepare($sql);
         $query->execute();
     }
@@ -545,7 +568,8 @@ foreach ($whsearray as $whse) {
     casepm_noncon,
     casepm_inch_per_min,
     casepm_vert_inch_per_min,
-    baytobay_inches
+    baytobay_inches,
+    casebatch_shipzone
 FROM
     printvis.openbatches_case
         JOIN
@@ -558,13 +582,15 @@ FROM
         AND caseequip_equipment = casepm_equipment
     LEFT JOIN
         printvis.casepm_baytobay on baytobay_whse = casebatch_whse and baytobay_aisle = casebatch_aisle
+    LEFT JOIN
+        printvis.printcutoff B ON B.cutoff_DC = casebatch_whse
+            AND SUBSTRING(B.cutoff_zone, 1, 2) = SUBSTR(casebatch_shipzone, 1, 2)
 WHERE
     casebatch_whse = $whsesel and casebatch_build = $building
- --          and caseequip_batch = 30702
+           and caseequip_batch is not null
 ORDER BY casebatch_cart , casebatch_minbin");
     $opentotedata->execute();
     $opentotedataarray = $opentotedata->fetchAll(pdo::FETCH_ASSOC);
-
     //initiate batch variable
     $openbatchcount = 0;
     $openarraycount = count($opentotedataarray) - 1;
@@ -576,6 +602,9 @@ ORDER BY casebatch_cart , casebatch_minbin");
         //calculate estimated completion times by batch/aisle key
         $casebatch_whse = $opentotedataarray[$key]['casebatch_whse'];
         $casebatch_build = $opentotedataarray[$key]['casebatch_build'];
+        if (is_null($casebatch_whse) && is_null($casebatch_build)) {
+            continue;
+        }
 
         //What is CSTART
         $cstart = $conn1->prepare("SELECT 
@@ -618,6 +647,7 @@ ORDER BY casebatch_cart , casebatch_minbin");
         $casebatch_aisle = $opentotedataarray[$key]['casebatch_aisle'];
         $casebatch_trips = $opentotedataarray[$key]['casebatch_trips'];
         $casebatch_lines = $opentotedataarray[$key]['casebatch_lines'];
+        $casebatch_shipzone = $opentotedataarray[$key]['casebatch_shipzone'];
         $casebatch_firstloc = $opentotedataarray[$key]['casebatch_firstloc'];
         $casebatch_lastloc = $opentotedataarray[$key]['casebatch_lastloc'];
         $openbatches_printdatetime = $opentotedataarray[$key]['openbatches_printdatetime'];
@@ -640,7 +670,7 @@ ORDER BY casebatch_cart , casebatch_minbin");
         $LASTLOC_X = $opentotedataarray[$key]['LASTLOC_X'];
         $LASTLOC_Z = $opentotedataarray[$key]['LASTLOC_Z'];
 
-        If ($key !== 0) { //Not the first record
+        if ($key !== 0) { //Not the first record
             $previousloc_X = $opentotedataarray[$key - 1]['LASTLOC_X'];  //previous aisle last location X
             $previousloc_Z = $opentotedataarray[$key - 1]['LASTLOC_Z'];  //previous aisle last location Z
             $previousaisleH_X = $opentotedataarray[$key - 1]['HIGHSTART_X'];  //previous aisle high parking X
@@ -774,14 +804,15 @@ ORDER BY casebatch_cart , casebatch_minbin");
 
         $totaltime = $calc_picktimeloc + $calc_picktimeunit + $calc_picktimeindirect + $calc_picktimedropoff + $calc_picktimenoncon + $calc_taveltime + $calc_verttime;
 
-        $data_totetimes[] = "($casebatch_whse, $casebatch_build, $casebatch_cart, '$casebatch_aisle', '$caseequip_equipment', '$casebatch_trips', $casebatch_lines, '$casebatch_firstloc', '$casebatch_lastloc', '$openbatches_printdatetime', '$calc_picktimeloc', '$calc_picktimeunit', '$calc_picktimeindirect', '$calc_picktimedropoff', '$calc_picktimenoncon', $caseaisle_inches_inner, $outeraisle_min,  '$calc_taveltime', '$calc_verttime', '$totaltime')";
+        $data_totetimes[] = "($casebatch_whse, $casebatch_build, $casebatch_cart, '$casebatch_aisle', '$caseequip_equipment', '$casebatch_trips', $casebatch_lines, '$casebatch_firstloc', '$casebatch_lastloc', '$openbatches_printdatetime', '$calc_picktimeloc', '$calc_picktimeunit', '$calc_picktimeindirect', '$calc_picktimedropoff', '$calc_picktimenoncon', $caseaisle_inches_inner, $outeraisle_min,  '$calc_taveltime', '$calc_verttime', '$totaltime', '$casebatch_shipzone')";
     }
 
     //Add to table casetote_time
+    //time by aisle, which is then summed at the "batch" level, which for case is all aisles summed together
 
     if (!is_null($data_totetimes)) {
         $values3 = implode(',', $data_totetimes);
-        $sql3 = "INSERT INTO printvis.casetote_time ($casetotetimes_cols) VALUES $values3  ON DUPLICATE KEY UPDATE casetote_time_equipment=VALUES(casetote_time_equipment), casetote_time_trips=VALUES(casetote_time_trips) , casetote_time_lines=VALUES(casetote_time_lines) , casetote_time_firstloc=VALUES(casetote_time_firstloc) , casetote_time_lastloc=VALUES(casetote_time_lastloc) , casetote_time_printdate=VALUES(casetote_time_printdate) , casetote_time_pickloctime=VALUES(casetote_time_pickloctime) , casetote_time_pickunittime=VALUES(casetote_time_pickunittime) , casetote_time_indirecttime=VALUES(casetote_time_indirecttime) , casetote_time_dropofftime=VALUES(casetote_time_dropofftime) , casetote_time_noncontime=VALUES(casetote_time_noncontime) , casetote_time_inches_inneraisle=VALUES(casetote_time_inches_inneraisle) , casetote_time_inches_outeraisle=VALUES(casetote_time_inches_outeraisle) , casetote_time_traveltime=VALUES(casetote_time_traveltime) , casetote_time_verttime=VALUES(casetote_time_verttime), casetote_time_totaltime=VALUES(casetote_time_totaltime) ";
+        $sql3 = "INSERT INTO printvis.casetote_time ($casetotetimes_cols) VALUES $values3  ON DUPLICATE KEY UPDATE casetote_time_equipment=VALUES(casetote_time_equipment), casetote_time_trips=VALUES(casetote_time_trips) , casetote_time_lines=VALUES(casetote_time_lines) , casetote_time_firstloc=VALUES(casetote_time_firstloc) , casetote_time_lastloc=VALUES(casetote_time_lastloc) , casetote_time_printdate=VALUES(casetote_time_printdate) , casetote_time_pickloctime=VALUES(casetote_time_pickloctime) , casetote_time_pickunittime=VALUES(casetote_time_pickunittime) , casetote_time_indirecttime=VALUES(casetote_time_indirecttime) , casetote_time_dropofftime=VALUES(casetote_time_dropofftime) , casetote_time_noncontime=VALUES(casetote_time_noncontime) , casetote_time_inches_inneraisle=VALUES(casetote_time_inches_inneraisle) , casetote_time_inches_outeraisle=VALUES(casetote_time_inches_outeraisle) , casetote_time_traveltime=VALUES(casetote_time_traveltime) , casetote_time_verttime=VALUES(casetote_time_verttime), casetote_time_totaltime=VALUES(casetote_time_totaltime) , casetote_time_shipzone=VALUES(casetote_time_shipzone)";
         $query3 = $conn1->prepare($sql3);
         $query3->execute();
     }
@@ -789,101 +820,112 @@ ORDER BY casebatch_cart , casebatch_minbin");
     //Aggregate tote (aisle) times to the batch level accounting for the initial distance from start and final distance to stop
 
     $batchsummarydata = $conn1->prepare("SELECT 
-                                                                                        casetote_time_whse AS CART_WHSE,
-                                                                                        casetote_time_build AS CART_BUILD,
-                                                                                        casetote_time_cart AS CART_BATCH,
-                                                                                        casetote_time_equipment AS CART_EQUIP,
-                                                                                        casetote_time_printdate AS PRINT_DATE,
-                                                                                        casepm_kiosk,
-                                                                                        casepm_batch,
-                                                                                        casepm_comp,
-                                                                                        casepm_short,
-                                                                                        casepm_trip,
-                                                                                        casepm_inch_per_min,
-                                                                                        SUM(casetote_time_trips) / casepm_tripdivisor AS TOT_TRIPS,
-                                                                                        SUM(casetote_time_lines) AS TOT_LINES,
-                                                                                        MIN(casetote_time_firstloc) AS FIRST_LOC,
-                                                                                        MAX(casetote_time_lastloc) AS LAST_LOC,
-                                                                                        SUM(casetote_time_pickloctime) AS TIME_PICKLOC,
-                                                                                        SUM(casetote_time_pickunittime) AS TIME_UNIT,
-                                                                                        SUM(casetote_time_indirecttime) AS TIME_INDIRECT,
-                                                                                        SUM(casetote_time_dropofftime) AS TIME_DROPOFF,
-                                                                                        SUM(casetote_time_noncontime) AS TIME_NONCON,
-                                                                                        SUM(casetote_time_inches_inneraisle + casetote_time_inches_outeraisle) AS TOT_INCHES_AISLE,
-                                                                                        SUM(casetote_time_traveltime) AS TIME_TRAVEL_AISLE,
-                                                                                        SUM(casetote_time_verttime) as TIME_TRAVEL_VERT,
-                                                                                        SUM(casetote_time_totaltime) AS TIME_SUB_TOTAL,
-                                                                                        ABS((SELECT 
-                                                                                                        pickprediction_xcoor
-                                                                                                    FROM
-                                                                                                        printvis.pickprediction_casemap
-                                                                                                    WHERE
-                                                                                                        casemap_loc = SUBSTR(MIN(casetote_time_firstloc),
-                                                                                                            1,
-                                                                                                            6)
-                                                                                                            AND casemap_whse = casetote_time_whse
-                                                                                                            AND casetote_time_build = casemap_building) - (SELECT 
-                                                                                                        pickprediction_xcoor
-                                                                                                    FROM
-                                                                                                        printvis.pickprediction_casemap
-                                                                                                    WHERE
-                                                                                                        casemap_loc = 'CSTART'
-                                                                                                            AND casemap_whse = casetote_time_whse
-                                                                                                            AND casetote_time_build = casemap_building) + ABS((SELECT 
-                                                                                                                casemap_zcoor
-                                                                                                            FROM
-                                                                                                                printvis.pickprediction_casemap
-                                                                                                            WHERE
-                                                                                                                casemap_loc = SUBSTR(MIN(casetote_time_firstloc),
-                                                                                                                    1,
-                                                                                                                    6)
-                                                                                                                    AND casemap_whse = casetote_time_whse
-                                                                                                                    AND casetote_time_build = casemap_building) - (SELECT 
-                                                                                                                casemap_zcoor
-                                                                                                            FROM
-                                                                                                                printvis.pickprediction_casemap
-                                                                                                            WHERE
-                                                                                                                casemap_loc = 'CSTART'
-                                                                                                                    AND casemap_whse = casetote_time_whse
-                                                                                                                    AND casetote_time_build = casemap_building))) AS START_TO_FIRSTLOC,
-                                                                                        ABS((SELECT 
-                                                                                                        pickprediction_xcoor
-                                                                                                    FROM
-                                                                                                        printvis.pickprediction_casemap
-                                                                                                    WHERE
-                                                                                                        casemap_loc = SUBSTR(MIN(casetote_time_lastloc), 1, 6)
-                                                                                                            AND casemap_whse = casetote_time_whse
-                                                                                                            AND casetote_time_build = casemap_building) - (SELECT 
-                                                                                                        pickprediction_xcoor
-                                                                                                    FROM
-                                                                                                        printvis.pickprediction_casemap
-                                                                                                    WHERE
-                                                                                                        casemap_loc = 'CSTOP'
-                                                                                                            AND casemap_whse = casetote_time_whse
-                                                                                                            AND casetote_time_build = casemap_building)) + ABS((SELECT 
-                                                                                                        casemap_zcoor
-                                                                                                    FROM
-                                                                                                        printvis.pickprediction_casemap
-                                                                                                    WHERE
-                                                                                                        casemap_loc = SUBSTR(MIN(casetote_time_lastloc), 1, 6)
-                                                                                                            AND casemap_whse = casetote_time_whse
-                                                                                                            AND casetote_time_build = casemap_building) - (SELECT 
-                                                                                                        casemap_zcoor
-                                                                                                    FROM
-                                                                                                        printvis.pickprediction_casemap
-                                                                                                    WHERE
-                                                                                                        casemap_loc = 'CSTOP'
-                                                                                                            AND casemap_whse = casetote_time_whse
-                                                                                                            AND casetote_time_build = casemap_building)) AS LASTLOC_TO_STOP
-                                                                                    FROM
-                                                                                        printvis.casetote_time
-                                                                                            JOIN
-                                                                                        printvis.pm_casetimes ON casepm_whse = casetote_time_whse
-                                                                                            AND casepm_build = casetote_time_build
-                                                                                            AND casepm_equipment = casetote_time_equipment
-                                                                                    WHERE
-                                                                                        casetote_time_whse = $whsesel
-                                                                                    GROUP BY casetote_time_whse , casetote_time_build , casetote_time_cart , casetote_time_equipment , casetote_time_printdate , casepm_kiosk , casepm_batch , casepm_comp , casepm_short , casepm_trip");
+                                        casetote_time_whse AS CART_WHSE,
+                                        casetote_time_build AS CART_BUILD,
+                                        casetote_time_cart AS CART_BATCH,
+                                        casetote_time_equipment AS CART_EQUIP,
+                                        casetote_time_printdate AS PRINT_DATE,
+                                        casepm_kiosk,
+                                        casepm_batch,
+                                        casepm_comp,
+                                        casepm_short,
+                                        casepm_trip,
+                                        casepm_inch_per_min,
+                                            (
+                                                SELECT
+                                                        X.cutoff_zone
+                                                FROM
+                                                        printvis.printcutoff X
+                                                WHERE
+                                                        X.cutoff_rank = MIN(B.cutoff_rank)
+                                                AND     X.cutoff_DC   = B.cutoff_DC) AS SHIPZONE,
+                                        SUM(casetote_time_trips) / casepm_tripdivisor AS TOT_TRIPS,
+                                        SUM(casetote_time_lines) AS TOT_LINES,
+                                        MIN(casetote_time_firstloc) AS FIRST_LOC,
+                                        MAX(casetote_time_lastloc) AS LAST_LOC,
+                                        SUM(casetote_time_pickloctime) AS TIME_PICKLOC,
+                                        SUM(casetote_time_pickunittime) AS TIME_UNIT,
+                                        SUM(casetote_time_indirecttime) AS TIME_INDIRECT,
+                                        SUM(casetote_time_dropofftime) AS TIME_DROPOFF,
+                                        SUM(casetote_time_noncontime) AS TIME_NONCON,
+                                        SUM(casetote_time_inches_inneraisle + casetote_time_inches_outeraisle) AS TOT_INCHES_AISLE,
+                                        SUM(casetote_time_traveltime) AS TIME_TRAVEL_AISLE,
+                                        SUM(casetote_time_verttime) as TIME_TRAVEL_VERT,
+                                        SUM(casetote_time_totaltime) AS TIME_SUB_TOTAL,
+                                        ABS((SELECT 
+                                                        pickprediction_xcoor
+                                                    FROM
+                                                        printvis.pickprediction_casemap
+                                                    WHERE
+                                                        casemap_loc = SUBSTR(MIN(casetote_time_firstloc),
+                                                            1,
+                                                            6)
+                                                            AND casemap_whse = casetote_time_whse
+                                                            AND casetote_time_build = casemap_building) - (SELECT 
+                                                        pickprediction_xcoor
+                                                    FROM
+                                                        printvis.pickprediction_casemap
+                                                    WHERE
+                                                        casemap_loc = 'CSTART'
+                                                            AND casemap_whse = casetote_time_whse
+                                                            AND casetote_time_build = casemap_building) + ABS((SELECT 
+                                                                casemap_zcoor
+                                                            FROM
+                                                                printvis.pickprediction_casemap
+                                                            WHERE
+                                                                casemap_loc = SUBSTR(MIN(casetote_time_firstloc),
+                                                                    1,
+                                                                    6)
+                                                                    AND casemap_whse = casetote_time_whse
+                                                                    AND casetote_time_build = casemap_building) - (SELECT 
+                                                                casemap_zcoor
+                                                            FROM
+                                                                printvis.pickprediction_casemap
+                                                            WHERE
+                                                                casemap_loc = 'CSTART'
+                                                                    AND casemap_whse = casetote_time_whse
+                                                                    AND casetote_time_build = casemap_building))) AS START_TO_FIRSTLOC,
+                                        ABS((SELECT 
+                                                        pickprediction_xcoor
+                                                    FROM
+                                                        printvis.pickprediction_casemap
+                                                    WHERE
+                                                        casemap_loc = SUBSTR(MIN(casetote_time_lastloc), 1, 6)
+                                                            AND casemap_whse = casetote_time_whse
+                                                            AND casetote_time_build = casemap_building) - (SELECT 
+                                                        pickprediction_xcoor
+                                                    FROM
+                                                        printvis.pickprediction_casemap
+                                                    WHERE
+                                                        casemap_loc = 'CSTOP'
+                                                            AND casemap_whse = casetote_time_whse
+                                                            AND casetote_time_build = casemap_building)) + ABS((SELECT 
+                                                        casemap_zcoor
+                                                    FROM
+                                                        printvis.pickprediction_casemap
+                                                    WHERE
+                                                        casemap_loc = SUBSTR(MIN(casetote_time_lastloc), 1, 6)
+                                                            AND casemap_whse = casetote_time_whse
+                                                            AND casetote_time_build = casemap_building) - (SELECT 
+                                                        casemap_zcoor
+                                                    FROM
+                                                        printvis.pickprediction_casemap
+                                                    WHERE
+                                                        casemap_loc = 'CSTOP'
+                                                            AND casemap_whse = casetote_time_whse
+                                                            AND casetote_time_build = casemap_building)) AS LASTLOC_TO_STOP
+                                    FROM
+                                        printvis.casetote_time
+                                            JOIN
+                                        printvis.pm_casetimes ON casepm_whse = casetote_time_whse
+                                            AND casepm_build = casetote_time_build
+                                            AND casepm_equipment = casetote_time_equipment
+                                                LEFT JOIN
+                                        printvis.printcutoff B ON B.cutoff_DC = casetote_time_whse
+                                            AND SUBSTRING(B.cutoff_zone, 1, 2) = SUBSTR(casetote_time_shipzone, 1, 2)
+                                    WHERE
+                                        casetote_time_whse = $whsesel
+                                    GROUP BY casetote_time_whse , casetote_time_build , casetote_time_cart , casetote_time_equipment , casetote_time_printdate , casepm_kiosk , casepm_batch , casepm_comp , casepm_short , casepm_trip");
     $batchsummarydata->execute();
     $batchsummaryarray = $batchsummarydata->fetchAll(pdo::FETCH_ASSOC);
 
@@ -918,30 +960,21 @@ ORDER BY casebatch_cart , casebatch_minbin");
         $TOT_INCHES_AISLE = intval($batchsummaryarray[$key]['TOT_INCHES_AISLE']);
         $TIME_TRAVEL_AISLE = $batchsummaryarray[$key]['TIME_TRAVEL_AISLE'];
         $TIME_TRAVEL_VERT = $batchsummaryarray[$key]['TIME_TRAVEL_VERT'];
-//        $START_TO_FIRSTLOC = intval($batchsummaryarray[$key]['START_TO_FIRSTLOC']);
-//        $LASTLOC_TO_STOP = intval($batchsummaryarray[$key]['LASTLOC_TO_STOP']);
         $START_TO_FIRSTLOC = 0;  //now accounted for in "outer aisle travel"
         $LASTLOC_TO_STOP = 0;  //now accounted for in "outer aisle travel"
         $casepm_inch_per_min = intval($batchsummaryarray[$key]['casepm_inch_per_min']);
-//        $TOT_INCHES_STARTSTOP = $START_TO_FIRSTLOC + $LASTLOC_TO_STOP;
-//        if ($casepm_inch_per_min > 0) {
-//            $TIME_STARTSTOP = $TOT_INCHES_STARTSTOP / $casepm_inch_per_min;
-//        } else {
-//            $TIME_STARTSTOP = 0;
-//        }
-
         $TOT_INCHES_STARTSTOP = 0; //now accounted for in "outer aisle travel"
         $TIME_STARTSTOP = 0; //now accounted for in "outer aisle travel"
         $TIME_SUB_TOTAL = $batchsummaryarray[$key]['TIME_SUB_TOTAL'];
         $TIME_BATCH_FINAL = $casepm_kiosk + $casepm_batch + $casepm_comp + $casepm_short + $TIME_TRIPCUBE + $TIME_PICKLOC + $TIME_UNIT + $TIME_INDIRECT + $TIME_DROPOFF + $TIME_NONCON + $TIME_TRAVEL_AISLE + $TIME_TRAVEL_VERT + $TIME_STARTSTOP;
-
+        $SHIP_ZONE = $batchsummaryarray[$key]['SHIPZONE'];
         $TIME_BATCH_FINAL_max = intval($TIME_BATCH_FINAL);
         if ($TIME_BATCH_FINAL_max == 0) {
             $TIME_BATCH_FINAL_min = $TIME_BATCH_FINAL_max;
         } else {
             $TIME_BATCH_FINAL_min = intval($TIME_BATCH_FINAL_max - 1);
         }
-        $batchcompletedata[] = "($CART_WHSE, $CART_BUILD, $CART_BATCH,  '$CART_EQUIP', '$PRINT_DATE', '$casepm_kiosk', '$casepm_batch', '$casepm_comp', '$casepm_short', '$casepm_trip', $TOT_TRIPS, '$TIME_TRIPCUBE', $TOT_LINES, '$FIRST_LOC', '$LAST_LOC','$TIME_PICKLOC', '$TIME_UNIT', '$TIME_INDIRECT', '$TIME_DROPOFF', '$TIME_NONCON', $TOT_INCHES_AISLE,  '$TIME_TRAVEL_AISLE', '$TIME_TRAVEL_VERT', $START_TO_FIRSTLOC, $LASTLOC_TO_STOP, $casepm_inch_per_min, $TOT_INCHES_STARTSTOP,  '$TIME_STARTSTOP',  '$TIME_BATCH_FINAL' )";
+        $batchcompletedata[] = "($CART_WHSE, $CART_BUILD, $CART_BATCH,  '$CART_EQUIP', '$PRINT_DATE', '$casepm_kiosk', '$casepm_batch', '$casepm_comp', '$casepm_short', '$casepm_trip', $TOT_TRIPS, '$TIME_TRIPCUBE', $TOT_LINES, '$FIRST_LOC', '$LAST_LOC','$TIME_PICKLOC', '$TIME_UNIT', '$TIME_INDIRECT', '$TIME_DROPOFF', '$TIME_NONCON', $TOT_INCHES_AISLE,  '$TIME_TRAVEL_AISLE', '$TIME_TRAVEL_VERT', $START_TO_FIRSTLOC, $LASTLOC_TO_STOP, $casepm_inch_per_min, $TOT_INCHES_STARTSTOP,  '$TIME_STARTSTOP',  '$TIME_BATCH_FINAL', '$SHIP_ZONE' )";
 
         $batchpadded = str_pad($CART_BATCH, 5, "0", STR_PAD_LEFT);
         $datafortaskpred[] = "('$batchpadded', $CART_WHSE, 'CAS', '$CART_EQUIP', $TIME_BATCH_FINAL_min, $TIME_BATCH_FINAL_max, '$todaydatetime' )";
@@ -977,7 +1010,8 @@ ORDER BY casebatch_cart , casebatch_minbin");
                             casebatches_inchpermin =VALUES(casebatches_inchpermin), 
                             casebatches_startstopinches =VALUES(casebatches_startstopinches), 
                             casebatches_time_startstop =VALUES(casebatches_time_startstop), 
-                            casebatches_time_final=VALUES(casebatches_time_final)";
+                            casebatches_time_final=VALUES(casebatches_time_final),
+                            casebatches_time_shipzone=VALUES(casebatches_time_shipzone)";
         $query4 = $conn1->prepare($sql4);
         $query4->execute();
 

@@ -56,7 +56,9 @@ $itemsql = $conn1->prepare("SELECT
                                                                             WHEN EOLLOOSE_TSM IS NULL THEN EOLCASE_TSM
                                                                             ELSE EOLLOOSE_TSM
                                                                         END)
-                                                            END AS EOL_TSM
+                                                            END AS EOL_TSM,
+                                                            SEQNUM,
+                                                            DC_CODE
                                                         FROM
                                                             custaudit.complaint_detail
                                                         WHERE

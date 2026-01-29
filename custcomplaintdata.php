@@ -74,6 +74,8 @@
                                             <th>Pick Location</th>
                                             <th>Pick Date</th>
                                             <th>EOL?</th>
+                                            <th>SEQ#</th>
+                                            <th>DC Code</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -101,6 +103,8 @@
                                             <th>Pack Station</th>
                                             <th>Pack Date</th>
                                             <th>EOL?</th>
+                                            <th>SEQ#</th>
+                                            <th>DC Code</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -128,6 +132,8 @@
                                             <th>Pick Location</th>
                                             <th>Pick Date</th>
                                             <th>EOL?</th>
+                                            <th>SEQ#</th>
+                                            <th>DC Code</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -156,6 +162,13 @@
                                             <th>Pick Location</th>
                                             <th>Pick Date</th>
                                             <th>EOL?</th>
+                                            <th>SEQ#</th>
+                                            <th>DC Code</th>
+                                            <th>Item Class</th>
+                                            <th>Loc Tier</th>
+                                            <th>Sales Rep</th>
+                                            <th>Sales Div.</th>
+                                            <th>Avg Cost</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -166,7 +179,7 @@
 
                 <!--Modal Includes-->
                 <?php
-                include_once 'modals/modal_commonreports.php ';
+                include_once 'modals/modal_commonreports.php';
                 ?>
             </section>
         </section>

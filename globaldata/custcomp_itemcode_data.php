@@ -14,7 +14,7 @@ if (isset($_SESSION['MYUSER'])) {
 $var_item = $_GET['itemcode'];
 $stardate = date('Y-m-d', strtotime("-90 days"));
 $itemsql = $conn1->prepare("SELECT 
-                                                            ITEMCODE,                                                           
+                                                            ITEMCODE,                                                            
                                                             ORD_RETURNDATE,
                                                             RETURNCODE,
                                                             CONCAT(WCSNUM, '-', WONUM) AS WCSNUM,
@@ -56,7 +56,9 @@ $itemsql = $conn1->prepare("SELECT
                                                                             WHEN EOLLOOSE_TSM IS NULL THEN EOLCASE_TSM
                                                                             ELSE EOLLOOSE_TSM
                                                                         END)
-                                                            END AS EOL_TSM
+                                                            END AS EOL_TSM,
+                                                            SEQNUM,
+                                                            DC_CODE
                                                         FROM
                                                             custaudit.complaint_detail
                                                         WHERE

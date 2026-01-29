@@ -486,26 +486,26 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
     $sql_batchtimes->execute();
 
     //add to taskpred table
-//    $taskpredcolumns = 'taskpred_id, taskpred_whse, taskpred_function, taskpred_type, taskpred_mintime, taskpred_maxtime, taskpred_updatetime';
-//    $sql_looselines_taskpred = $conn1->prepare("INSERT IGNORE INTO printvis.taskpred($taskpredcolumns)
-//                                                                                                SELECT 
-//                                                                                                    LPAD(batchtime_cart, 5, '0') AS BATCH,
-//                                                                                                    batchtime_whse,
-//                                                                                                    'PIK',
-//                                                                                                    'LOOSEPICK',
-//                                                                                                    CASE
-//                                                                                                        WHEN CAST(batchtime_time_totaltime AS UNSIGNED) - 1 > 999 THEN 999
-//                                                                                                        ELSE CAST(batchtime_time_totaltime AS UNSIGNED) - 1
-//                                                                                                    END AS MINTIME,
-//                                                                                                    CASE
-//                                                                                                        WHEN CAST(batchtime_time_totaltime AS UNSIGNED) > 999 THEN 999
-//                                                                                                        ELSE CAST(batchtime_time_totaltime AS UNSIGNED)
-//                                                                                                    END AS MAXTIME,
-//                                                                                                    '$todaydatetime'
-//                                                                                                FROM
-//                                                                                                    printvis.looselines_batchtime 
-//                                                                                                WHERE batchtime_whse = $whsesel;");
-//    $sql_looselines_taskpred->execute();
+   $taskpredcolumns = 'taskpred_id, taskpred_whse, taskpred_function, taskpred_type, taskpred_mintime, taskpred_maxtime, taskpred_updatetime';
+   $sql_looselines_taskpred = $conn1->prepare("INSERT IGNORE INTO printvis.taskpred($taskpredcolumns)
+                                                                                               SELECT 
+                                                                                                   LPAD(batchtime_cart, 5, '0') AS BATCH,
+                                                                                                   batchtime_whse,
+                                                                                                   'PIK',
+                                                                                                   'LOOSEPICK',
+                                                                                                   CASE
+                                                                                                       WHEN CAST(batchtime_time_totaltime AS UNSIGNED) - 1 > 999 THEN 999
+                                                                                                       ELSE CAST(batchtime_time_totaltime AS UNSIGNED) - 1
+                                                                                                   END AS MINTIME,
+                                                                                                   CASE
+                                                                                                       WHEN CAST(batchtime_time_totaltime AS UNSIGNED) > 999 THEN 999
+                                                                                                       ELSE CAST(batchtime_time_totaltime AS UNSIGNED)
+                                                                                                   END AS MAXTIME,
+                                                                                                   '$todaydatetime'
+                                                                                               FROM
+                                                                                                   printvis.looselines_batchtime 
+                                                                                               WHERE batchtime_whse = $whsesel;");
+   $sql_looselines_taskpred->execute();
     //write to aisle time historical file
 
     $ftpdatetime = date('Ymd_His');
@@ -749,8 +749,8 @@ WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID]
                                                             T.[ProductCode] as ItemCode,
                                                             JSON_VALUE(T.UserDefinedData, '$.NDCNum') as NDC_Num,
                                                             [Weight] as EachWeight,
-                                                            [LastEventOccurredBusinessDate] as DateTimeFirstPick,
-                                                            [CreatedDateTime] as DATECREATED,
+                                                            [LastEventOccurredDateTimeLocal] as DateTimeFirstPick,
+                                                            [LastEventOccurredDateTimeLocal] as DATECREATED,
                                                             JSON_VALUE(T.UserDefinedData, '$.BOFlag') as BO,
                                                             IIF(PE.ExceptionEventId = 3, 1, 0) as PutAwayFlag,
                                                             SUBSTRING( T.[LocationString] ,1,6) as LOCJOIN,
