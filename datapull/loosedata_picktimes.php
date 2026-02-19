@@ -216,7 +216,43 @@ foreach ($whsearray as $whsesel) {
                                                                                         AND loosemap_location = temploose_locjoin
                                                                                 WHERE
                                                                                     loosemap_location IS NULL and (temploose_locjoin like 'A%' or temploose_locjoin like 'B%' or temploose_locjoin like 'C%') )");
-    $sql_error->execute();
+    // Retry logic for deadlock errors
+    $max_retries = 5;
+    $retry_count = 0;
+    $executed = false;
+    while ($retry_count < $max_retries && !$executed) {
+        try {
+            $sql_error->execute();
+            $executed = true;
+        } catch (PDOException $e) {
+            // Check if it's a deadlock error (SQLSTATE 40001 or error code 1213)
+            if ($e->getCode() == '40001' || (isset($e->errorInfo[1]) && $e->errorInfo[1] == 1213)) {
+                $retry_count++;
+                if ($retry_count < $max_retries) {
+                    // Exponential backoff: wait 100ms * 2^(retry_count-1)
+                    $wait_time = 100000 * pow(2, $retry_count - 1); // microseconds
+                    usleep($wait_time);
+                    // Re-prepare the statement for retry
+                    $sql_error = $conn1->prepare("INSERT IGNORE INTO printvis.error_loosepickmap 
+                                                                        (SELECT DISTINCT
+                                                                                    temploose_whse, temploose_locjoin
+                                                                                FROM
+                                                                                    printvis.temp_looselines
+                                                                                        LEFT JOIN
+                                                                                    printvis.pickprediction_loosepickmap ON loosemap_whse = temploose_whse
+                                                                                        AND loosemap_location = temploose_locjoin
+                                                                                WHERE
+                                                                                    loosemap_location IS NULL and (temploose_locjoin like 'A%' or temploose_locjoin like 'B%' or temploose_locjoin like 'C%') )");
+                } else {
+                    // Max retries reached, re-throw the exception
+                    throw $e;
+                }
+            } else {
+                // Not a deadlock error, re-throw immediately
+                throw $e;
+            }
+        }
+    }
 
     //Delete records from the error file if they have been added to the pickprediction_loosepickmap
     $sql_error_delete = $conn1->prepare("  DELETE FROM printvis.error_loosepickmap 
@@ -227,7 +263,41 @@ foreach ($whsearray as $whsesel) {
                                                                                 printvis.pickprediction_loosepickmap
                                                                                       WHERE
                                                                                 loosemap_whse = error_whse and loosemap_location = error_loc)");
-    $sql_error_delete->execute();
+    // Retry logic for deadlock errors
+    $max_retries_delete = 5;
+    $retry_count_delete = 0;
+    $executed_delete = false;
+    while ($retry_count_delete < $max_retries_delete && !$executed_delete) {
+        try {
+            $sql_error_delete->execute();
+            $executed_delete = true;
+        } catch (PDOException $e) {
+            // Check if it's a deadlock error (SQLSTATE 40001 or error code 1213)
+            if ($e->getCode() == '40001' || (isset($e->errorInfo[1]) && $e->errorInfo[1] == 1213)) {
+                $retry_count_delete++;
+                if ($retry_count_delete < $max_retries_delete) {
+                    // Exponential backoff: wait 100ms * 2^(retry_count-1)
+                    $wait_time = 100000 * pow(2, $retry_count_delete - 1); // microseconds
+                    usleep($wait_time);
+                    // Re-prepare the statement for retry
+                    $sql_error_delete = $conn1->prepare("  DELETE FROM printvis.error_loosepickmap 
+                                                                        WHERE
+                                                                            error_loc IN (SELECT 
+                                                                                loosemap_location
+                                                                            FROM
+                                                                                printvis.pickprediction_loosepickmap
+                                                                                      WHERE
+                                                                                loosemap_whse = error_whse and loosemap_location = error_loc)");
+                } else {
+                    // Max retries reached, re-throw the exception
+                    throw $e;
+                }
+            } else {
+                // Not a deadlock error, re-throw immediately
+                throw $e;
+            }
+        }
+    }
 
     //Join the temp_looselines to the pickprediction_loosepickmap to get additional info of x,y,z, opening height and distance
     //The pickprediction_loosepickmap should be automatically downloaded from the NV server once access is gained.
@@ -491,16 +561,18 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
                                                                                                SELECT 
                                                                                                    LPAD(batchtime_cart, 5, '0') AS BATCH,
                                                                                                    batchtime_whse,
-                                                                                                   'PIK',
-                                                                                                   'LOOSEPICK',
-                                                                                                   CASE
-                                                                                                       WHEN CAST(batchtime_time_totaltime AS UNSIGNED) - 1 > 999 THEN 999
-                                                                                                       ELSE CAST(batchtime_time_totaltime AS UNSIGNED) - 1
-                                                                                                   END AS MINTIME,
-                                                                                                   CASE
-                                                                                                       WHEN CAST(batchtime_time_totaltime AS UNSIGNED) > 999 THEN 999
-                                                                                                       ELSE CAST(batchtime_time_totaltime AS UNSIGNED)
-                                                                                                   END AS MAXTIME,
+                                                                                                    'PIK',
+                                                                                                    'LOOSEPICK',
+                                                                                                    CASE
+                                                                                                        WHEN batchtime_time_totaltime IS NULL OR CAST(batchtime_time_totaltime AS UNSIGNED) = 0 THEN 1
+                                                                                                        WHEN CAST(batchtime_time_totaltime AS UNSIGNED) - 1 > 999 THEN 999
+                                                                                                        ELSE CAST(batchtime_time_totaltime AS UNSIGNED) - 1
+                                                                                                    END AS MINTIME,
+                                                                                                    CASE
+                                                                                                        WHEN batchtime_time_totaltime IS NULL OR CAST(batchtime_time_totaltime AS UNSIGNED) = 0 THEN 1
+                                                                                                        WHEN CAST(batchtime_time_totaltime AS UNSIGNED) > 999 THEN 999
+                                                                                                        ELSE CAST(batchtime_time_totaltime AS UNSIGNED)
+                                                                                                    END AS MAXTIME,
                                                                                                    '$todaydatetime'
                                                                                                FROM
                                                                                                    printvis.looselines_batchtime 

@@ -800,8 +800,9 @@ ORDER BY casebatch_cart , casebatch_minbin");
         $TIME_BATCH_FINAL = $casepm_kiosk + $casepm_batch + $casepm_comp + $casepm_short + $TIME_TRIPCUBE + $TIME_PICKLOC + $TIME_UNIT + $TIME_INDIRECT + $TIME_DROPOFF + $TIME_NONCON + $TIME_TRAVEL_AISLE + $TIME_STARTSTOP;
 
         $TIME_BATCH_FINAL_max = intval($TIME_BATCH_FINAL);
-        if ($TIME_BATCH_FINAL_max == 0) {
-            $TIME_BATCH_FINAL_min = $TIME_BATCH_FINAL_max;
+        if ($TIME_BATCH_FINAL_max <= 0) {
+            $TIME_BATCH_FINAL_max = 1;
+            $TIME_BATCH_FINAL_min = 1;
         } else {
             $TIME_BATCH_FINAL_min = intval($TIME_BATCH_FINAL_max - 1);
         }

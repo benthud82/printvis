@@ -618,10 +618,12 @@ $sql_looselines_taskpred = $conn1->prepare("INSERT INTO printvis.taskpred
                                                                                                 'CRT',
                                                                                                 'PUTAWAY',
                                                                                                 CASE
+                                                                                                    WHEN openputaway_logtime_totaltime IS NULL OR CAST(openputaway_logtime_totaltime AS UNSIGNED) = 0 THEN 1
                                                                                                     WHEN CAST(openputaway_logtime_totaltime AS UNSIGNED) - 1 > 999 THEN 999
                                                                                                     ELSE CAST(openputaway_logtime_totaltime AS UNSIGNED) - 1
                                                                                                 END AS MINTIME,
                                                                                                 CASE
+                                                                                                    WHEN openputaway_logtime_totaltime IS NULL OR CAST(openputaway_logtime_totaltime AS UNSIGNED) = 0 THEN 1
                                                                                                     WHEN CAST(openputaway_logtime_totaltime AS UNSIGNED) > 999 THEN 999
                                                                                                     ELSE CAST(openputaway_logtime_totaltime AS UNSIGNED)
                                                                                                 END AS MAXTIME,
