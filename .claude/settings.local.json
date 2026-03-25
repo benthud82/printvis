@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/Bentley.Hudson/xampp/htdocs/**)",
+      "Bash(mysql -u root -e \"SELECT rep_id, rep_desc, rep_section, rep_whse, rep_build, rep_include, rep_order FROM nahsi.reports WHERE rep_section = ''slot'' ORDER BY rep_order LIMIT 20;\")",
+      "Bash(mysql:*)",
+      "Bash(find C:/Users/Bentley.Hudson -maxdepth 3 -name CLAUDE.md -o -name .cursorrules -o -name *.mdc)"
+    ]
+  }
+}
