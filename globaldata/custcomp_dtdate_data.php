@@ -2,6 +2,7 @@
 
 include_once '../sessioninclude.php';
 include '../../connections/conn_printvis.php';
+include 'custcomp_tsm_sql.php';
 if (isset($_SESSION['MYUSER'])) {
     $var_userid = $_SESSION['MYUSER'];
     $whssql = $conn1->prepare("SELECT prodvisdb_users_PRIMDC from printvis.prodvisdb_users WHERE prodvisdb_users_ID = '$var_userid'");
@@ -22,13 +23,13 @@ $itemsql = $conn1->prepare("SELECT
     cd.BOXSIZE,
     cd.TRACERNUM,
     cd.BATCH_NUM,
-    UPPER(IFNULL(cd.PICK_TSM, cd.CASEPICK_TSMNAME)) AS PICK_TSM,
-    UPPER(IFNULL(cd.PACK_TSMNAME, cd.CASEPICK_TSMNAME)) AS PACK_TSMNAME,
+    $complaint_pick_tsm_sql AS PICK_TSM,
+    $complaint_pack_tsm_sql AS PACK_TSMNAME,
     cd.PICK_LOCATION,
     IFNULL(cd.PICK_DATE, cd.CASEPICK_DATETIME) AS PICK_DATE,
-    IFNULL(t.tsm_name, '-') AS EOL_TSM,
-    SEQNUM,
-    DC_CODE,
+    IFNULL(eol_tsm.tsm_name, '-') AS EOL_TSM,
+    cd.SEQNUM,
+    cd.DC_CODE,
     ITEM_CLASS,
     LOC_TIER,
     SALESREP,
@@ -36,7 +37,8 @@ $itemsql = $conn1->prepare("SELECT
     AVG_COST
 FROM
     custaudit.complaint_detail cd
-    LEFT JOIN printvis.tsm t ON t.tsm_num = IFNULL(cd.EOLLOOSE_TSM, cd.EOLCASE_TSM)
+    $complaint_tsm_joins
+    LEFT JOIN printvis.tsm eol_tsm ON eol_tsm.tsm_num = IFNULL(cd.EOLLOOSE_TSM, cd.EOLCASE_TSM)
     LEFT JOIN nahsi.items on cd.PICK_WHSE = item_whse and cd.ITEMCODE = item
     LEFT JOIN nahsi.locations on cd.PICK_WHSE = loc_whse and cd.PICK_LOCATION = location
     LEFT JOIN custaudit.salesplan on cd.SHIPTONUM = SHIPTO

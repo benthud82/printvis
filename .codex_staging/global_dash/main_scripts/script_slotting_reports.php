@@ -39,29 +39,29 @@
             $('head').append(
                 '<style id="shortsExpeditorManagerStyles">' +
                 '.shorts-expeditor-panel-open{overflow:hidden;}' +
-                '#shortsExpeditorManager{position:fixed;top:0;right:0;bottom:0;left:0;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,0.24);z-index:2050;}' +
+                '#shortsExpeditorManager{position:fixed;top:0;right:0;bottom:0;left:0;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(33,37,41,0.18);z-index:2050;}' +
                 '#shortsExpeditorManager.is-open{display:flex;}' +
-                '#shortsExpeditorManager .shorts-expeditor-panel{width:100%;max-width:860px;max-height:86vh;display:flex;flex-direction:column;overflow:hidden;border-radius:24px;border:1px solid rgba(148,163,184,0.30);background:linear-gradient(180deg,#fffdf7 0%,#ffffff 44%,#f8fafc 100%);box-shadow:0 28px 80px rgba(15,23,42,0.24);}' +
-                '#shortsExpeditorManager .shorts-expeditor-panel-head{padding:22px 26px 18px 26px;border-bottom:1px solid rgba(226,232,240,0.95);background:linear-gradient(135deg,#f97316 0%,#fb923c 45%,#facc15 100%);color:#111827;}' +
-                '#shortsExpeditorManager .shorts-expeditor-panel-title{margin:0;font-size:1.55rem;font-weight:700;letter-spacing:0.01em;}' +
-                '#shortsExpeditorManager .shorts-expeditor-panel-subtitle{margin-top:6px;font-size:0.95rem;max-width:560px;color:rgba(17,24,39,0.80);}' +
-                '#shortsExpeditorManager .shorts-expeditor-panel-badge{display:inline-flex;align-items:center;justify-content:center;min-width:42px;padding:7px 12px;border-radius:999px;background:rgba(17,24,39,0.12);font-size:0.95rem;font-weight:700;}' +
-                '#shortsExpeditorManager .shorts-expeditor-panel-close{border:0;background:rgba(255,255,255,0.72);color:#111827;border-radius:999px;width:38px;height:38px;font-size:1.1rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(15,23,42,0.12);}' +
-                '#shortsExpeditorManager .shorts-expeditor-panel-close:hover{background:#ffffff;}' +
-                '#shortsExpeditorManager .shorts-expeditor-panel-body{padding:24px 26px 26px 26px;overflow:auto;background:linear-gradient(180deg,rgba(255,255,255,0.96) 0%,rgba(248,250,252,0.96) 100%);}' +
+                '#shortsExpeditorManager .shorts-expeditor-panel{width:100%;max-width:860px;max-height:86vh;display:flex;flex-direction:column;overflow:hidden;border-radius:10px;border:1px solid #d6dde5;background:#ffffff;box-shadow:0 18px 48px rgba(0,0,0,0.16);}' +
+                '#shortsExpeditorManager .shorts-expeditor-panel-head{padding:18px 22px 16px 22px;border-bottom:1px solid #dde4eb;background:linear-gradient(180deg,#f8fafc 0%,#eef3f7 100%);box-shadow:inset 4px 0 0 #007bff;color:#2f3c4d;}' +
+                '#shortsExpeditorManager .shorts-expeditor-panel-title{margin:0;font-size:1.35rem;font-weight:700;letter-spacing:0.01em;}' +
+                '#shortsExpeditorManager .shorts-expeditor-panel-subtitle{margin-top:5px;font-size:0.93rem;max-width:560px;color:#617181;}' +
+                '#shortsExpeditorManager .shorts-expeditor-panel-badge{display:inline-flex;align-items:center;justify-content:center;min-width:42px;padding:7px 12px;border-radius:999px;background:#e9eff5;color:#34495e;font-size:0.92rem;font-weight:700;border:1px solid #d7e0e8;}' +
+                '#shortsExpeditorManager .shorts-expeditor-panel-close{border:1px solid #cfd7df;background:#ffffff;color:#495057;border-radius:999px;width:38px;height:38px;font-size:1.05rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;box-shadow:none;}' +
+                '#shortsExpeditorManager .shorts-expeditor-panel-close:hover{background:#f5f7fa;border-color:#bfc9d4;}' +
+                '#shortsExpeditorManager .shorts-expeditor-panel-body{padding:22px;overflow:auto;background:#f7f9fb;}' +
                 '#shortsExpeditorManager .shorts-expeditor-manager-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:18px;}' +
-                '#shortsExpeditorManager .shorts-expeditor-manager-input{flex:1 1 260px;min-width:220px;height:44px;border:1px solid #d5dbe3;border-radius:14px;padding:0 14px;font-size:1rem;box-shadow:inset 0 1px 2px rgba(15,23,42,0.05);}' +
-                '#shortsExpeditorManager .shorts-expeditor-manager-input:focus{border-color:#f97316;box-shadow:0 0 0 3px rgba(249,115,22,0.16);outline:none;}' +
+                '#shortsExpeditorManager .shorts-expeditor-manager-input{flex:1 1 260px;min-width:220px;height:42px;border:1px solid #ced4da;border-radius:6px;padding:0 12px;font-size:0.98rem;background:#ffffff;box-shadow:none;}' +
+                '#shortsExpeditorManager .shorts-expeditor-manager-input:focus{border-color:#80bdff;box-shadow:0 0 0 0.2rem rgba(0,123,255,0.14);outline:none;}' +
                 '#shortsExpeditorManager .shorts-expeditor-manager-actions{display:flex;flex-wrap:wrap;gap:10px;}' +
                 '#shortsExpeditorManager .shorts-expeditor-manager-list{display:flex;flex-direction:column;gap:12px;}' +
-                '#shortsExpeditorManager .shorts-expeditor-manager-item{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:14px;padding:16px 18px;border:1px solid rgba(226,232,240,0.92);border-radius:18px;background:#ffffff;box-shadow:0 12px 32px rgba(15,23,42,0.06);}' +
-                '#shortsExpeditorManager .shorts-expeditor-manager-item:hover{transform:translateY(-1px);box-shadow:0 16px 32px rgba(15,23,42,0.08);}' +
-                '#shortsExpeditorManager .shorts-expeditor-manager-loc{font-size:1.15rem;font-weight:700;color:#111827;letter-spacing:0.03em;}' +
-                '#shortsExpeditorManager .shorts-expeditor-manager-meta{margin-top:4px;font-size:0.9rem;color:#64748b;}' +
+                '#shortsExpeditorManager .shorts-expeditor-manager-item{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:14px;padding:15px 16px;border:1px solid #e0e6ec;border-radius:8px;background:#ffffff;box-shadow:none;}' +
+                '#shortsExpeditorManager .shorts-expeditor-manager-item:hover{background:#fdfefe;border-color:#d2dbe4;}' +
+                '#shortsExpeditorManager .shorts-expeditor-manager-loc{font-size:1.08rem;font-weight:700;color:#2c3e50;letter-spacing:0.02em;}' +
+                '#shortsExpeditorManager .shorts-expeditor-manager-meta{margin-top:4px;font-size:0.89rem;color:#6c757d;}' +
                 '#shortsExpeditorManager .shorts-expeditor-manager-row-actions{display:flex;flex-wrap:wrap;gap:8px;}' +
-                '#shortsExpeditorManager .shorts-expeditor-manager-empty{display:none;padding:30px 20px;border:1px dashed #cbd5e1;border-radius:18px;background:rgba(255,255,255,0.72);text-align:center;color:#64748b;font-size:0.98rem;}' +
-                '#shortsExpeditorManager .shorts-expeditor-manager-loading{display:none;padding:22px 10px;color:#64748b;font-weight:600;text-align:center;}' +
-                '#shortsExpeditorManager .shorts-expeditor-manager-footer{margin-top:18px;font-size:0.88rem;color:#64748b;}' +
+                '#shortsExpeditorManager .shorts-expeditor-manager-empty{display:none;padding:28px 20px;border:1px dashed #c9d2db;border-radius:8px;background:#ffffff;text-align:center;color:#6c757d;font-size:0.96rem;}' +
+                '#shortsExpeditorManager .shorts-expeditor-manager-loading{display:none;padding:22px 10px;color:#6c757d;font-weight:600;text-align:center;}' +
+                '#shortsExpeditorManager .shorts-expeditor-manager-footer{margin-top:18px;font-size:0.87rem;color:#6c757d;}' +
                 '@media (max-width: 767px){#shortsExpeditorManager{padding:14px;}#shortsExpeditorManager .shorts-expeditor-panel-head{padding:18px 18px 16px 18px;}#shortsExpeditorManager .shorts-expeditor-panel-body{padding:18px;}#shortsExpeditorManager .shorts-expeditor-manager-item{padding:14px;}#shortsExpeditorManager .shorts-expeditor-manager-row-actions{width:100%;}#shortsExpeditorManager .shorts-expeditor-manager-row-actions .btn{flex:1 1 0;}}' +
                 '</style>'
             );
@@ -78,7 +78,7 @@
                         '<div class="d-flex justify-content-between align-items-start flex-wrap" style="gap:12px;">' +
                             '<div>' +
                                 '<h3 id="shortsExpeditorManagerTitle" class="shorts-expeditor-panel-title">Omitted Locations</h3>' +
-                                '<div class="shorts-expeditor-panel-subtitle">Review the 1-hour exclusions, add a location manually, or add one back without risking the black-screen Bootstrap backdrop issue.</div>' +
+                                '<div class="shorts-expeditor-panel-subtitle">Review the 1-hour exclusions, add a location manually, or restore one without leaving the report.</div>' +
                             '</div>' +
                             '<div class="d-flex align-items-center" style="gap:10px;">' +
                                 '<span id="shortsExpeditorManagerCount" class="shorts-expeditor-panel-badge">0</span>' +
@@ -93,7 +93,7 @@
                         '<div class="shorts-expeditor-manager-toolbar">' +
                             '<input type="text" id="shortsExpeditorNewLoc" class="shorts-expeditor-manager-input" maxlength="20" placeholder="Enter a location to omit for 1 hour">' +
                             '<div class="shorts-expeditor-manager-actions">' +
-                                '<button type="button" class="btn btn-warning" id="shortsExpeditorAddLoc"><i class="fa fa-ban" style="margin-right:6px;"></i>Omit 1 Hr</button>' +
+                                '<button type="button" class="btn btn-primary" id="shortsExpeditorAddLoc"><i class="fa fa-ban" style="margin-right:6px;"></i>Omit 1 Hr</button>' +
                                 '<button type="button" class="btn btn-outline-secondary" id="shortsExpeditorRefreshList"><i class="fa fa-refresh" style="margin-right:6px;"></i>Refresh</button>' +
                                 '<button type="button" class="btn btn-outline-danger" id="shortsExpeditorClearAll"><i class="fa fa-eraser" style="margin-right:6px;"></i>Clear All</button>' +
                             '</div>' +
@@ -248,6 +248,24 @@
         }
     }
 
+    function _shorts_expeditor_sort_old_first() {
+        if (typeof oTable4 === 'undefined' || !$.fn.DataTable.isDataTable('#dt_reports')) {
+            return;
+        }
+
+        oTable4.order([[5, 'asc'], [9, 'desc']]).draw();
+    }
+
+    function _shorts_expeditor_sort_default() {
+        if (typeof oTable4 === 'undefined' || !$.fn.DataTable.isDataTable('#dt_reports')) {
+            return;
+        }
+
+        if (window.shortsExpeditorDefaultOrder) {
+            oTable4.order(window.shortsExpeditorDefaultOrder).draw();
+        }
+    }
+
     function _shorts_expeditor_manage_omitted(action, loc, successMessage) {
         var requestData = { action: action };
         if (loc) {
@@ -389,6 +407,9 @@
             sort_col = 0;
             sort_dir = 'asc';
         }
+        if (report_id === 'shorts_expeditor') {
+            window.shortsExpeditorDefaultOrder = [[sort_col, sort_dir]];
+        }
         //debugger;
         $.each(col_primkey, function (index, value) {
             val_col_primkey = value.primkey;
@@ -470,11 +491,11 @@
                         }
                     }
 
-                    // Visual count badges on Box Hold Count (col 6), Shorts Count (col 8), Total (col 9)
-                    var holdVal  = parseInt(aData[6]) || 0;
+                    // Reverse-fill Box Hold Lines (col 7), Shorts Count (col 8), and Total (col 9)
+                    var lineVal  = parseInt(aData[7]) || 0;
                     var shortVal = parseInt(aData[8]) || 0;
-                    if (holdVal > 0) {
-                        $('td:eq(6)', nRow).html('<span class="badge badge-pill" style="background-color:#6f42c1;color:#fff;font-size:1em;padding:5px 9px;">' + holdVal + '</span>');
+                    if (lineVal > 0) {
+                        $('td:eq(7)', nRow).html('<span class="badge badge-pill" style="background-color:#6f42c1;color:#fff;font-size:1em;padding:5px 9px;">' + lineVal + '</span>');
                     }
                     if (shortVal > 0) {
                         $('td:eq(8)', nRow).html('<span class="badge badge-pill badge-danger" style="font-size:1em;padding:5px 9px;">' + shortVal + '</span>');
@@ -954,6 +975,16 @@
         _shorts_expeditor_open_omitted_panel();
     });
 
+    $(document).on('click', '#shortsExpeditorSortOldBtn', function (e) {
+        e.preventDefault();
+        _shorts_expeditor_sort_old_first();
+    });
+
+    $(document).on('click', '#shortsExpeditorSortDefaultBtn', function (e) {
+        e.preventDefault();
+        _shorts_expeditor_sort_default();
+    });
+
     $(document).on('click', '[data-close-shortsexp-manager="1"]', function (e) {
         e.preventDefault();
         _shorts_expeditor_close_omitted_panel();
@@ -1055,10 +1086,18 @@
             '<small class="text-muted"><i class="fa fa-clock-o" style="margin-right:4px;"></i>' +
             'Auto-refreshes every 4 min &nbsp;|&nbsp; ' +
             '<i class="fa fa-times-circle text-danger"></i> = dismiss location for 1 hr</small>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:8px;">' +
+            '<button type="button" id="shortsExpeditorSortOldBtn" class="btn btn-outline-secondary btn-sm" style="border-radius:999px;padding:7px 14px;font-weight:700;">' +
+            '<i class="fa fa-clock-o" style="margin-right:6px;"></i>Old &gt; 2h First' +
+            '</button>' +
+            '<button type="button" id="shortsExpeditorSortDefaultBtn" class="btn btn-outline-secondary btn-sm" style="border-radius:999px;padding:7px 14px;font-weight:700;">' +
+            '<i class="fa fa-sort-amount-desc" style="margin-right:6px;"></i>Default Sort' +
+            '</button>' +
             '<button type="button" id="shortsExpeditorManageBtn" class="btn btn-light btn-sm" style="border:1px solid #d6dbe3;border-radius:999px;padding:7px 14px;font-weight:700;box-shadow:0 8px 20px rgba(15,23,42,0.08);">' +
             '<i class="fa fa-sliders" style="margin-right:6px;color:#495057;"></i>Manage Omitted ' +
             '<span id="shortsExpeditorOmittedCount" class="badge badge-pill badge-dark" style="margin-left:6px;">0</span>' +
             '</button>' +
+            '</div>' +
             '</div>' +
             '</div>';
 

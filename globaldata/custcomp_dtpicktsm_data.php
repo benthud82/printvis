@@ -2,6 +2,7 @@
 
 include_once '../sessioninclude.php';
 include '../../connections/conn_printvis.php';
+include 'custcomp_tsm_sql.php';
 if (isset($_SESSION['MYUSER'])) {
     $var_userid = $_SESSION['MYUSER'];
     $whssql = $conn1->prepare("SELECT prodvisdb_users_PRIMDC from printvis.prodvisdb_users WHERE prodvisdb_users_ID = '$var_userid'");
@@ -13,58 +14,29 @@ if (isset($_SESSION['MYUSER'])) {
 }
 $var_picktsm = strtoupper($_GET['picktsm']);
 $stardate = date('Y-m-d', strtotime("-90 days"));
-$itemsql = $conn1->prepare("SELECT 
-                                                            ITEMCODE,
-                                                            ORD_RETURNDATE,
-                                                            RETURNCODE,
-                                                            CONCAT(WCSNUM, '-', WONUM) AS WCSNUM,
-                                                            SHIPZONE,
-                                                            BOXSIZE,
-                                                            TRACERNUM,
-                                                            UPPER(CASE
-                                                                WHEN PICK_TSM IS NULL THEN CASEPICK_TSMNAME
-                                                                ELSE PICK_TSM
-                                                            END) AS PICK_TSM,
-                                                            UPPER(CASE
-                                                                WHEN PACK_TSMNAME IS NULL THEN CASEPICK_TSMNAME
-                                                                ELSE PACK_TSMNAME
-                                                            END) AS PACK_TSMNAME,
-                                                            PICK_LOCATION,
-                                                            CASE
-                                                                WHEN PICK_DATE IS NULL THEN CASEPICK_DATETIME
-                                                                ELSE PICK_DATE
-                                                            END AS PICK_DATE,
-                                                            CASE
-                                                                WHEN
-                                                                    (SELECT 
-                                                                            tsm_name
-                                                                        FROM
-                                                                            printvis.tsm
-                                                                        WHERE
-                                                                            tsm_num = CASE
-                                                                                WHEN EOLLOOSE_TSM IS NULL THEN EOLCASE_TSM
-                                                                                ELSE EOLLOOSE_TSM
-                                                                            END) IS NULL
-                                                                THEN
-                                                                    '-'
-                                                                ELSE (SELECT 
-                                                                        tsm_name
-                                                                    FROM
-                                                                        printvis.tsm
-                                                                    WHERE
-                                                                        tsm_num = CASE
-                                                                            WHEN EOLLOOSE_TSM IS NULL THEN EOLCASE_TSM
-                                                                            ELSE EOLLOOSE_TSM
-                                                                        END)
-                                                            END AS EOL_TSM,
-                                                            SEQNUM,
-                                                            DC_CODE
-                                                        FROM
-                                                            custaudit.complaint_detail
-                                                        WHERE
-                                                            ORD_RETURNDATE >= '$stardate'
-                                                                AND UPPER(PICK_TSM) = '$var_picktsm'
-                                                        ORDER BY ORD_RETURNDATE DESC");
+$itemsql = $conn1->prepare("SELECT
+    cd.ITEMCODE,
+    cd.ORD_RETURNDATE,
+    cd.RETURNCODE,
+    CONCAT(cd.WCSNUM, '-', cd.WONUM) AS WCSNUM,
+    cd.SHIPZONE,
+    cd.BOXSIZE,
+    cd.TRACERNUM,
+    $complaint_pick_tsm_sql AS PICK_TSM,
+    $complaint_pack_tsm_sql AS PACK_TSMNAME,
+    cd.PICK_LOCATION,
+    IFNULL(cd.PICK_DATE, cd.CASEPICK_DATETIME) AS PICK_DATE,
+    IFNULL(eol_tsm.tsm_name, '-') AS EOL_TSM,
+    cd.SEQNUM,
+    cd.DC_CODE
+FROM
+    custaudit.complaint_detail cd
+    $complaint_tsm_joins
+    LEFT JOIN printvis.tsm eol_tsm ON eol_tsm.tsm_num = IFNULL(cd.EOLLOOSE_TSM, cd.EOLCASE_TSM)
+WHERE
+    cd.ORD_RETURNDATE >= '$stardate'
+    AND $complaint_pick_tsm_sql = '$var_picktsm'
+ORDER BY cd.ORD_RETURNDATE DESC");
 $itemsql->execute();
 $item_array = $itemsql->fetchAll(pdo::FETCH_ASSOC);
 

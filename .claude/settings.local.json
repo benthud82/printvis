@@ -4,7 +4,12 @@
       "Read(//c/Users/Bentley.Hudson/xampp/htdocs/**)",
       "Bash(mysql -u root -e \"SELECT rep_id, rep_desc, rep_section, rep_whse, rep_build, rep_include, rep_order FROM nahsi.reports WHERE rep_section = ''slot'' ORDER BY rep_order LIMIT 20;\")",
       "Bash(mysql:*)",
-      "Bash(find C:/Users/Bentley.Hudson -maxdepth 3 -name CLAUDE.md -o -name .cursorrules -o -name *.mdc)"
+      "Bash(find C:/Users/Bentley.Hudson -maxdepth 3 -name CLAUDE.md -o -name .cursorrules -o -name *.mdc)",
+      "Bash(git:*)",
+      "Bash(find /c/Users/Bentley.Hudson/xampp/htdocs/nahsi -name *change* -o -name *changelog* -o -name *log*)",
+      "Bash(grep -rn functions*getDCOperatingHours C:UsersBentley.Hudsonxampphtdocs --include=*.php)",
+      "Bash(grep -n \"^$start_date\\\\|^$end_date\" \"C:\\\\Users\\\\Bentley.Hudson\\\\xampp\\\\htdocs\\\\global_dash\\\\ajax\\\\shorts_replen_analysis.php\")",
+      "Bash(grep -n \"$start_date\\\\s*=\" \"C:\\\\Users\\\\Bentley.Hudson\\\\xampp\\\\htdocs\\\\global_dash\\\\ajax\\\\shorts_replen_analysis.php\")"
     ]
   }
 }

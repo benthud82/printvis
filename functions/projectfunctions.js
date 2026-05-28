@@ -230,10 +230,12 @@ function _dt_date(clickedval) {
     if (clickedval == null) {
         var startdate = $('#startfiscal').val();
         var enddate = $('#endfiscal').val();
-        debugger;
-    } else {
+    } else if (typeof clickedval === 'object' && clickedval.startdate) {
         var startdate = clickedval.startdate;
         var enddate = clickedval.enddate;
+    } else {
+        var startdate = clickedval;
+        var enddate = clickedval;
     }
     oTable = $('#table_date').DataTable({
         dom: "<'row'<'col-sm-4 pull-left'l><'col-sm-4 text-center'B><'col-sm-4 pull-right'f>>" + "<'row'<'col-sm-12'tr>>" + "<'row'<'col-sm-4 pull-left'i><'col-sm-8 pull-right'p>>",
