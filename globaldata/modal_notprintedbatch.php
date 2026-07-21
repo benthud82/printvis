@@ -2,6 +2,7 @@
 include '../sessioninclude.php';
 include '../../CustomerAudit/connection/connection_details.php';
 include '../functions/functions_totetimes.php';
+include '../functions/casepick_metadata.php';
 
 $var_userid = $_SESSION['MYUSER'];
 $whssql = $conn1->prepare("SELECT prodvisdb_users_PRIMDC from printvis.prodvisdb_users WHERE prodvisdb_users_ID = '$var_userid'");
@@ -37,12 +38,12 @@ $totedata_modal = $totedata->fetchAll(pdo::FETCH_ASSOC);
         <div class='widget-content widget-table'  style="position: relative;">
             <div class='divtable'>
                 <div class='divtableheader'>
-                    <div class='divtabletitle width16_66' >Batch</div>
-                    <div class='divtabletitle width16_66' >Aisle</div>
-                    <div class='divtabletitle width16_66' >Lines</div>
-                    <div class='divtabletitle width16_66' >First Location</div>
-                    <div class='divtabletitle width16_66' >Last Location</div>
-                    <div class='divtabletitle width16_66' >Total Time</div>
+                    <div class='divtabletitle width16_66' >Batch <?php echo casepick_meta_icon('modal_notprinted_detail', 'eye', 'Show not printed modal verification details'); ?></div>
+                    <div class='divtabletitle width16_66' >Aisle <?php echo casepick_meta_icon('modal_notprinted_detail', 'eye', 'Show not printed modal verification details'); ?></div>
+                    <div class='divtabletitle width16_66' >Lines <?php echo casepick_meta_icon('modal_notprinted_detail', 'eye', 'Show not printed modal verification details'); ?></div>
+                    <div class='divtabletitle width16_66' >First Location <?php echo casepick_meta_icon('modal_notprinted_detail', 'eye', 'Show not printed modal verification details'); ?></div>
+                    <div class='divtabletitle width16_66' >Last Location <?php echo casepick_meta_icon('modal_notprinted_detail', 'eye', 'Show not printed modal verification details'); ?></div>
+                    <div class='divtabletitle width16_66' >Total Time <?php echo casepick_meta_icon('modal_notprinted_detail', 'eye', 'Show not printed modal verification details'); ?></div>
 
 
                 </div>

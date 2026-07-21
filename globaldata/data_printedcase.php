@@ -2,6 +2,7 @@
 include '../../CustomerAudit/connection/connection_details.php';
 include '../sessioninclude.php';
 include '../functions/functions_totetimes.php';
+include '../functions/casepick_metadata.php';
 if (isset($_SESSION['MYUSER'])) {
     $var_userid = $_SESSION['MYUSER'];
     $whssql = $conn1->prepare("SELECT prodvisdb_users_PRIMDC from printvis.prodvisdb_users WHERE prodvisdb_users_ID = '$var_userid'");
@@ -125,14 +126,14 @@ $printedtimebyequiparray = $printedtimebyequip->fetchAll(pdo::FETCH_ASSOC);
                         ?>
                         <i class = "widget-thumb-icon bg-blue fa  fa-clock-o  fa-3x "></i>
                         <div class = "widget-thumb-body">
-                            <span class = "widget-thumb-subtitle">Count of Reach Batches</span>
+                            <span class = "widget-thumb-subtitle">Count of Reach Batches <?php echo casepick_meta_icon('printed_equip_time', 'eye', 'Show printed reach count verification details'); ?></span>
                             <span class="widget-thumb-body-stat" ><?php echo intval($printedtimebyequiparray[$key]['EQUIPCOUNT']) ?> </span>
                         </div>
                     <?php } else { ?>
 
                         <i class = "widget-thumb-icon bg-blue fa  fa-clock-o  fa-3x "></i>
                         <div class = "widget-thumb-body">
-                            <span class = "widget-thumb-subtitle">Time Required for<strong> <?php echo $printedtimebyequiparray[$key]['casebatches_equipment'] ?></strong> </span>
+                            <span class = "widget-thumb-subtitle">Time Required for<strong> <?php echo $printedtimebyequiparray[$key]['casebatches_equipment'] ?></strong> <?php echo casepick_meta_icon('printed_equip_time', 'eye', 'Show printed equipment time verification details'); ?></span>
                             <span class="widget-thumb-body-stat" ><?php echo _convertToHoursMins($printedtimebyequiparray[$key]['casebatches_time_final']) ?> </span>
                         </div>
 
@@ -156,7 +157,7 @@ $printedtimebyequiparray = $printedtimebyequip->fetchAll(pdo::FETCH_ASSOC);
 
 
 <div id="container_deletebtn">
-    <button id="btn_delete_printed" class="btn btn-danger">Delete Selected Batches</button>
+    <button id="btn_delete_printed" class="btn btn-danger">Delete Selected Batches</button> <?php echo casepick_meta_icon('printed_delete', 'question', 'Show printed delete verification details'); ?>
 </div>
 
 
@@ -171,16 +172,16 @@ $printedtimebyequiparray = $printedtimebyequip->fetchAll(pdo::FETCH_ASSOC);
                 <div id="sticky-anchor"></div>
                 <div style="padding-top: 51px;"></div>
                 <div id="sticky" class='divtableheader' style="padding-top">
-                    <div class='divtabletitle width10' style="cursor: default">Delete?</div>
-                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="batch" data-sort="<?php echo $asc_desc ?>" data-toggle='tooltip' title='Click on batch pick detail' data-placement='top' data-container='body' >Batch</div>
-                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="equip" data-sort="<?php echo $asc_desc ?>" >Equipment Needed</div>
-                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="printdate" data-sort="<?php echo $asc_desc ?>" >Print Date</div>
-                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="lines" data-sort="<?php echo $asc_desc ?>" >Total Lines</div>
-                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="firstloc" data-sort="<?php echo $asc_desc ?>" >First Location</div>
-                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="lastloc" data-sort="<?php echo $asc_desc ?>" >Last Location</div>
-                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="comptime" data-sort="<?php echo $asc_desc ?>" >Projected Completion Time</div>
-                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="boxrel" data-sort="<?php echo $asc_desc ?>" >Boxes Released</div>
-                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="percrel" data-sort="<?php echo $asc_desc ?>" >Percent Released</div>
+                    <div class='divtabletitle width10' style="cursor: default">Delete? <?php echo casepick_meta_icon('printed_delete', 'question', 'Show printed delete verification details'); ?></div>
+                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="batch" data-sort="<?php echo $asc_desc ?>" data-toggle='tooltip' title='Click on batch pick detail' data-placement='top' data-container='body' >Batch <?php echo casepick_meta_icon('printed_batch', 'eye', 'Show printed batch verification details'); ?></div>
+                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="equip" data-sort="<?php echo $asc_desc ?>" >Equipment Needed <?php echo casepick_meta_icon('printed_equipment', 'eye', 'Show printed equipment verification details'); ?></div>
+                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="printdate" data-sort="<?php echo $asc_desc ?>" >Print Date <?php echo casepick_meta_icon('printed_printdate', 'eye', 'Show printed date verification details'); ?></div>
+                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="lines" data-sort="<?php echo $asc_desc ?>" >Total Lines <?php echo casepick_meta_icon('printed_lines', 'eye', 'Show printed line count verification details'); ?></div>
+                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="firstloc" data-sort="<?php echo $asc_desc ?>" >First Location <?php echo casepick_meta_icon('printed_firstloc', 'eye', 'Show first location verification details'); ?></div>
+                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="lastloc" data-sort="<?php echo $asc_desc ?>" >Last Location <?php echo casepick_meta_icon('printed_lastloc', 'eye', 'Show last location verification details'); ?></div>
+                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="comptime" data-sort="<?php echo $asc_desc ?>" >Projected Completion Time <?php echo casepick_meta_icon('printed_projected', 'eye', 'Show printed projected time verification details'); ?></div>
+                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="boxrel" data-sort="<?php echo $asc_desc ?>" >Boxes Released <?php echo casepick_meta_icon('printed_boxes', 'question', 'Show boxes released verification details'); ?></div>
+                    <div class='divtabletitle width10 click_sort ' data-pull="printed" name="percrel" data-sort="<?php echo $asc_desc ?>" >Percent Released <?php echo casepick_meta_icon('printed_percent', 'question', 'Show percent released verification details'); ?></div>
                 </div>
                 <?php
                 foreach ($casesprintedarray as $key => $value) {

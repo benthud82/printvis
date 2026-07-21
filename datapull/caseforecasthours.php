@@ -27,6 +27,16 @@ $whsearray = array(7, 3.1, 3.2, 6, 9,2);
 
 //$today = date('Y-m-d') ;
 $today = date('Y-m-d');
+if (PHP_SAPI === 'cli' && isset($argv)) {
+    foreach ($argv as $arg) {
+        if (strpos($arg, '--date=') === 0) {
+            $cli_date = substr($arg, 7);
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $cli_date)) {
+                $today = $cli_date;
+            }
+        }
+    }
+}
 
 $turninches = intval(120);
 

@@ -1,6 +1,7 @@
 <?php
 include '../../connections/conn_printvis.php';
 include_once '../sessioninclude.php';
+include '../functions/casepick_metadata.php';
 
 if (isset($_SESSION['MYUSER'])) {
     $var_userid = $_SESSION['MYUSER'];
@@ -165,24 +166,24 @@ if ($voladjusthoursneeded == $forstat_hoursremain) {
     <div class="row">
         <div class="col-md-6">
             <blockquote>
-                <p> <?php echo "Today's available hours are $forstat_hoursremain on a predicted forecast of $forestat_forecasthoursneeded hours." ?> </p>
+                <p> <?php echo "Today's available hours are $forstat_hoursremain on a predicted forecast of $forestat_forecasthoursneeded hours." ?> <?php echo casepick_meta_icon('forecast_available', 'eye', 'Show available hours and forecast verification details'); ?></p>
             </blockquote>
         </div>
         <div class="col-md-6">
             <blockquote>
-                <p> <?php echo "Based off today's volume already received, $trendstatement" ?> </p>
+                <p> <?php echo "Based off today's volume already received, $trendstatement" ?> <?php echo casepick_meta_icon('forecast_trend', 'eye', 'Show trend verification details'); ?></p>
             </blockquote>
         </div>
     </div>
     <div class="row">
         <div class="col-md-6">
             <blockquote>
-                <p> <?php echo "Based off today's forecast, $forecasttoavail" ?> </p>
+                <p> <?php echo "Based off today's forecast, $forecasttoavail" ?> <?php echo casepick_meta_icon('forecast_capacity', 'question', 'Show forecast capacity verification details'); ?></p>
             </blockquote>
         </div>
         <div class="col-md-6">
             <blockquote>
-                <p> <?php echo "Taking today's volume adjust forecast into account, $forecasttoavail_voladjust" ?> </p>
+                <p> <?php echo "Taking today's volume adjust forecast into account, $forecasttoavail_voladjust" ?> <?php echo casepick_meta_icon('forecast_adjusted', 'eye', 'Show volume adjusted forecast verification details'); ?></p>
             </blockquote>
         </div>
     </div>

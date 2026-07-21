@@ -11,6 +11,7 @@ include '../../connections/conn_printvis.php';
 ini_set('max_execution_time', 99999);
 ini_set('memory_limit', '-1');
 include '../functions/functions_totetimes.php';
+include __DIR__ . '/../functions/functions_active_carts.php';
 include '../../globalincludes/whse_build_array.php';
 
 $today = date('Y-m-d');
@@ -54,9 +55,8 @@ if ($dayofweek == 1) {
     $yesterday = date('Y-m-d', strtotime("-1 day"));
 }
 $yestJdate = _gregdatetoyyddd($yesterday);
-$yesterdaytime = ('17:20:59');
 $todaydatetime = date('Y-m-d H:i:s');
-$printcutoff = date('Y-m-d H:i:s', strtotime("$yesterday $yesterdaytime"));
+$printcutoff = printvis_current_print_cutoff($conn1);
 
 $sqldelete2 = "DELETE from  printvis.looselines_batchtime WHERE date(batchtime_datetimeadded) < '$yesterday'";
 $querydelete2 = $conn1->prepare($sqldelete2);
@@ -70,9 +70,13 @@ $sqldelete3 = "DELETE from  printvis.voice_batchespicked WHERE date(voice_startd
 $querydelete3 = $conn1->prepare($sqldelete3);
 $querydelete3->execute();
 
-$sqldelete4 = "DELETE from  printvis.voicepicks WHERE date(DateTimeFirstPick) <= '$yesterday'";
-$querydelete4 = $conn1->prepare($sqldelete4);
-$querydelete4->execute();
+$voicePicksAvailable = printvis_table_exists($conn1, 'voicepicks');
+$voicePicksHistAvailable = printvis_table_exists($conn1, 'voicepicks_hist');
+if ($voicePicksAvailable) {
+    $sqldelete4 = "DELETE from printvis.voicepicks WHERE date(DateTimeFirstPick) <= '$yesterday'";
+    $querydelete4 = $conn1->prepare($sqldelete4);
+    $querydelete4->execute();
+}
 
 //column listings
 $col_loosetemp = 'temploose_whse, temploose_wcs, temploose_cart, temploose_loc, temploose_units, temploose_wcard, temploose_loctype, temploose_locjoin, temploose_picktype, temploose_predshort, temploose_printdatetime, temploose_recdatetime, temploose_shipzone,temploose_colg';
@@ -97,9 +101,11 @@ foreach ($whsearray as $whsesel) {
     include '../timezoneset.php';
     $maxret = 1;
     $dbh = false;
-    //if no connection break and continue.  This is just for testing
-
     include '../../globalincludes/voice_' . $whsesel . '.php';
+    $voiceConnectionAvailable = $dbh instanceof PDO;
+    if (!$voiceConnectionAvailable) {
+        error_log("Lucas voice connection unavailable for warehouse $whsesel; continuing non-voice refresh steps.");
+    }
 
     $todaydatetime = date('Y-m-d H:i:s');
     $sqldelete1 = "DELETE from  printvis.temp_looselines WHERE temploose_whse = $whsesel ";
@@ -666,39 +672,52 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
                                                                     batchtime_time_totaltime=values(batchtime_time_totaltime)");
     $sql_looselines_batchtimehist->execute();
 
-    switch ($whsesel) {
-        case 99:
-            //pull in batches that have started picking to clean up display
-            $cartspicked = $dbh->prepare("SELECT
-                                            [Warehouse]
-                                            ,[Batch_Num]
-                                            ,[DateTimeFirstPick]
-                                            ,[ReserveUserID]
-                                            ,[CartConfigTemp]
-                                            ,[CartShelves]
-                                        FROM [HenrySchein].[dbo].[Batch]
-                                        WHERE [DATECREATED] >= '$printcutoff'");
+    $cartspicked_array = array();
+    if ($voiceConnectionAvailable) {
+        try {
+            switch ($whsesel) {
+                case 11:
+                case 99:
+                    // Legacy Lucas schema: only return batches with a real picker assignment.
+                    $cartspicked = $dbh->prepare("SELECT
+                                                    [Warehouse],
+                                                    [Batch_Num],
+                                                    [DateTimeFirstPick],
+                                                    [ReserveUserID],
+                                                    [CartConfigTemp],
+                                                    [CartShelves]
+                                                FROM [HenrySchein].[dbo].[Batch]
+                                                WHERE [DATECREATED] >= '$printcutoff'
+                                                  AND [ReserveUserID] IS NOT NULL");
+                    break;
+                default:
+                    // Local Picking Supervisor: activation is a TaskState event, not task creation.
+                    $cartspicked = $dbh->prepare("SELECT
+                                                   CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') AS INT) AS Warehouse,
+                                                   JSON_VALUE(T.UserDefinedData, '$.BatchNum') AS Batch_Num,
+                                                   MIN(TS.LastEventOccurredDateTimeLocal) AS DateTimeFirstPick,
+                                                   MAX(TS.LastPickedUserLogin) AS ReserveUserID,
+                                                   JSON_VALUE(T.UserDefinedData, '$.CartFlag') AS CartConfigTemp,
+                                                   JSON_VALUE(T.UserDefinedData, '$.CartShelves') AS CartShelves
+                                            FROM [Local_PickingSupervisor].[dbo].[Task] T (NOLOCK)
+                                            INNER JOIN [Local_PickingSupervisor].[dbo].[TaskState] TS (NOLOCK)
+                                                ON T.TaskID = TS.TaskID
+                                            WHERE CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') AS INT) = $whsesel
+                                              AND JSON_VALUE(T.UserDefinedData, '$.BatchNum') IS NOT NULL
+                                              AND TS.LastPickedUserLogin IS NOT NULL
+                                              AND TS.LastEventOccurredDateTimeLocal >= '$printcutoff'
+                                            GROUP BY
+                                                CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') AS INT),
+                                                JSON_VALUE(T.UserDefinedData, '$.BatchNum'),
+                                                JSON_VALUE(T.UserDefinedData, '$.CartFlag'),
+                                                JSON_VALUE(T.UserDefinedData, '$.CartShelves')");
+                    break;
+            }
             $cartspicked->execute();
-            $cartspicked_array = $cartspicked->fetchAll(pdo::FETCH_ASSOC);
-            break;
-        default:
-
-            //pull in batches that have started picking to clean up display
-            $cartspicked = $dbh->prepare("SELECT DISTINCT
-                                           CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT) as Warehouse,
-                                               JSON_VALUE(T.UserDefinedData, '$.BatchNum') as Batch_Num,
-                                               min([LastEventOccurredDateTimeLocal]) as DateTimeFirstPick,
-                                               LastPickedUserLogin as ReserveUserID,
-                                               JSON_VALUE(T.UserDefinedData, '$.CartFlag') as CartConfigTemp,
-                                               JSON_VALUE(T.UserDefinedData, '$.CartShelves') as CartShelves
-                                    FROM [Local_PickingSupervisor].[dbo].[Task] T (NOLOCK) INNER JOIN  [Local_PickingSupervisor].[dbo].[TaskState] TS (NOLOCK) on T.TaskID = TS.TaskID
-                               --     WHERE CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT) = $whsesel
-                                    GROUP BY  CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') as INT), JSON_VALUE(T.UserDefinedData, '$.BatchNum'), LastPickedUserLogin, JSON_VALUE(T.UserDefinedData, '$.CartFlag'), JSON_VALUE(T.UserDefinedData, '$.CartShelves')
-                                    HAVING  min([LastEventOccurredDateTimeLocal]) >= '$printcutoff'");
-            $cartspicked->execute();
-            $cartspicked_array = $cartspicked->fetchAll(pdo::FETCH_ASSOC);
-
-            break;
+            $cartspicked_array = $cartspicked->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Throwable $voiceError) {
+            error_log("Lucas batch-start query failed for warehouse $whsesel: " . $voiceError->getMessage());
+        }
     }
 
 
@@ -712,13 +731,16 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
     $cartsdata = array();
     foreach ($cartspicked_array as $key => $value) {
         $batch = $cartspicked_array[$key]['Batch_Num'];
+        if (is_null($batch) || $batch === '') {
+            continue;
+        }
         $datetime = $cartspicked_array[$key]['DateTimeFirstPick'];
         if (is_null($datetime)) {
             $datetime = '1900-01-01 23:59:59';
         }
         $userid = $cartspicked_array[$key]['ReserveUserID'];
-        if (is_null($userid)) {
-            $userid = 0;
+        if (is_null($userid) || intval($userid) <= 0) {
+            continue;
         }
         $cartconfig = $cartspicked_array[$key]['CartConfigTemp'];
         if (is_null($cartconfig)) {
@@ -734,13 +756,19 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
     if (!empty($values_cart)) {
         $sql = "INSERT INTO printvis.voice_batchespicked ($col_cartspicked) VALUES $values_cart ON DUPLICATE KEY UPDATE "
                 . "voice_startdatetime=values(voice_startdatetime),"
-                . "voice_userid=values(voice_userid)";
+                . "voice_userid=values(voice_userid),"
+                . "voice_cartconfig=values(voice_cartconfig),"
+                . "voice_cartshelves=values(voice_cartshelves)";
         $query = $conn1->prepare($sql);
         $query->execute();
     }
 
-    switch ($whsesel) {
-        case 99:
+    $linespicked_array = array();
+    if ($voiceConnectionAvailable && $voicePicksAvailable) {
+        try {
+            switch ($whsesel) {
+                case 11:
+                case 99:
             //insert voice picked info into printvis.voicepicks table
             $linespicked = $dbh->prepare(" SELECT 
     [Pick].[Pick_ID],
@@ -787,7 +815,8 @@ JOIN [HenrySchein].[dbo].[Tote] ON [Tote].[Batch_ID] = [Batch].[Batch_ID]
 JOIN [JenX].[dbo].[Users] ON [Pick].[ReserveUserID] = [Users].[UserName]
 WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID]
     AND [Pick].[Batch_ID] = [Tote].[Batch_ID]
-    AND [Pick].[DateTimeFirstPick] >= '$today $printhourmin_colon';");
+    AND [Pick].[DateTimeFirstPick] >= '$printcutoff'
+    AND [Pick].[ReserveUserID] IS NOT NULL;");
             $linespicked->execute();
             $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
          
@@ -807,8 +836,8 @@ WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID]
                                                             SUBSTRING( T.[LocationString] ,7,1) as Pos,
                                                             JSON_VALUE(T.UserDefinedData, '$.PickType') as PickType,
                                                             case when JSON_VALUE(T.UserDefinedData, '$.LotNum') is null then 0 else 1 end as LotReq,
-                                                            [QuantityOrdered] as QtyOrder,
-                                                            [QuantityPicked] as QtyPick,
+                                                            TS.[QuantityOrdered] as QtyOrder,
+                                                            TS.[QuantityPicked] as QtyPick,
                                                             JSON_VALUE(T.UserDefinedData, '$.PackageUnit') as PackageUnit,
                                                             JSON_VALUE(T.UserDefinedData, '$.DrugFlag') as Drug,
                                                             JSON_VALUE(T.UserDefinedData, '$.IceFlag') as Ice,
@@ -820,9 +849,9 @@ WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID]
                                                             case when JSON_VALUE(T.UserDefinedData, '$.ExpirationDate') is null then 0 else 1 end as ExpyChkReq,
                                                             T.[ProductCode] as ItemCode,
                                                             JSON_VALUE(T.UserDefinedData, '$.NDCNum') as NDC_Num,
-                                                            [Weight] as EachWeight,
-                                                            [LastEventOccurredDateTimeLocal] as DateTimeFirstPick,
-                                                            [LastEventOccurredDateTimeLocal] as DATECREATED,
+                                                            T.[Weight] as EachWeight,
+                                                            TS.[LastEventOccurredDateTimeLocal] as DateTimeFirstPick,
+                                                            T.[CreatedDateTime] as DATECREATED,
                                                             JSON_VALUE(T.UserDefinedData, '$.BOFlag') as BO,
                                                             IIF(PE.ExceptionEventId = 3, 1, 0) as PutAwayFlag,
                                                             SUBSTRING( T.[LocationString] ,1,6) as LOCJOIN,
@@ -831,15 +860,23 @@ WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID]
                                                             JSON_VALUE(T.UserDefinedData, '$.BoxNumber') as BOX_NUM,
                                                             JSON_VALUE(T.UserDefinedData, '$.ToteLocation') as TOTELOCATION,
                                                             JSON_VALUE(T.UserDefinedData, '$.ShipZone') as SHIP_ZONE,
-                                                            [LastPickedUserDisplayName] as UserDescription,
-                                                            [LastPickedUserLogin] as ReserveUSerID
+                                                            TS.[LastPickedUserDisplayName] as UserDescription,
+                                                            TS.[LastPickedUserLogin] as ReserveUSerID
                                                   FROM [Local_PickingSupervisor].[dbo].[Task] T (NOLOCK) INNER JOIN  [Local_PickingSupervisor].[dbo].[TaskState] TS (NOLOCK) on T.TaskID = TS.TaskID
                                                   LEFT JOIN [Local_PickingSupervisor].[dbo].[PickingException] PE (NOLOCK) on PE.TaskNumber = T.TaskNumber
-                                                  WHERE  [CreatedDateTime]>= '$today $printhourmin_colon'");
+                                                  WHERE CAST(JSON_VALUE(T.UserDefinedData, '$.Warehouse') AS INT) = $whsesel
+                                                    AND JSON_VALUE(T.UserDefinedData, '$.BatchNum') IS NOT NULL
+                                                    AND TS.LastPickedUserLogin IS NOT NULL
+                                                    AND TS.LastEventOccurredDateTimeLocal >= '$printcutoff'");
             $linespicked->execute();
             $linespicked_array = $linespicked->fetchAll(pdo::FETCH_ASSOC);
 
             break;
+            }
+        } catch (Throwable $voiceError) {
+            $linespicked_array = array();
+            error_log("Lucas line-pick query failed for warehouse $whsesel: " . $voiceError->getMessage());
+        }
     }
 
 
@@ -848,10 +885,15 @@ WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID]
 
 
 
+    $pickdata = array();
+    $pickdata_hist = array();
     foreach ($linespicked_array as $key => $value) {
 
         $Pick_ID = $linespicked_array[$key]['Pick_ID'];
         $Batch_Num = $linespicked_array[$key]['Batch_Num'];
+        if (is_null($Pick_ID) || $Pick_ID === '' || is_null($Batch_Num) || $Batch_Num === '') {
+            continue;
+        }
         $Status = $linespicked_array[$key]['Status'];
         $Short_Status = $linespicked_array[$key]['Short_Status'];
         $Location = $linespicked_array[$key]['Location'];
@@ -897,102 +939,46 @@ WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID]
         $values_pick = implode(', ', $pickdata);
         $values_pick_hist = implode(', ', $pickdata_hist);
 
-        $sql = "INSERT IGNORE INTO printvis.voicepicks ($col_linespicked) VALUES $values_pick";
+        $sql = "INSERT INTO printvis.voicepicks ($col_linespicked) VALUES $values_pick
+                ON DUPLICATE KEY UPDATE
+                    Batch_Num=values(Batch_Num),
+                    Status=values(Status),
+                    Short_Status=values(Short_Status),
+                    Location=values(Location),
+                    QtyOrder=values(QtyOrder),
+                    QtyPick=values(QtyPick),
+                    PutAwayFlag=values(PutAwayFlag),
+                    DateTimeFirstPick=values(DateTimeFirstPick),
+                    UserDescription=values(UserDescription),
+                    ReserveUSerID=values(ReserveUSerID)";
         $query = $conn1->prepare($sql);
         $query->execute();
-        $sql2 = "INSERT IGNORE INTO printvis.voicepicks_hist ($col_linespicked_hist) VALUES $values_pick_hist";
-        $query2 = $conn1->prepare($sql2);
-        $query2->execute();
+        if ($voicePicksHistAvailable) {
+            $sql2 = "INSERT IGNORE INTO printvis.voicepicks_hist ($col_linespicked_hist) VALUES $values_pick_hist";
+            $query2 = $conn1->prepare($sql2);
+            $query2->execute();
+        }
     }
 } //end of whsarray loop 
-//Delete records from voicepicks table that are currently in packing.  This will increase speed of below queries as day progresses
-$sqldelete8 = "DELETE FROM printvis.voicepicks 
-                                WHERE
-                                    Batch_Num IN (SELECT DISTINCT
-                                        batch_start_batch
-                                    FROM
-                                        printvis.batch_start)";
-$querydelete8 = $conn1->prepare($sqldelete8);
-$querydelete8->execute();
+// Remove completed/pacing-area batches from the optional line-level cache.
+if ($voicePicksAvailable) {
+    $sqldelete8 = "DELETE FROM printvis.voicepicks
+        WHERE EXISTS (
+            SELECT 1
+            FROM printvis.batch_start P
+            WHERE P.batch_start_whse = printvis.voicepicks.Whse
+                AND P.batch_start_batch = printvis.voicepicks.Batch_Num
+        )";
+    $querydelete8 = $conn1->prepare($sqldelete8);
+    $querydelete8->execute();
+}
 
-//write for all DCs the current pick status of carts to looselines_cartsinprocess_temp
-//write to a temp table, do a left join on main table to delete carts no longer needed
-//do a left join on carts that are in the packing area and delete as no longer in picking if they are currenlty being packed.
-$sqldelete5 = "TRUNCATE printvis.looselines_cartsinprocess_temp";
-$querydelete5 = $conn1->prepare($sqldelete5);
-$querydelete5->execute();
-
-$sql_looselines_batchtimehist = $conn1->prepare("INSERT INTO printvis.looselines_cartsinprocess_temp
-                                                                                                (SELECT 
-                                                                                                    aisletime_whse,
-                                                                                                    aisletime_cart,
-                                                                                                    min(aisletime_shipzone) as SHIPZONE,
-                                                                                                    min(aisletime_datetimeadded) as DATE_ADDED,
-                                                                                                    min(aisletime_printdatetime) as DATE_PRINTDATE,
-                                                                                                    min(aisletime_recdatetime) as DATE_RECDATE,
-                                                                                                    @TOTALTIME:=(SELECT 
-                                                                                                            SUM(aisletime_time_pickline + aisletime_time_wcard + aisletime_time_fridge + aisletime_time_pullbin + aisletime_time_unit + aisletime_time_ladder + aisletime_time_putline + aisletime_time_putunit + aisletime_time_aisletravel)
-                                                                                                        FROM
-                                                                                                            printvis.looselines_aisletime C
-                                                                                                        WHERE
-                                                                                                            C.aisletime_whse = A.aisletime_whse
-                                                                                                                AND C.aisletime_cart = A.aisletime_cart) AS TOTALTIME,
-                                                                                                    @CURRENTAISLE:=(SELECT 
-                                                                                                            MAX(SUBSTR(Location, 1, 3))
-                                                                                                        FROM
-                                                                                                            printvis.voicepicks
-                                                                                                        WHERE
-                                                                                                            A.aisletime_whse = Whse
-                                                                                                                AND A.aisletime_cart = Batch_Num) AS CURRENTAISLE,
-                                                                                                    @PICKEDTIME:=(SELECT 
-                                                                                                            SUM(aisletime_time_pickline + aisletime_time_wcard + aisletime_time_fridge + aisletime_time_pullbin + aisletime_time_unit + aisletime_time_ladder + aisletime_time_putline + aisletime_time_putunit + aisletime_time_aisletravel)
-                                                                                                        FROM
-                                                                                                            printvis.looselines_aisletime B
-                                                                                                        WHERE
-                                                                                                            B.aisletime_whse = A.aisletime_whse
-                                                                                                                AND B.aisletime_cart = A.aisletime_cart
-                                                                                                                AND B.aisletime_aisle <= @CURRENTAISLE) AS PICKED_TIME,
-                                                                                                    @REMAININGTIME:=@TOTALTIME - @PICKEDTIME AS REMAININGTIME,
-                                                                                                    @ELAPSEDTIME:=(SELECT 
-                                                                                                            TIMESTAMPDIFF(MINUTE,
-                                                                                                                    MIN(DateTimeFirstPick),
-                                                                                                                    case when aisletime_whse = 3 then DATE_SUB(NOW(), INTERVAL 3 HOUR) when aisletime_whse = 7 then DATE_SUB(NOW(), INTERVAL 1 HOUR) else now() end)  AS ELAPSEDMIN
-                                                                                                        FROM
-                                                                                                            printvis.voicepicks D
-                                                                                                        WHERE
-                                                                                                            D.Whse = A.aisletime_whse
-                                                                                                                AND D.Batch_Num = A.aisletime_cart
-                                                                                                                AND DATE(DateTimeFirstPick) = CURDATE()) AS ELAPSEDTIME,
-                                                                                                    CASE
-                                                                                                        WHEN @ELAPSEDTIME + @REMAININGTIME - 2 > @TOTALTIME THEN 'LATE'
-                                                                                                        ELSE 'ONTIME'
-                                                                                                    END AS PICKSTATUS
-                                                                                                FROM
-                                                                                                    printvis.looselines_aisletime A
-                                                                                                GROUP BY aisletime_cart
-                                                                                                HAVING @REMAININGTIME > 0)");
-$sql_looselines_batchtimehist->execute();
-
-//Delete records no longer needed in looselines_cartsinprocess
-$sqldelete7 = "DELETE FROM printvis.looselines_cartsinprocess 
-                            WHERE
-                                cartpick_cart NOT IN (SELECT DISTINCT
-                                    cartpick_cart
-                                FROM
-                                    printvis.looselines_cartsinprocess_temp)";
-$querydelete7 = $conn1->prepare($sqldelete7);
-$querydelete7->execute();
-
-//insert new records into looselines_cartsinprocess on duplicate key update
-$sql_cartupdate = $conn1->prepare("INSERT INTO printvis.looselines_cartsinprocess 
-                                                                (SELECT * FROM printvis.looselines_cartsinprocess_temp) on duplicate key update 
-                                                                cartpick_shipzone=values(cartpick_shipzone),
-                                                                cartpick_currentaisle=values(cartpick_currentaisle),
-                                                                cartpick_picktime=values(cartpick_picktime),
-                                                                cartpick_remaintime=values(cartpick_remaintime),
-                                                                cartpick_elaptime=values(cartpick_elaptime),
-                                                                cartpick_status=values(cartpick_status)");
-$sql_cartupdate->execute();
+// Batch-level Lucas starts drive activation. Line picks only enrich progress.
+try {
+    printvis_refresh_active_carts($conn1, $printcutoff);
+} catch (Throwable $activeCartError) {
+    error_log('Active-cart refresh failed: ' . $activeCartError->getMessage());
+}
 
 //Cases manifested by batch
 $casesman = $connection->prepare("SELECT PBCART,PBPTJD, count(*) as BOX_COUNT, sum(case when PBRLJD > 0 then 1 else 0 end) as REL_COUNT

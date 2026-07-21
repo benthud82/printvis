@@ -2,6 +2,7 @@
 include '../../CustomerAudit/connection/connection_details.php';
 include '../sessioninclude.php';
 include '../functions/functions_totetimes.php';
+include '../functions/casepick_metadata.php';
 if (isset($_SESSION['MYUSER'])) {
     $var_userid = $_SESSION['MYUSER'];
     $whssql = $conn1->prepare("SELECT prodvisdb_users_PRIMDC from printvis.prodvisdb_users WHERE prodvisdb_users_ID = '$var_userid'");
@@ -92,7 +93,7 @@ if ($timenow > $printcutoff) {
                     <div class="widget-thumb-wrap">
                         <i class="widget-thumb-icon bg-blue fa  fa-clock-o  fa-3x "></i>
                         <div class="widget-thumb-body">
-                            <span class="widget-thumb-subtitle">Time Required for <?php echo $notprintedbyequiparray[$key]['casebatches_equipment'] ?> </span>
+                            <span class="widget-thumb-subtitle">Time Required for <?php echo $notprintedbyequiparray[$key]['casebatches_equipment'] ?> <?php echo casepick_meta_icon('notprinted_equip_time', 'eye', 'Show not printed equipment time verification details'); ?></span>
                             <span class="widget-thumb-body-stat" ><?php echo _convertToHoursMins($notprintedbyequiparray[$key]['FINALTIME']) ?> </span>
                         </div>
                     </div>
@@ -106,7 +107,7 @@ if ($timenow > $printcutoff) {
 
 
     <!--activate modal to change number of equipment operators-->
-    <div id="btn_equipmodal" class="btn btn-inverse">Modify Equipment Usage</div>
+    <div id="btn_equipmodal" class="btn btn-inverse">Modify Equipment Usage <?php echo casepick_meta_icon('equipment_usage', 'question', 'Show equipment usage verification details'); ?></div>
 
     <!--start of div table-->
     <div class="" id="divtable_notprinted" style="padding-bottom: 51px">
@@ -116,10 +117,10 @@ if ($timenow > $printcutoff) {
                     <div id="sticky-anchor"></div>
                     <div style="padding-top: 51px;"></div>
                     <div id="sticky" class='divtableheader' style="padding-top">
-                        <div class='divtabletitle width25 click_sort' data-pull="notprinted"  name="batch" data-sort="<?php echo $asc_desc ?>" >Batch</div>
-                        <div class='divtabletitle width25 click_sort' data-pull="notprinted"  name="equip" data-sort="<?php echo $asc_desc ?>" >Equipment Needed</div>
-                        <div class='divtabletitle width25 click_sort' data-pull="notprinted"  name="lines" data-sort="<?php echo $asc_desc ?>">Total Lines</div>
-                        <div class='divtabletitle width25 click_sort' data-pull="notprinted"  name="hours_projected" data-sort="<?php echo $asc_desc ?>" >Projected Completion Time</div>
+                        <div class='divtabletitle width25 click_sort' data-pull="notprinted"  name="batch" data-sort="<?php echo $asc_desc ?>" >Batch <?php echo casepick_meta_icon('notprinted_batch', 'eye', 'Show not printed batch verification details'); ?></div>
+                        <div class='divtabletitle width25 click_sort' data-pull="notprinted"  name="equip" data-sort="<?php echo $asc_desc ?>" >Equipment Needed <?php echo casepick_meta_icon('notprinted_equipment', 'eye', 'Show not printed equipment verification details'); ?></div>
+                        <div class='divtabletitle width25 click_sort' data-pull="notprinted"  name="lines" data-sort="<?php echo $asc_desc ?>">Total Lines <?php echo casepick_meta_icon('notprinted_lines', 'eye', 'Show not printed line count verification details'); ?></div>
+                        <div class='divtabletitle width25 click_sort' data-pull="notprinted"  name="hours_projected" data-sort="<?php echo $asc_desc ?>" >Projected Completion Time <?php echo casepick_meta_icon('notprinted_projected', 'eye', 'Show not printed projected time verification details'); ?></div>
                     </div>
     <?php
     foreach ($casesnotprintedarray as $key => $value) {

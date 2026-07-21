@@ -2,6 +2,7 @@
 include '../../CustomerAudit/connection/connection_details.php';
 include '../sessioninclude.php';
 include '../functions/functions_totetimes.php';
+include '../functions/casepick_metadata.php';
 
 if (isset($_SESSION['MYUSER'])) {
     $var_userid = $_SESSION['MYUSER'];
@@ -220,14 +221,14 @@ $timebyequiparray = $timebyequip->fetchAll(pdo::FETCH_ASSOC);
                         ?>
                         <i class = "widget-thumb-icon bg-blue fa  fa-clock-o  fa-3x "></i>
                         <div class = "widget-thumb-body">
-                            <span class = "widget-thumb-subtitle">Count of Reach Batches</span>
+                            <span class = "widget-thumb-subtitle">Count of Reach Batches <?php echo casepick_meta_icon('picking_equip_time', 'eye', 'Show picking reach count verification details'); ?></span>
                             <span class="widget-thumb-body-stat" ><?php echo intval($timebyequiparray[$key]['EQUIPCOUNT']) ?> </span>
                         </div>
                     <?php } else { ?>
 
                         <i class = "widget-thumb-icon bg-blue fa  fa-clock-o  fa-3x "></i>
                         <div class = "widget-thumb-body">
-                            <span class = "widget-thumb-subtitle">Time Required for<strong> <?php echo $timebyequiparray[$key]['casebatches_equipment'] ?></strong> </span>
+                            <span class = "widget-thumb-subtitle">Time Required for<strong> <?php echo $timebyequiparray[$key]['casebatches_equipment'] ?></strong> <?php echo casepick_meta_icon('picking_equip_time', 'eye', 'Show picking equipment time verification details'); ?></span>
                             <span class="widget-thumb-body-stat" ><?php echo _convertToHoursMins($timebyequiparray[$key]['EST_MIN_REMAINING']) ?> </span>
                         </div>
 
@@ -242,7 +243,7 @@ $timebyequiparray = $timebyequip->fetchAll(pdo::FETCH_ASSOC);
 </div>  
 
 <div id="container_deletebtn">
-    <button id="btn_delete_picking" class="btn btn-danger">Delete Selected Batches</button>
+    <button id="btn_delete_picking" class="btn btn-danger">Delete Selected Batches</button> <?php echo casepick_meta_icon('picking_delete', 'question', 'Show picking delete verification details'); ?>
 </div>
 
 
@@ -254,18 +255,18 @@ $timebyequiparray = $timebyequip->fetchAll(pdo::FETCH_ASSOC);
                 <div id="sticky-anchor"></div>
                 <div style="padding-top: 51px;"></div>
                 <div id="sticky" class='divtableheader' style="padding-top">
-                    <div class='divtabletitle width8_33' style="cursor: default">Delete?</div>
-                    <div class='divtabletitle width8_33 click_sort' data-pull="picking"  name="tsm" data-sort="<?php echo $asc_desc ?>">TSM#</div>
-                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="starttime" style="cursor: default" data-sort="<?php echo $asc_desc ?>">Start Time</div>
-                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="batch" data-sort="<?php echo $asc_desc ?>">Batch</div>
-                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="equip" data-sort="<?php echo $asc_desc ?>">Equipment Needed</div>
-                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="lines" data-sort="<?php echo $asc_desc ?>">Total Lines</div>
-                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="lunchorbreak" data-sort="<?php echo $asc_desc ?>">Lunch or Break?</div>
-                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="hours_projected" data-sort="<?php echo $asc_desc ?>">Projected Hours/Mins</div>
-                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="hours_elapsed" data-sort="<?php echo $asc_desc ?>">Hours/Mins Elapsed</div>
-                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="hours_remain" data-sort="<?php echo $asc_desc ?>">Estimated Hours/Mins Remaining</div>
-                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="boxesrel" data-sort="<?php echo $asc_desc ?>">Boxes Released</div>
-                    <div class='divtabletitle width8_33  click_sort' data-pull="picking" name="percrel" data-sort="<?php echo $asc_desc ?>">Percent Released</div>
+                    <div class='divtabletitle width8_33' style="cursor: default">Delete? <?php echo casepick_meta_icon('picking_delete', 'question', 'Show picking delete verification details'); ?></div>
+                    <div class='divtabletitle width8_33 click_sort' data-pull="picking"  name="tsm" data-sort="<?php echo $asc_desc ?>">TSM# <?php echo casepick_meta_icon('picking_tsm', 'question', 'Show TSM verification details'); ?></div>
+                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="starttime" style="cursor: default" data-sort="<?php echo $asc_desc ?>">Start Time <?php echo casepick_meta_icon('picking_starttime', 'question', 'Show start time verification details'); ?></div>
+                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="batch" data-sort="<?php echo $asc_desc ?>">Batch <?php echo casepick_meta_icon('picking_batch', 'eye', 'Show picking batch verification details'); ?></div>
+                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="equip" data-sort="<?php echo $asc_desc ?>">Equipment Needed <?php echo casepick_meta_icon('picking_equipment', 'eye', 'Show picking equipment verification details'); ?></div>
+                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="lines" data-sort="<?php echo $asc_desc ?>">Total Lines <?php echo casepick_meta_icon('picking_lines', 'eye', 'Show picking line count verification details'); ?></div>
+                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="lunchorbreak" data-sort="<?php echo $asc_desc ?>">Lunch or Break? <?php echo casepick_meta_icon('picking_break', 'question', 'Show lunch or break verification details'); ?></div>
+                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="hours_projected" data-sort="<?php echo $asc_desc ?>">Projected Hours/Mins <?php echo casepick_meta_icon('picking_projected', 'eye', 'Show projected picking time verification details'); ?></div>
+                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="hours_elapsed" data-sort="<?php echo $asc_desc ?>">Hours/Mins Elapsed <?php echo casepick_meta_icon('picking_elapsed', 'eye', 'Show elapsed time verification details'); ?></div>
+                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="hours_remain" data-sort="<?php echo $asc_desc ?>">Estimated Hours/Mins Remaining <?php echo casepick_meta_icon('picking_remaining', 'eye', 'Show remaining time verification details'); ?></div>
+                    <div class='divtabletitle width8_33 click_sort' data-pull="picking" name="boxesrel" data-sort="<?php echo $asc_desc ?>">Boxes Released <?php echo casepick_meta_icon('picking_boxes', 'question', 'Show picking boxes released verification details'); ?></div>
+                    <div class='divtabletitle width8_33  click_sort' data-pull="picking" name="percrel" data-sort="<?php echo $asc_desc ?>">Percent Released <?php echo casepick_meta_icon('picking_percent', 'question', 'Show picking percent released verification details'); ?></div>
                 </div>
                 <?php
                 foreach ($casespickingarray as $key => $value) {
