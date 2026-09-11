@@ -39,12 +39,12 @@ FROM
     custaudit.complaint_detail cd
     $complaint_tsm_joins
     LEFT JOIN printvis.tsm eol_tsm ON eol_tsm.tsm_num = IFNULL(cd.EOLLOOSE_TSM, cd.EOLCASE_TSM)
-    LEFT JOIN nahsi.items on cd.PICK_WHSE = item_whse and cd.ITEMCODE = item
-    LEFT JOIN nahsi.locations on cd.PICK_WHSE = loc_whse and cd.PICK_LOCATION = location
+    LEFT JOIN nahsi.items on COALESCE(cd.PICK_WHSE, cd.WHSE) = item_whse and cd.ITEMCODE = item
+    LEFT JOIN nahsi.locations on COALESCE(cd.PICK_WHSE, cd.WHSE) = loc_whse and cd.PICK_LOCATION = location
     LEFT JOIN custaudit.salesplan on cd.SHIPTONUM = SHIPTO
 WHERE
     cd.ORD_RETURNDATE BETWEEN '$var_startdate' AND '$var_enddate'
-    AND cd.PICK_WHSE = $var_whse
+    AND COALESCE(cd.PICK_WHSE, cd.WHSE) = $var_whse
 ORDER BY
     cd.ORD_RETURNDATE DESC
 ");

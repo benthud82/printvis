@@ -72,6 +72,17 @@ $querydelete3->execute();
 
 $voicePicksAvailable = printvis_table_exists($conn1, 'voicepicks');
 $voicePicksHistAvailable = printvis_table_exists($conn1, 'voicepicks_hist');
+$voiceLoadFailures = array();
+$voiceHistoryStats = array();
+if (!$voicePicksAvailable) {
+    $voiceLoadFailures[] = 'printvis.voicepicks is missing';
+}
+if (!$voicePicksHistAvailable) {
+    $voiceLoadFailures[] = 'printvis.voicepicks_hist is missing';
+}
+error_log('[voicepicks_hist] starting refresh with cutoff ' . $printcutoff
+    . '; voicepicks=' . ($voicePicksAvailable ? 'available' : 'missing')
+    . '; voicepicks_hist=' . ($voicePicksHistAvailable ? 'available' : 'missing'));
 if ($voicePicksAvailable) {
     $sqldelete4 = "DELETE from printvis.voicepicks WHERE date(DateTimeFirstPick) <= '$yesterday'";
     $querydelete4 = $conn1->prepare($sqldelete4);
@@ -85,6 +96,17 @@ $col_linespicked = 'Pick_ID, Whse, Batch_Num, Status, Short_Status, Location, Se
 $col_linespicked_hist = 'Pick_ID, Whse, Batch_Num, Location, ItemCode, DateTimeFirstPick, WCS_NUM, WORKORDER_NUM, BOX_NUM, UserDescription, ReserveUSerID';
 
 foreach ($whsearray as $whsesel) {
+
+    $voiceHistoryStats[$whsesel] = array(
+        'connection' => 'not tested',
+        'batch_rows' => 0,
+        'source_rows' => 0,
+        'history_rows_inserted' => 0,
+        'query_error' => null,
+        'write_error' => null,
+        'probe' => null,
+        'columns' => null
+    );
 
     switch ($whsesel) {
         case 11:
@@ -103,8 +125,18 @@ foreach ($whsearray as $whsesel) {
     $dbh = false;
     include '../../globalincludes/voice_' . $whsesel . '.php';
     $voiceConnectionAvailable = $dbh instanceof PDO;
+    if ($voiceConnectionAvailable) {
+        // The voice_*.php includes build the PDO without an error mode, so it defaults to
+        // ERRMODE_SILENT: a failing execute() returns false, fetchAll() hands back an empty
+        // array, and nothing is thrown. That turns a broken query into "0 rows" with no error.
+        $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
     if (!$voiceConnectionAvailable) {
+        $voiceHistoryStats[$whsesel]['connection'] = 'unavailable';
+        $voiceLoadFailures[] = "warehouse $whsesel voice connection unavailable";
         error_log("Lucas voice connection unavailable for warehouse $whsesel; continuing non-voice refresh steps.");
+    } else {
+        $voiceHistoryStats[$whsesel]['connection'] = 'available';
     }
 
     $todaydatetime = date('Y-m-d H:i:s');
@@ -716,9 +748,14 @@ GROUP BY aisletime_whse , aisletime_cart,    voice_scanon,
             $cartspicked->execute();
             $cartspicked_array = $cartspicked->fetchAll(PDO::FETCH_ASSOC);
         } catch (Throwable $voiceError) {
+            $voiceHistoryStats[$whsesel]['query_error'] = 'batch-start: ' . $voiceError->getMessage();
+            $voiceLoadFailures[] = "warehouse $whsesel batch-start query failed";
             error_log("Lucas batch-start query failed for warehouse $whsesel: " . $voiceError->getMessage());
         }
     }
+    // The batch-start and line-pick queries share the same warehouse/cutoff predicates,
+    // so reporting both counts shows whether a filter broke one feed or the whole source.
+    $voiceHistoryStats[$whsesel]['batch_rows'] = count($cartspicked_array);
 
 
 
@@ -836,7 +873,7 @@ WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID]
                                                             SUBSTRING( T.[LocationString] ,7,1) as Pos,
                                                             JSON_VALUE(T.UserDefinedData, '$.PickType') as PickType,
                                                             case when JSON_VALUE(T.UserDefinedData, '$.LotNum') is null then 0 else 1 end as LotReq,
-                                                            TS.[QuantityOrdered] as QtyOrder,
+                                                            T.[QuantityOrdered] as QtyOrder,
                                                             TS.[QuantityPicked] as QtyPick,
                                                             JSON_VALUE(T.UserDefinedData, '$.PackageUnit') as PackageUnit,
                                                             JSON_VALUE(T.UserDefinedData, '$.DrugFlag') as Drug,
@@ -875,15 +912,97 @@ WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID]
             }
         } catch (Throwable $voiceError) {
             $linespicked_array = array();
+            $voiceHistoryStats[$whsesel]['query_error'] = trim($voiceHistoryStats[$whsesel]['query_error']
+                . ' line-pick: ' . $voiceError->getMessage());
+            $voiceLoadFailures[] = "warehouse $whsesel line-pick query failed";
             error_log("Lucas line-pick query failed for warehouse $whsesel: " . $voiceError->getMessage());
         }
     }
 
+    $voiceHistoryStats[$whsesel]['source_rows'] = count($linespicked_array);
+    if ($voiceConnectionAvailable && empty($linespicked_array)) {
+        error_log("[voicepicks_hist] warehouse $whsesel returned 0 source line-pick rows for cutoff $printcutoff");
 
+        // A clean query that returns nothing tells us the connection worked but a
+        // predicate excluded everything. Probe the source without the warehouse and
+        // cutoff filters so the next run says which predicate is doing it.
+        try {
+            switch ($whsesel) {
+                case 11:
+                case 99:
+                    $probe = $dbh->prepare("SELECT
+                            COUNT(*) AS recent_rows,
+                            CONVERT(varchar(19), MAX([DateTimeFirstPick]), 120) AS max_pick,
+                            SUM(CASE WHEN [ReserveUserID] IS NULL THEN 1 ELSE 0 END) AS null_user_rows
+                        FROM [HenrySchein].[dbo].[Pick] (NOLOCK)
+                        WHERE [DateTimeFirstPick] >= DATEADD(DAY, -7, GETDATE())");
+                    $probe->execute();
+                    $probeRows = $probe->fetchAll(PDO::FETCH_ASSOC);
+                    break;
+                default:
+                    // Group by the raw JSON warehouse value: if it is NULL or formatted
+                    // differently than the integer we compare against, every row is filtered out.
+                    $probe = $dbh->prepare("SELECT TOP 10
+                            ISNULL(JSON_VALUE(T.UserDefinedData, '$.Warehouse'), '<null>') AS whse_json,
+                            COUNT(*) AS recent_rows,
+                            CONVERT(varchar(19), MAX(TS.LastEventOccurredDateTimeLocal), 120) AS max_event,
+                            SUM(CASE WHEN JSON_VALUE(T.UserDefinedData, '$.BatchNum') IS NULL THEN 1 ELSE 0 END) AS null_batch_rows,
+                            SUM(CASE WHEN TS.LastPickedUserLogin IS NULL THEN 1 ELSE 0 END) AS null_user_rows
+                        FROM [Local_PickingSupervisor].[dbo].[Task] T (NOLOCK)
+                        INNER JOIN [Local_PickingSupervisor].[dbo].[TaskState] TS (NOLOCK) ON T.TaskID = TS.TaskID
+                        WHERE TS.LastEventOccurredDateTimeLocal >= DATEADD(DAY, -7, GETDATE())
+                        GROUP BY JSON_VALUE(T.UserDefinedData, '$.Warehouse')
+                        ORDER BY COUNT(*) DESC");
+                    $probe->execute();
+                    $probeRows = $probe->fetchAll(PDO::FETCH_ASSOC);
+                    break;
+            }
 
+            if (empty($probeRows)) {
+                $voiceHistoryStats[$whsesel]['probe'] = 'source has no rows at all in the last 7 days';
+            } else {
+                $probeParts = array();
+                foreach ($probeRows as $probeRow) {
+                    $probePair = array();
+                    foreach ($probeRow as $probeCol => $probeVal) {
+                        $probePair[] = $probeCol . '=' . (is_null($probeVal) ? '<null>' : $probeVal);
+                    }
+                    $probeParts[] = '{' . implode(' ', $probePair) . '}';
+                }
+                $voiceHistoryStats[$whsesel]['probe'] = implode(' ', $probeParts);
+            }
+        } catch (Throwable $probeError) {
+            $voiceHistoryStats[$whsesel]['probe'] = 'probe failed: ' . $probeError->getMessage();
+        }
 
+        // Commit 4d8f1da table-qualified columns that used to be bare. If any got bound to the
+        // wrong alias the query is an "Invalid column name" error, so report where each lives.
+        if ($whsesel != 11 && $whsesel != 99) {
+            try {
+                $colprobe = $dbh->prepare("SELECT TABLE_NAME, COLUMN_NAME
+                    FROM [Local_PickingSupervisor].INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME IN ('Task', 'TaskState', 'PickingException')
+                      AND COLUMN_NAME IN ('TaskNumber', 'LocationString', 'ProductCode', 'Weight',
+                                          'CreatedDateTime', 'OrderNumber', 'UserDefinedData', 'TaskID',
+                                          'QuantityScratched', 'QuantityOrdered', 'QuantityPicked',
+                                          'LastEventOccurredDateTimeLocal', 'LastPickedUserDisplayName',
+                                          'LastPickedUserLogin', 'ExceptionEventId')
+                    ORDER BY COLUMN_NAME, TABLE_NAME");
+                $colprobe->execute();
+                $colParts = array();
+                foreach ($colprobe->fetchAll(PDO::FETCH_ASSOC) as $colRow) {
+                    $colParts[] = $colRow['TABLE_NAME'] . '.' . $colRow['COLUMN_NAME'];
+                }
+                $voiceHistoryStats[$whsesel]['columns'] = empty($colParts)
+                    ? 'no matching columns found'
+                    : implode(' ', $colParts);
+            } catch (Throwable $colError) {
+                $voiceHistoryStats[$whsesel]['columns'] = 'column probe failed: ' . $colError->getMessage();
+            }
+        }
 
-
+        error_log("[voicepicks_hist] warehouse $whsesel probe: " . $voiceHistoryStats[$whsesel]['probe']);
+    }
 
     $pickdata = array();
     $pickdata_hist = array();
@@ -939,24 +1058,31 @@ WHERE [Tote].[Tote_ID] = [Pick].[Tote_ID]
         $values_pick = implode(', ', $pickdata);
         $values_pick_hist = implode(', ', $pickdata_hist);
 
-        $sql = "INSERT INTO printvis.voicepicks ($col_linespicked) VALUES $values_pick
-                ON DUPLICATE KEY UPDATE
-                    Batch_Num=values(Batch_Num),
-                    Status=values(Status),
-                    Short_Status=values(Short_Status),
-                    Location=values(Location),
-                    QtyOrder=values(QtyOrder),
-                    QtyPick=values(QtyPick),
-                    PutAwayFlag=values(PutAwayFlag),
-                    DateTimeFirstPick=values(DateTimeFirstPick),
-                    UserDescription=values(UserDescription),
-                    ReserveUSerID=values(ReserveUSerID)";
-        $query = $conn1->prepare($sql);
-        $query->execute();
-        if ($voicePicksHistAvailable) {
-            $sql2 = "INSERT IGNORE INTO printvis.voicepicks_hist ($col_linespicked_hist) VALUES $values_pick_hist";
-            $query2 = $conn1->prepare($sql2);
-            $query2->execute();
+        try {
+            $sql = "INSERT INTO printvis.voicepicks ($col_linespicked) VALUES $values_pick
+                    ON DUPLICATE KEY UPDATE
+                        Batch_Num=values(Batch_Num),
+                        Status=values(Status),
+                        Short_Status=values(Short_Status),
+                        Location=values(Location),
+                        QtyOrder=values(QtyOrder),
+                        QtyPick=values(QtyPick),
+                        PutAwayFlag=values(PutAwayFlag),
+                        DateTimeFirstPick=values(DateTimeFirstPick),
+                        UserDescription=values(UserDescription),
+                        ReserveUSerID=values(ReserveUSerID)";
+            $query = $conn1->prepare($sql);
+            $query->execute();
+            if ($voicePicksHistAvailable) {
+                $sql2 = "INSERT IGNORE INTO printvis.voicepicks_hist ($col_linespicked_hist) VALUES $values_pick_hist";
+                $query2 = $conn1->prepare($sql2);
+                $query2->execute();
+                $voiceHistoryStats[$whsesel]['history_rows_inserted'] = $query2->rowCount();
+            }
+        } catch (Throwable $voiceWriteError) {
+            $voiceHistoryStats[$whsesel]['write_error'] = $voiceWriteError->getMessage();
+            $voiceLoadFailures[] = "warehouse $whsesel MySQL voice-pick write failed";
+            error_log("[voicepicks_hist] MySQL write failed for warehouse $whsesel: " . $voiceWriteError->getMessage());
         }
     }
 } //end of whsarray loop 
@@ -1032,6 +1158,33 @@ foreach ($whsebuild_array as $key => $value) {
         $build = $whsebuild_array[$key]['build'];
         include '../../heatmap_logic/tbl_update_NAHSI_table_updatetimes.php';
     }
+}
+
+echo '[voicepicks_hist] cutoff=' . $printcutoff . PHP_EOL;
+foreach ($voiceHistoryStats as $warehouse => $stats) {
+    echo '[voicepicks_hist] warehouse=' . $warehouse
+        . '; connection=' . $stats['connection']
+        . '; batch_rows=' . $stats['batch_rows']
+        . '; source_rows=' . $stats['source_rows']
+        . '; history_rows_inserted=' . $stats['history_rows_inserted']
+        . ($stats['query_error'] !== null ? '; query_error=' . $stats['query_error'] : '')
+        . ($stats['write_error'] !== null ? '; write_error=' . $stats['write_error'] : '')
+        . ($stats['probe'] !== null ? '; probe=' . $stats['probe'] : '')
+        . ($stats['columns'] !== null ? '; columns=' . $stats['columns'] : '')
+        . PHP_EOL;
+}
+
+if (!empty($voiceLoadFailures)) {
+    $voiceLoadFailures = array_values(array_unique($voiceLoadFailures));
+    $voiceFailureMessage = '[voicepicks_hist] refresh incomplete: ' . implode('; ', $voiceLoadFailures);
+    error_log($voiceFailureMessage);
+    echo $voiceFailureMessage . PHP_EOL;
+    if (PHP_SAPI === 'cli') {
+        exit(1);
+    }
+} else {
+    error_log('[voicepicks_hist] refresh completed without detected connection, query, or write errors');
+    echo '[voicepicks_hist] refresh completed without detected connection, query, or write errors' . PHP_EOL;
 }
 
 
