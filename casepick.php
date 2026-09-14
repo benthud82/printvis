@@ -5,14 +5,12 @@
     <?php
     include 'sessioninclude.php';
     include_once '../Off_System_Slotting/connection/connection_details.php';
-    include_once 'functions/casepick_metadata.php';
     ?>
     <!--Headers-->
     <head>
         <title>Case Pick</title>
         <?php include_once '../Off_System_Slotting/headerincludes.php'; ?>
         <script src="../easytimer.js" type="text/javascript"></script>
-        <link href="osscss/casepick_metadata.css" rel="stylesheet" type="text/css"/>
 
     </head>
 
@@ -41,18 +39,6 @@
                     $selected = '';
                 }
                 ?>
-                <div class="casepick-meta-toolbar">
-                    <div>
-                        <div class="casepick-meta-toolbar-title">Case Pick Testing Metadata <?php echo casepick_meta_icon('page_context', 'question', 'Show page context and verification order'); ?> <?php echo casepick_meta_icon('freshness_audit', 'question', 'Show data freshness audit'); ?></div>
-                        <div class="casepick-meta-toolbar-subtitle">Simple MySQL checks first, deeper pipeline tracing only when the first checks do not explain the value.</div>
-                    </div>
-                    <label class="casepick-meta-switch" for="casepickMetaToggle">
-                        <span class="casepick-meta-switch-label">Show testing metadata</span>
-                        <input type="checkbox" id="casepickMetaToggle">
-                        <span class="casepick-meta-switch-track"></span>
-                    </label>
-                </div>
-
                 <div id="buildingcontainer" class="<?php echo $buidlingclass ?>">
                     <label>Select Building: </label>
                     <select class="selectstyle" id="building" name="building" style="width: 75px;" onChange="refreshall()">
@@ -84,7 +70,7 @@
                 <!--highchart for not printed cases goes here-->        
                 <div class="hidewrapper">
                     <section class="panel portlet-item" style="opacity: 1; z-index: 0; margin-top: 15px;">
-                        <header class="panel-heading bg-inverse"> Hours Needed over Time <?php echo casepick_meta_icon('chart_hours_needed', 'eye', 'Show chart verification details'); ?> <i class="fa fa-close pull-right closehidden" style="cursor: pointer;" id="close_asgntasks"></i><i class="fa fa-chevron-up pull-right clicktotoggle-chevron" style="cursor: pointer;"></i></header>
+                        <header class="panel-heading bg-inverse"> Hours Needed over Time  <i class="fa fa-close pull-right closehidden" style="cursor: pointer;" id="close_asgntasks"></i><i class="fa fa-chevron-up pull-right clicktotoggle-chevron" style="cursor: pointer;"></i></header>
                         <div class="panel-body">
                             <div id="chartpage"  class="page-break" style="width: 100%">
                                 <div id="chart_hoursneeded" class="hidden">
@@ -98,7 +84,7 @@
                 <!--highchart for forecast to actual graph goes here-->        
                 <div class="hidewrapper">
                     <section class="panel portlet-item" style="opacity: 1; z-index: 0; margin-top: 15px;">
-                        <header class="panel-heading bg-inverse"> Hours needed - Forecast to Actual <?php echo casepick_meta_icon('chart_forecast_hours', 'eye', 'Show forecast hours chart verification details'); ?> <i class="fa fa-close pull-right closehidden" style="cursor: pointer;" id="close_foretoact"></i><i class="fa fa-chevron-up pull-right clicktotoggle-chevron" style="cursor: pointer;"></i></header>
+                        <header class="panel-heading bg-inverse"> Hours needed - Forecast to Actual  <i class="fa fa-close pull-right closehidden" style="cursor: pointer;" id="close_foretoact"></i><i class="fa fa-chevron-up pull-right clicktotoggle-chevron" style="cursor: pointer;"></i></header>
                         <!--Stats about forecast to actual go here.  From the php include globaldata/forecaststats.php-->
                         <div class="panel-body">
                             <!--forecasts stats data goes here-->
@@ -118,7 +104,7 @@
                 <!--highchart for forecast to actual graph goes here-->        
                 <div class="hidewrapper">
                     <section class="panel portlet-item" style="opacity: 1; z-index: 0; margin-top: 15px;">
-                        <header class="panel-heading bg-inverse"> Warehouse Lines - Forecast to Actual <?php echo casepick_meta_icon('chart_forecast_lines', 'eye', 'Show forecast lines chart verification details'); ?> <i class="fa fa-close pull-right closehidden" style="cursor: pointer;" id="close_foretoact"></i><i class="fa fa-chevron-up pull-right clicktotoggle-chevron" style="cursor: pointer;"></i></header>
+                        <header class="panel-heading bg-inverse"> Warehouse Lines - Forecast to Actual  <i class="fa fa-close pull-right closehidden" style="cursor: pointer;" id="close_foretoact"></i><i class="fa fa-chevron-up pull-right clicktotoggle-chevron" style="cursor: pointer;"></i></header>
                         <!--Stats about forecast to actual go here.  From the php include globaldata/forecaststats.php-->
                         <div class="panel-body">
                             <!--forecasts stats data goes here-->
@@ -147,7 +133,7 @@
                 <!-- Modal content-->
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Batch Level Data - NOT Printed <?php echo casepick_meta_icon('modal_notprinted_detail', 'eye', 'Show not printed modal verification details'); ?></h4>
+                        <h4 class="modal-title">Batch Level Data - NOT Printed </h4>
                     </div>
                     <form class="form-horizontal" id="post_refreshpackdata">
                         <div class="modal-body">
@@ -164,7 +150,7 @@
                 <!-- Modal content-->
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Batch Level Data - Printed but not yet picked <?php echo casepick_meta_icon('modal_printed_picking_detail', 'question', 'Show printed modal verification details'); ?></h4>
+                        <h4 class="modal-title">Batch Level Data - Printed but not yet picked </h4>
                     </div>
                     <form class="form-horizontal" id="">
                         <div class="modal-body">
@@ -181,7 +167,7 @@
                 <!-- Modal content-->
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Batch Level Data - Currently being picked <?php echo casepick_meta_icon('modal_printed_picking_detail', 'question', 'Show picking modal verification details'); ?></h4>
+                        <h4 class="modal-title">Batch Level Data - Currently being picked </h4>
                     </div>
                     <form class="form-horizontal" id="">
                         <div class="modal-body">
@@ -198,7 +184,7 @@
                 <!-- Modal content-->
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Change Equipment Allocation <?php echo casepick_meta_icon('equipment_usage', 'question', 'Show equipment allocation verification details'); ?></h4>
+                        <h4 class="modal-title">Change Equipment Allocation </h4>
                     </div>
                     <form class="form-horizontal" id="">
                         <div class="modal-body">
@@ -209,147 +195,10 @@
             </div>
         </div>
 
-        <div id="casepickMetaBackdrop" class="casepick-meta-backdrop"></div>
-        <aside id="casepickMetaDrawer" class="casepick-meta-drawer" aria-hidden="true">
-            <button type="button" id="casepickMetaClose" class="casepick-meta-close" aria-label="Close metadata"><i class="fa fa-times"></i></button>
-            <div id="casepickMetaContent">
-                <div class="casepick-meta-empty">Select a metadata icon to inspect the data lineage.</div>
-            </div>
-        </aside>
-
         <!--Scripts-->
         <script>
-            window.casepickMetadata = <?php echo casepick_metadata_json(); ?>;
-
             $("body").tooltip({selector: '[data-toggle="tooltip"]'});
             $("#casepick").addClass('active');
-
-            function casepickEscapeHtml(value) {
-                return String(value || '').replace(/[&<>"']/g, function (character) {
-                    return {
-                        '&': '&amp;',
-                        '<': '&lt;',
-                        '>': '&gt;',
-                        '"': '&quot;',
-                        "'": '&#039;'
-                    }[character];
-                });
-            }
-
-            function casepickRenderList(items) {
-                if (!items || !items.length) {
-                    return '';
-                }
-                var html = '<ul>';
-                $.each(items, function (index, item) {
-                    html += '<li>' + casepickEscapeHtml(item) + '</li>';
-                });
-                html += '</ul>';
-                return html;
-            }
-
-            function casepickRenderSection(title, content) {
-                var html = '';
-                if (!content) {
-                    return html;
-                }
-                html += '<div class="casepick-meta-section">';
-                html += '<div class="casepick-meta-section-title">' + casepickEscapeHtml(title) + '</div>';
-                if ($.isArray(content)) {
-                    html += casepickRenderList(content);
-                } else {
-                    if (content.checks) {
-                        html += casepickRenderList(content.checks);
-                    }
-                    if (content.sql) {
-                        html += '<div class="casepick-meta-sql-wrap">';
-                        html += '<pre class="casepick-meta-sql">' + casepickEscapeHtml(content.sql) + '</pre>';
-                        html += '<button type="button" class="casepick-meta-copy">Copy SQL</button>';
-                        html += '</div>';
-                    }
-                }
-                html += '</div>';
-                return html;
-            }
-
-            function casepickOpenMetadata(metaId) {
-                var metadata = window.casepickMetadata[metaId];
-                if (!metadata) {
-                    metadata = {
-                        title: 'Metadata Not Found',
-                        status: 'Missing registry entry',
-                        start: ['No metadata definition exists for this control yet.']
-                    };
-                }
-                var html = '<div class="casepick-meta-drawer-header">';
-                html += '<div class="casepick-meta-eyebrow">Testing Metadata</div>';
-                html += '<div class="casepick-meta-title">' + casepickEscapeHtml(metadata.title) + '</div>';
-                html += '<span class="casepick-meta-status">' + casepickEscapeHtml(metadata.status || 'Traceable') + '</span>';
-                html += '</div>';
-                html += casepickRenderSection('Start Here', metadata.start);
-                html += casepickRenderSection('Verify In MySQL', metadata.verify);
-                html += casepickRenderSection('If It Does Not Match', metadata.mismatch);
-                html += casepickRenderSection('Go Deeper', metadata.deeper);
-                html += casepickRenderSection('Open Questions', metadata.questions);
-                $('#casepickMetaContent').html(html);
-                $('#casepickMetaBackdrop, #casepickMetaDrawer').addClass('is-open');
-                $('#casepickMetaDrawer').attr('aria-hidden', 'false');
-            }
-
-            function casepickCloseMetadata() {
-                $('#casepickMetaBackdrop, #casepickMetaDrawer').removeClass('is-open');
-                $('#casepickMetaDrawer').attr('aria-hidden', 'true');
-            }
-
-            function casepickSetMetadataState(enabled) {
-                $('#casepickMetaToggle').prop('checked', enabled);
-                $('body').toggleClass('casepick-meta-on', enabled);
-                try {
-                    window.localStorage.setItem('casepickShowMetadata', enabled ? '1' : '0');
-                } catch (ignore) {
-                }
-            }
-
-            function casepickGetMetadataState() {
-                try {
-                    return window.localStorage.getItem('casepickShowMetadata') === '1';
-                } catch (ignore) {
-                    return false;
-                }
-            }
-
-            $('#casepickMetaToggle').on('change', function () {
-                casepickSetMetadataState($(this).is(':checked'));
-            });
-
-            $(document).on("click touchstart", ".casepick-meta-trigger", function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                casepickOpenMetadata($(this).attr('data-meta-id'));
-            });
-
-            $(document).on("click", "#casepickMetaClose, #casepickMetaBackdrop", function (e) {
-                e.preventDefault();
-                casepickCloseMetadata();
-            });
-
-            $(document).on("click", ".casepick-meta-copy", function (e) {
-                e.preventDefault();
-                var sqlText = $(this).siblings('.casepick-meta-sql').text();
-                var button = $(this);
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(sqlText).then(function () {
-                        button.text('Copied');
-                    }).catch(function () {
-                        button.text('Select SQL');
-                    });
-                } else {
-                    button.text('Select SQL');
-                }
-            });
-
-            casepickSetMetadataState(casepickGetMetadataState());
 
             //ajax detail data for cases not yet printed
             $(document).on("click touchstart", "#stat_notprintedtime", function (e) {

@@ -1,7 +1,6 @@
 <?php
 include '../../connections/conn_printvis.php';
 include '../functions/functions_totetimes.php';
-include '../functions/casepick_metadata.php';
 include '../sessioninclude.php';
 
 
@@ -57,10 +56,10 @@ $case_total = $case_notprinttime + $case_printtime + $case_picking;
 $case_total_formatted = _convertToHoursMins($case_total);
 ?>
 <div class="row" style="padding: 10px;">
-    Last refresh time: <?php echo date('H:i:s'); ?> <?php echo casepick_meta_icon('refresh_time', 'eye', 'Show last refresh verification details'); ?>
+    Last refresh time: <?php echo date('H:i:s'); ?>
 </div>
 <div class="row" style="padding: 10px;     display: -webkit-inline-box;">
-    <?php echo 'Time till next refresh:   ' ?> <?php echo casepick_meta_icon('refresh_countdown', 'eye', 'Show countdown verification details'); ?>
+    <?php echo 'Time till next refresh:   ' ?>
     <div id="countdownExample" style="padding-left: 5px;">
         <div class="values"></div>
     </div>
@@ -77,7 +76,7 @@ $case_total_formatted = _convertToHoursMins($case_total);
                 <div class="number">
                     <span data-counter="counterup" data-value="1349"><?php echo $case_total_formatted ?></span>
                 </div>
-                <div class="desc"> Total Hours Needed <?php echo casepick_meta_icon('header_total', 'eye', 'Show total hours needed verification details'); ?></div>
+                <div class="desc"> Total Hours Needed </div>
             </div>
         </div>
     </div>
@@ -90,7 +89,7 @@ $case_total_formatted = _convertToHoursMins($case_total);
                 <div class="number">
                     <span data-counter="counterup" data-value="1349"><?php echo $case_notprinttime_formatted ?></span>
                 </div>
-                <div class="desc"> Total Hours not Printed <?php echo casepick_meta_icon('header_not_printed', 'eye', 'Show not printed hours verification details'); ?></div>
+                <div class="desc"> Total Hours not Printed </div>
             </div>
         </div>
     </div>
@@ -103,7 +102,7 @@ $case_total_formatted = _convertToHoursMins($case_total);
                 <div class="number">
                     <span data-counter="counterup" data-value="1349"><?php echo $case_printtime_formatted ?></span>
                 </div>
-                <div class="desc"> Total Hours Printed Waiting to be Picked <?php echo casepick_meta_icon('header_printed', 'eye', 'Show printed waiting hours verification details'); ?></div>
+                <div class="desc"> Total Hours Printed Waiting to be Picked </div>
             </div>
         </div>
     </div>
@@ -116,7 +115,7 @@ $case_total_formatted = _convertToHoursMins($case_total);
                 <div class="number">
                     <span data-counter="counterup" data-value="1349"><?php echo $case_picking_formatted ?></span>
                 </div>
-                <div class="desc"> Total Hours Remaining in Picking <?php echo casepick_meta_icon('header_picking', 'eye', 'Show picking remaining hours verification details'); ?></div>
+                <div class="desc"> Total Hours Remaining in Picking </div>
             </div>
         </div>
     </div>
@@ -132,4 +131,3 @@ $case_total_formatted = _convertToHoursMins($case_total);
         $('#countdownExample .values').html(timer.getTimeValues().toString());
     });
 </script>
-

@@ -1,7 +1,6 @@
 <?php
 include '../sessioninclude.php';
 include '../../connections/conn_printvis.php';
-include '../functions/casepick_metadata.php';
 
 
 $var_userid = $_SESSION['MYUSER'];
@@ -37,7 +36,7 @@ $equipdata_array = $equipdata->fetchAll(pdo::FETCH_ASSOC);
             foreach ($equipdata_array as $key => $value) {
                 ?>
                 <div class="form-group">
-                    <label for="count_<?php echo $equipdata_array[$key]['equipcount_equipment'] ?>"><?php echo $equipdata_array[$key]['equipcount_equipment'] ?> <?php echo casepick_meta_icon('equipment_usage', 'question', 'Show equipment allocation verification details'); ?></label>
+                    <label for="count_<?php echo $equipdata_array[$key]['equipcount_equipment'] ?>"><?php echo $equipdata_array[$key]['equipcount_equipment'] ?> </label>
                     <input class="selectstyle" type="text" id="count_<?php echo $equipdata_array[$key]['equipcount_equipment'] ?>" value="<?php echo $equipdata_array[$key]['equipcount_count'] ?>" /> 
                 </div>
             <?php }
@@ -48,9 +47,8 @@ $equipdata_array = $equipdata->fetchAll(pdo::FETCH_ASSOC);
 </div>
 <div class="modal-footer">
     <div class="text-center">
-        <button type="submit" class="btn btn-inverse btn-lg pull-left" name="formpost_equipalloc" id="formpost_equipalloc"  tabindex="11">Change Equipment Allocation</button> <?php echo casepick_meta_icon('equipment_usage', 'question', 'Show equipment allocation verification details'); ?>
+        <button type="submit" class="btn btn-inverse btn-lg pull-left" name="formpost_equipalloc" id="formpost_equipalloc"  tabindex="11">Change Equipment Allocation</button>
     </div>
 </div>
-
 
 
